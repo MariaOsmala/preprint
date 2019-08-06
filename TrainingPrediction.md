@@ -529,6 +529,9 @@ R --slave --args --window=$window --binSize=$binSize --type=$type --cellLine=$ce
 * Process the files generated in the above steps to visualize in the genome browser
 * Move also ```/Data/K562/coverage_bigWig/``` files to a web accessible folder
 * ```trackDb.txt``` file as an example to generate track hub for K562 data
+* The data and predictions stored as UCSC Genome Browser track hubs, links to sessions: ```https://genome-euro.ucsc.edu/s/mpirttin/hg19_K562_publication``` and ```https://genome-euro.ucsc.edu/s/mpirttin/hg19_GM12878_publication```
+
+
 
 ```
 code/copy_files_for_genomebrowser.sh
