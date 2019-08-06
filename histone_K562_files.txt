@@ -1,0 +1,46 @@
+Mark	Ctcf 1
+../../Data/K562/bed_shifted_RFECS/Ctcf.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H2az 1
+../../Data/K562/bed_shifted_RFECS/H2az.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H3K27ac 1
+../../Data/K562/bed_shifted_RFECS/H3k27ac.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H3k27me3 1
+../../Data/K562/bed_shifted_RFECS/H3k27me3.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H3K36me3 1
+../../Data/K562/bed_shifted_RFECS/H3k36me3.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H3K4me1 1
+../../Data/K562/bed_shifted_RFECS/H3k4me1.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H3K4me2 1
+../../Data/K562/bed_shifted_RFECS/H3k4me2.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H3K4me3 1
+../../Data/K562/bed_shifted_RFECS/H3k4me3.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H3K79me2 1
+../../Data/K562/bed_shifted_RFECS/H3k79me2.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H3K9ac 1
+../../Data/K562/bed_shifted_RFECS/H3k9ac.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H3K9me3 1
+../../Data/K562/bed_shifted_RFECS/H3k9me3.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	H4K20me1 1
+../../Data/K562/bed_shifted_RFECS/H4k20me1.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	Pol2b 1
+../../Data/K562/bed_shifted_RFECS/Pol2RawData.bed
+../../Data/K562/bed_shifted_RFECS/Input.bed
+Mark	DNase-seq 1
+../../Data/K562/bed_shifted_RFECS/OpenChromDnase.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+Mark	nucleosome 1
+../../Data/K562/bed_shifted_RFECS/Nsome.bed
+../../Data/K562/bed_shifted_RFECS/Control.bed
+EOF
