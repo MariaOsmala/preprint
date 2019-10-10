@@ -1,4 +1,4 @@
-# PRobabilistic Enhancer PredictIoN Tool PREPRINT: Data preprocessing steps
+# PRobabilistic Enhancer PRedictIoN Tool PREPRINT: Data preprocessing steps
 
 ## Align the reads
 

@@ -1,6 +1,6 @@
 # PRobabilistic Enhancer PRedictioN Tool PREPRINT: Training and genome-wide prediction
 
-This is the data processing and analysis steps to train the PREPRINT classifier and predict the enhancers genome-wide.
+The data processing and analysis steps to train the PREPRINT classifier and predict the enhancers genome-wide.
 
 ## Define training data
 

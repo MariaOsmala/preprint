@@ -1,6 +1,6 @@
 # PREPRINT
 
-This package is a PRobabilistic Enhancer PredictIoN Tool PREPRINT.
+This package is a PRobabilistic Enhancer PRedictIoN Tool PREPRINT.
 
 ## Installation
 
@@ -83,7 +83,7 @@ packageurl <- "https://cran.r-project.org/src/contrib/Archive/accelerometry/acce
 install.packages(packageurl, repos=NULL, type="source")
 ```
 
-* Other Cran and Bioconductor packeges required
+* Other required Cran and Bioconductor packages
 
 ```
 sessionInfo()
@@ -201,8 +201,8 @@ bash fetchChromSizes hg19 > hg19.chrom.sizes
 ## Citation:
 
 @Article{Osmala2019,
-    AUTHOR = "M. Osmala and H. Lähdesmäki",
-    TITLE = "",
+    AUTHOR = "Maria Osmala and Harri Lähdesmäki",
+    TITLE = "Enhancer prediction in the human genome by probabilistic modeling of the chromatin feature patterns",
     VOLUME = {},
     PAGES = "",
     ADDRESS= "",
