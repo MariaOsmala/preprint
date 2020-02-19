@@ -1,7 +1,7 @@
 #!/bin/bash
 
-path_to_dir=/m/cs/scratch/csb/projects/enhancer_prediction_BMCBioinformatics/preprint #specify
-
+#path_to_dir=/m/cs/scratch/csb/projects/enhancer_prediction_BMCBioinformatics/preprint #specify
+path_to_dir=/m/cs/scratch/csb/projects/enhancer_prediction/experiments/RProjects/preprint
 cd $path_to_dir
 
 
@@ -60,43 +60,80 @@ mkdir $path_to_dir/Data/K562/data_R/
 mkdir $path_to_dir/Data/GM12878/data_R/
 
 mkdir $path_to_dir/results/
-mkdir $path_to_dir/results/K562/
-mkdir $path_to_dir/results/GM12878/
-mkdir $path_to_dir/results/K562/pure_random/
-mkdir $path_to_dir/results/K562/pure_random/ML
-mkdir $path_to_dir/results/K562/pure_random/ML/5-fold_CV_1
-mkdir $path_to_dir/results/K562/pure_random/ML/5-fold_CV_2
-mkdir $path_to_dir/results/K562/pure_random/ML/5-fold_CV_3
-mkdir $path_to_dir/results/K562/pure_random/ML/5-fold_CV_4
-mkdir $path_to_dir/results/K562/pure_random/ML/5-fold_CV_5
-mkdir $path_to_dir/results/K562/pure_random/Bayes_estimated_priors
-mkdir $path_to_dir/results/K562/pure_random/Bayes_estimated_priors/5-fold_CV_1
-mkdir $path_to_dir/results/K562/pure_random/Bayes_estimated_priors/5-fold_CV_2
-mkdir $path_to_dir/results/K562/pure_random/Bayes_estimated_priors/5-fold_CV_3
-mkdir $path_to_dir/results/K562/pure_random/Bayes_estimated_priors/5-fold_CV_4
-mkdir $path_to_dir/results/K562/pure_random/Bayes_estimated_priors/5-fold_CV_5
-mkdir $path_to_dir/results/K562/random_with_signal/
-mkdir $path_to_dir/results/K562/random_with_signal/ML
-mkdir $path_to_dir/results/K562/random_with_signal/ML/5-fold_CV_1
-mkdir $path_to_dir/results/K562/random_with_signal/ML/5-fold_CV_2
-mkdir $path_to_dir/results/K562/random_with_signal/ML/5-fold_CV_3
-mkdir $path_to_dir/results/K562/random_with_signal/ML/5-fold_CV_4
-mkdir $path_to_dir/results/K562/random_with_signal/ML/5-fold_CV_5
-mkdir $path_to_dir/results/K562/random_with_signal/Bayes_estimated_priors
-mkdir $path_to_dir/results/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_1
-mkdir $path_to_dir/results/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_2
-mkdir $path_to_dir/results/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_3
-mkdir $path_to_dir/results/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_4
-mkdir $path_to_dir/results/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_5
-mkdir $path_to_dir/results/GM12878/pure_random/
-mkdir $path_to_dir/results/GM12878/pure_random/ML
-mkdir $path_to_dir/results/GM12878/pure_random/Bayes_estimated_priors
-mkdir $path_to_dir/results/GM12878/random_with_signal/
-mkdir $path_to_dir/results/GM12878/random_with_signal/ML
-mkdir $path_to_dir/results/GM12878/random_with_signal/Bayes_estimated_priors
+mkdir $path_to_dir/results/model_promoters_and_random/
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/
 
+mkdir $path_to_dir/results/model_promoters_and_random/K562/
+mkdir $path_to_dir/results/model_promoters_and_random/GM12878/
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/GM12878/
 
-mkdir $path_to_dir/results/
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/ML
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/ML/5-fold_CV_1
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/ML/5-fold_CV_2
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/ML/5-fold_CV_3
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/ML/5-fold_CV_4
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/ML/5-fold_CV_5
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/Bayes_estimated_priors
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_1
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_2
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_3
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_4
+mkdir $path_to_dir/results/model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_5
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/ML
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_1
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_2
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_3
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_4
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_5
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_1
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_2
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_3
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_4
+mkdir $path_to_dir/results/model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_5
+mkdir $path_to_dir/results/model_promoters_and_random/GM12878/pure_random/
+mkdir $path_to_dir/results/model_promoters_and_random/GM12878/pure_random/ML
+mkdir $path_to_dir/results/model_promoters_and_random/GM12878/pure_random/Bayes_estimated_priors
+mkdir $path_to_dir/results/model_promoters_and_random/GM12878/random_with_signal/
+mkdir $path_to_dir/results/model_promoters_and_random/GM12878/random_with_signal/ML
+mkdir $path_to_dir/results/model_promoters_and_random/GM12878/random_with_signal/Bayes_estimated_priors
+
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/ML
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/ML/5-fold_CV_1
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/ML/5-fold_CV_2
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/ML/5-fold_CV_3
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/ML/5-fold_CV_4
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/ML/5-fold_CV_5
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/Bayes_estimated_priors
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_1
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_2
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_3
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_4
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/pure_random/Bayes_estimated_priors/5-fold_CV_5
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/ML
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_1
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_2
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_3
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_4
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/ML/5-fold_CV_5
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_1
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_2
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_3
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_4
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/K562/random_with_signal/Bayes_estimated_priors/5-fold_CV_5
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/GM12878/pure_random/
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/GM12878/pure_random/ML
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/GM12878/pure_random/Bayes_estimated_priors
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/GM12878/random_with_signal/
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/GM12878/random_with_signal/ML
+mkdir $path_to_dir/results/do_not_model_promoters_and_random/GM12878/random_with_signal/Bayes_estimated_priors
+
 mkdir $path_to_dir/results/RFECS/
 mkdir $path_to_dir/results/RFECS/K562
 mkdir $path_to_dir/results/RFECS/K562/pure_random/

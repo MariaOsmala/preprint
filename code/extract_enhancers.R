@@ -71,10 +71,8 @@ normalizeBool=opt$normalize
 NormCellLine=opt$NormCellLine
 
 setwd(path_to_dir)
+
 source("code/functions.R")
-source("code/extract_profiles_parallel.R")
-
-
 path=paste(path_to_dir, "/Data/",sep="")
 figure_path=paste(path_to_dir,"/figures/",sep="")
 
