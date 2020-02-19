@@ -7,7 +7,7 @@ This package is a PRobabilistic Enhancer PRedictIoN Tool PREPRINT.
 Clone the project to the desired directory, this will be your path_to_dir
 
 ```
-path_to_dir=.../preprint/
+path_to_dir=../preprint/
 ```
 The codes are in folder
 
