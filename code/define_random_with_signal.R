@@ -64,10 +64,17 @@ path_to_dir=opt$pathToDir
 cell_line=opt$cellLine
 p300_peaks_file=opt$p300File
 
+print(window)
+print(bin_size)
+print(N)
+print(threshold)
+print(path_to_dir)
+print(cell_line)
+print(p300_peaks_file)
 
 setwd(path_to_dir)
 source("code/functions.R")
-source("code/extract_profiles_parallel.R")
+
 
 
 #load the counts
@@ -75,9 +82,9 @@ path=paste(path_to_dir,"/Data/",sep="")
 
 
 load( file=paste(path_to_dir,"/Data/",cell_line,"/data_R/whole_genome_coverage.RData",sep="")) #unionBedGraph, unionBedGraph_zero, split_ranges, accepted_GRanges, steps
-rm(unionBedGraph, steps)
+rm(unionBedGraph)
 
-start(split_ranges)<-start(split_ranges)+1
+start(split_ranges)<-start(split_ranges)+1 #strand is +
 
 unionBedGraph_test=unionBedGraph_zero[,-which(colnames(unionBedGraph_zero)=="Nsome")]
 
@@ -95,7 +102,7 @@ sum(width(accepted_GRanges))/sum(as.numeric(human.chromlens)) #3 036 303 846 -> 
 ##################Remove first ENCODE_blacklists from the data##############################################
 ENCODE_blacklist=ENCODE_blaclist_regions(path_to_dir)
 #blacklist regions are 1-based
-test=as.matrix(findOverlaps(accepted_GRanges, ENCODE_blacklist))
+test=as.matrix(findOverlaps(accepted_GRanges, ENCODE_blacklist)) #strand is positive for both
 if(nrow(test)!=0){
   accepted_GRanges=accepted_GRanges[-unique(test[,1])]
    
@@ -106,13 +113,13 @@ if(nrow(test)!=0){
 
 
 
-p300peaks_GRanges=narrowPeak2GRanges(p300_peaks_file, TRUE, "qValue")
+p300peaks_GRanges=narrowPeak2GRanges(p300_peaks_file, TRUE)
 
 
 #remove chrM locations, should chroms Y and X be removed as well???
 
 p300peaks_GRanges=removeChrFromGRanges(p300peaks_GRanges, "chrM")
-
+strand(p300peaks_GRanges)="+"
 
 
 mtch<-try( abs(distToTss(accepted_GRanges, p300peaks_GRanges)) <= window/2, silent=TRUE) 
@@ -152,7 +159,7 @@ if( (class(mtch)!="try-error") & (length(mtch)!=0) ){
 
 accepted_GRanges=reduce(accepted_GRanges)
 
-sum(width(accepted_GRanges))/sum(as.numeric(human.chromlens)) #0.39
+sum(width(accepted_GRanges))/sum(as.numeric(human.chromlens)) #0.424
 
 
 ########################sample only for random regions where the sum of signal in all bins is min 5################################
@@ -162,8 +169,11 @@ windows=c(2000,3000,4000,5000)
 for(wi in windows){
 print( sum(width( accepted_GRanges[which((width(accepted_GRanges)>=wi)==TRUE)]))/ sum(as.numeric(human.chromlens)))
 
-# 0.0400140 0.02305852 0.01515772 0.01069445
 
+#  [1] 0.04735523
+#  [1] 0.02662455
+#  [1] 0.01719851
+#  [1] 0.01205615
 
 }
 
@@ -175,14 +185,14 @@ accepted_GRanges=accepted_GRanges[which((width(accepted_GRanges)>=window)==TRUE)
 accepted_GRanges_notshrinked=accepted_GRanges
 
 #How large proportion this is of the whole genome
-print( sum(width(accepted_GRanges_notshrinked))/sum(as.numeric(human.chromlens))  ) #4 %
+print( sum(width(accepted_GRanges_notshrinked))/sum(as.numeric(human.chromlens))  ) #4,7 %
 
 #######################decrease the region length by window/2 from both ends############################
 
 accepted_GRanges_temp <- resize(accepted_GRanges,  width = width(accepted_GRanges)-window/2+1, fix = 'end')
 accepted_GRanges_temp <- resize(accepted_GRanges_temp,  width = width(accepted_GRanges_temp)-window/2, fix = 'start')
 
-accepted_GRanges=accepted_GRanges_temp
+accepted_GRanges=accepted_GRanges_temp #strand +
 ##################################Sample random regions########################################################################
 #compute the probability for each range
 
@@ -215,6 +225,7 @@ for(i in 1:length(index)){
 
 print(N)
 
+#all have strand +
 save( regions, accepted_GRanges, accepted_GRanges_notshrinked, 
       file=paste(path,cell_line,"/data_R/",N,"_randomRegions_with_signal_bin_",bin_size,"_window_",window,".RData",sep=""))
 

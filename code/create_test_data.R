@@ -109,7 +109,7 @@ if(normalizeBool==TRUE){
 
   promoter_profiles=normalized_profiles_undirected
   promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
-  promoter_regions=regions$promoters
+  promoter_regions=regions
   #promoter_directions=regions$strand
   #averages, quantiles
 
@@ -125,6 +125,7 @@ if(normalizeBool==TRUE){
   load(file=paste(path,"/Data/",NormCellLine,"/data_R/",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
   
   }
+}
 
 random_profiles=normalized_profiles
 random_profiles=change_window(random_profiles, original_window, window, bin_size)
@@ -194,7 +195,7 @@ load(file=paste(path,"/Data/",cell_line,"/data_R/",NormCellLine,"_normalized_",N
 
 promoter_profiles_test=otherCellLine_normalized_profiles_undirected
 promoter_profiles_test=change_window(promoter_profiles_test, original_window, window, bin_size)
-promoter_regions_test=regions$promoters
+promoter_regions_test=regions
 #promoter_directions=regions$strand
 #averages, quantiles
 
@@ -268,7 +269,7 @@ if( distance_measure=="ML"){
                                                  fn=fn, distance_measure=distance_measure)
   }
    
-  if(distance_measure=="Bayes_estimated_priors"){
+if(distance_measure=="Bayes_estimated_priors"){
     
    
     
@@ -303,10 +304,9 @@ if( distance_measure=="ML"){
   
 }
     
-    ##########################Visualization of the data######################################################################## COntinue here
+##########################Visualization of the data######################################################################## COntinue here
 
-
-    common_path=paste(path, "/results/",cell_line,"/",random_str,"/",distance_measure,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,sep="")
+common_path=paste(path, "/results/model_promoters_and_random/",cell_line,"/",random_str,"/",distance_measure,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,sep="")
 
 
                                                 
@@ -314,68 +314,64 @@ if( distance_measure=="ML"){
   
    
     
-    ######################Normalize####################################3
-    
-    train_data_mean=rowMeans(cbind(train_data_pos$data, train_data_neg$data))
-    train_data_sd=apply(cbind(train_data_pos$data, train_data_neg$data),1,sd)
-    train_data_pos_norm<-(train_data_pos$data-train_data_mean)/train_data_sd
-    train_data_neg_norm<-(train_data_neg$data-train_data_mean)/train_data_sd
-    
-    test_data_pos_norm<-(test_data_pos$data-train_data_mean)/train_data_sd
-    test_data_neg_norm<-(test_data_neg$data-train_data_mean)/train_data_sd
-    
-    
-    ######################################################################################################################################################################################    
-    #save samples in libsvm format, normalized or unnormalized version
-  
-    train.data<-as.data.frame( cbind(train_data_pos$data, train_data_neg$data) )
-    train.labels<-rep(1,(ncol(train_data_pos$data)+ncol(train_data_neg$data)))
-    train.labels[(ncol(train_data_pos$data)+1):length(train.labels)]<- -1
-    train.labels=factor(train.labels)
-    
-    
-    test.data<-as.data.frame( cbind(test_data_pos$data, test_data_neg$data) )
-    test.labels<-rep(1,(ncol(test_data_pos$data)+ncol(test_data_neg$data)))
-    test.labels[(ncol(test_data_pos$data)+1):length(test.labels)]<- -1
-    test.labels=factor(test.labels)
-    
-    save.image(file=paste(common_path, "_training_data.RData" ,sep=""))
-    
-    #########################################unnormalized data is saved in libsvm format########################################################################################
-    append_bool=FALSE
-    for(h in 1:(ncol(test.data)) ){
-      string=paste(test.labels[h]," ",sep="")
-      for(j in 1:nrow(test.data)){
-        string<-paste(string,j,":",test.data[j,h]," ",sep="")
-      }
-      if(append_bool==FALSE){
-        write(string, file=paste(common_path, "_test_data.txt",sep=""), append=FALSE)
-        append_bool=TRUE
-      }else{
-        write(string, file=paste(common_path,"_test_data.txt",sep="") , append=TRUE)
-        
-      }
-    }
-    
-    
-    common_path=paste(path, "/results/",NormCellLine,"/",random_str,"/",distance_measure,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,sep="")
-    
-   
-    append_bool=FALSE
-    for(h in 1:(ncol(train.data)) ){
-      string=paste(train.labels[h]," ",sep="")
-      for(j in 1:nrow(train.data) ){
-        string<-paste(string,j,":",train.data[j,h]," ",sep="")
-      }
-      if(append_bool==FALSE){
-        write(string, file=paste(common_path, "_train_data.txt",sep=""), append=FALSE)
-        append_bool=TRUE
-      }else{
-        write(string, file=paste(common_path,"_train_data.txt",sep=""), append=TRUE)
-      }
-    }
-    
-}else{
-  stop()
-}
+######################Normalize####################################3
 
+train_data_mean=rowMeans(cbind(train_data_pos$data, train_data_neg$data))
+train_data_sd=apply(cbind(train_data_pos$data, train_data_neg$data),1,sd)
+train_data_pos_norm<-(train_data_pos$data-train_data_mean)/train_data_sd
+train_data_neg_norm<-(train_data_neg$data-train_data_mean)/train_data_sd
+
+test_data_pos_norm<-(test_data_pos$data-train_data_mean)/train_data_sd
+test_data_neg_norm<-(test_data_neg$data-train_data_mean)/train_data_sd
+
+
+######################################################################################################################################################################################    
+#save samples in libsvm format, normalized or unnormalized version
+
+train.data<-as.data.frame( cbind(train_data_pos$data, train_data_neg$data) )
+train.labels<-rep(1,(ncol(train_data_pos$data)+ncol(train_data_neg$data)))
+train.labels[(ncol(train_data_pos$data)+1):length(train.labels)]<- -1
+train.labels=factor(train.labels)
+
+    
+test.data<-as.data.frame( cbind(test_data_pos$data, test_data_neg$data) )
+test.labels<-rep(1,(ncol(test_data_pos$data)+ncol(test_data_neg$data)))
+test.labels[(ncol(test_data_pos$data)+1):length(test.labels)]<- -1
+test.labels=factor(test.labels)
+
+save.image(file=paste(common_path, "_training_data.RData" ,sep=""))
+    
+#########################################unnormalized data is saved in libsvm format########################################################################################
+append_bool=FALSE
+for(h in 1:(ncol(test.data)) ){
+  string=paste(test.labels[h]," ",sep="")
+  for(j in 1:nrow(test.data)){
+    string<-paste(string,j,":",test.data[j,h]," ",sep="")
+  }
+  if(append_bool==FALSE){
+    write(string, file=paste(common_path, "_test_data.txt",sep=""), append=FALSE)
+    append_bool=TRUE
+  }else{
+    write(string, file=paste(common_path,"_test_data.txt",sep="") , append=TRUE)
+    
+  }
+}
+    
+    
+common_path=paste(path, "/results/model_promoters_and_random/",NormCellLine,"/",random_str,"/",distance_measure,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,sep="")
+
+
+append_bool=FALSE
+for(h in 1:(ncol(train.data)) ){
+  string=paste(train.labels[h]," ",sep="")
+  for(j in 1:nrow(train.data) ){
+    string<-paste(string,j,":",train.data[j,h]," ",sep="")
+  }
+  if(append_bool==FALSE){
+    write(string, file=paste(common_path, "_train_data.txt",sep=""), append=FALSE)
+    append_bool=TRUE
+  }else{
+    write(string, file=paste(common_path,"_train_data.txt",sep=""), append=TRUE)
+  }
+}
+    

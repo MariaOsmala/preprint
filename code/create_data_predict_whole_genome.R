@@ -76,7 +76,8 @@ negatives_to_zero=FALSE
 
 
 ################################Load training data enhancers #############################################################
-load(file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #normalized_profiles, profiles, regions
+load(file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",
+                N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #normalized_profiles, profiles, regions
 
 original_window=nrow(normalized_profiles[[1]])*bin_size
 
@@ -95,7 +96,7 @@ load(file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",N,"_promoters_bin_"
 
 promoter_profiles=normalized_profiles_undirected
 promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
-promoter_regions=regions$promoters
+promoter_regions=regions
 #promoter_directions=regions$strand
 #averages, quantiles
 
@@ -162,14 +163,14 @@ train_summaries_promoters<-NULL
 train_summaries_random<-NULL
 
 
-      train_summaries_pos<-sapply( enhancer_profiles, function (x) rowMeans(x) ) #window length x 15
-      train_summaries_promoters<-sapply( negative_profiles, function (x) rowMeans(x) )
-      train_summaries_random<-sapply( negative_profiles, function (x) rowMeans(x) )
+train_summaries_pos<-sapply( enhancer_profiles, function (x) rowMeans(x) ) #window length x 15
+train_summaries_promoters<-sapply( negative_profiles, function (x) rowMeans(x) )
+train_summaries_random<-sapply( negative_profiles, function (x) rowMeans(x) )
 
 
   
   ############################Load the whole genome data##################################################################################
-  
+#Is this already normalized for GM12878 wrt K562?  YES IT IS!
 load(file=paste(path_to_dir,"/Data/",cell_line,"/data_R/whole_genome_coverage.RData",sep=""))
 rm(unionBedGraph)
   #unionBedGraph_zero, split_ranges

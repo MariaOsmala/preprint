@@ -63,7 +63,7 @@ NormCellLine=opt$NormCellLine
 
 
 source("code/functions.R")
-source("code/extract_profiles_parallel.R")
+
 
 if(normalizeBool==TRUE){
   load( file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions,
@@ -96,11 +96,13 @@ sample_own<-function(x, n=1, window){
   sample( (window/2):x , n)
 }
 ###########################################################
-locations=sapply(allowed_ranges, sample_own, n=1, window=window)
+#locations=sapply(allowed_ranges[1:5], sample_own, n=1, window=window)
+locations=sapply(allowed_ranges, sample_own, n=1, window=window) #samples loci from chromosomes, 10000 loci
 
 strandinformation=Rle( strand( rep( '+',length(locations) ) ))
 regions=GRanges(seqnames = random_chroms, 
-                ranges = IRanges(start=locations, end=locations),  strand = strandinformation)
+                ranges = IRanges(start=locations, end=locations),  
+                strand = strandinformation)
 
 ##############should be expanded #########################
 
@@ -109,7 +111,7 @@ regions_wider=resize(regions, width=window, fix="center" )
 ##################Remove first ENCODE_blacklists from the data##############################################
 ENCODE_blacklist=ENCODE_blaclist_regions(path_to_dir)
 #blacklist regions are 1-based
-test=as.matrix(findOverlaps(regions_wider, ENCODE_blacklist))
+test=as.matrix(findOverlaps(regions_wider, ENCODE_blacklist)) #both are positive
 if(nrow(test)!=0){
   regions=regions[-unique(test[,1])]
   regions_wider=regions_wider[-unique(test[,1])]
@@ -120,14 +122,14 @@ if(nrow(test)!=0){
 
 path=paste(path_to_dir,"/Data/",sep="")
 
-p300peaks_GRanges=narrowPeak2GRanges(p300_peaks_file, TRUE, "qValue")
+p300peaks_GRanges=narrowPeak2GRanges(p300_peaks_file, TRUE) #strand is *
 
 
 #remove chrM locations, should chroms Y and X be removed as well???
 
 p300peaks_GRanges=removeChrFromGRanges(p300peaks_GRanges, "chrM")
 
-
+strand(p300peaks_GRanges)="+"
 
 mtch<-try( abs(distToTss(regions, p300peaks_GRanges)) <= 5000/2, silent=TRUE) 
 
@@ -175,15 +177,20 @@ if( (class(mtch)!="try-error") & (length(mtch)!=0) ){
 
 ################################3extract profiles#####################################################################3
 regions=regions[1:N]
-
+strand(regions)="*"
 
 
 figure_path=paste(path_to_dir,"/figures/",sep="")
-
+print(path_to_dir)
+print(path)
+print(cell_line)
 bam_folder=paste(path,cell_line,"/bam_shifted" ,sep="")
+print(bam_folder)
 system.time(random_profiles<-extract_profiles_parallel(bam_folder=bam_folder, 
-                                                                  regions=regions, directionality=FALSE, 
-                                                                  directions=strand(regions), window=window, bin_size=bin_size))
+                                                                  regions=regions, 
+                                                                  directionality=FALSE, 
+                                                                  directions=strand(regions), 
+                                                       window=window, bin_size=bin_size))
 
 
 

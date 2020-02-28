@@ -61,7 +61,7 @@ print(NormCellLine)
 
 setwd(path_to_dir)
 source("code/functions.R")
-source("code/extract_profiles_parallel.R")
+
 
 path=paste(path_to_dir, "/Data",sep="")
 
@@ -74,8 +74,8 @@ if(normalizeBool==TRUE){
 
 
 
-load( file=paste(path,"/",cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions,
-counts=profiles$counts #remove "V2" from the names
+  load( file=paste(path,"/",cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions,
+  counts=profiles$counts #remove "V2" from the names
 #names(countsOtherCellLine)=gsub("V2","",  names(countsOtherCellLine))
 }else{
   load( file=paste(path,"/",cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions,
@@ -111,14 +111,14 @@ for(chr in chrnames ){
   
   
   header <- c('chr','start','end','id','score','strand')
-  names(df) <- header[1:length(names(df))]
+  names(df) <- header[1:length(names(df))] #strand is positive
   
   if('strand' %in% colnames(df)){
     df$strand <- gsub(pattern="[^+-]+", replacement = '*', x = df$strand)
   }
   
   
-  
+  #split_ranges is still in bed-format, 0-start based
   split_ranges <- c(split_ranges, with(df, GRanges(chr, IRanges(start, end), strand=strand))) #243 MB
   
   print(object_size(unionBedGraph)) #in total 2.55 GB

@@ -56,6 +56,16 @@ k=opt$k #k-fold CV
 random_str=opt$randomStr #pure_random, peaky_random or random_with_signal
 path_to_dir=opt$pathToDir
 
+print(cell_line)
+print(window)
+print(bin_size)
+print(N)
+print(distance_measure)
+print(k)
+print(random_str)
+print(path_to_dir)
+
+
 setwd(path_to_dir)
 source("code/functions.R")
 path=path_to_dir
@@ -93,7 +103,7 @@ load(file=paste(path,"/Data/",cell_line,"/data_R/",N,"_promoters_bin_",bin_size,
 
 promoter_profiles=normalized_profiles_undirected
 promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
-promoter_regions=regions$promoters
+promoter_regions=regions
 #promoter_directions=regions$strand
 #averages, quantiles
 
@@ -176,11 +186,15 @@ for(i in 1:k){
   
   
   
-  train_data_pos=compute_distance_two_negatives(profile=enhancer_profiles, subset=cv_groups$pos[[i]]$train, 
-                                                summary_pos=train_summaries_pos[[i]], summary_neg_promoters=train_summaries_promoters[[i]],
+  train_data_pos=compute_distance_two_negatives(profile=enhancer_profiles, 
+                                                subset=cv_groups$pos[[i]]$train, 
+                                                summary_pos=train_summaries_pos[[i]], 
+                                                summary_neg_promoters=train_summaries_promoters[[i]],
                                                 summary_neg_random=train_summaries_random[[i]],
                                                 fn=fn, distance_measure=distance_measure,
-                                                learn_alpha_prior=TRUE, priorgammas_pos=NULL, priorgammas_neg_promoters=NULL, priorgammas_neg_random=NULL)
+                                                learn_alpha_prior=TRUE, priorgammas_pos=NULL, 
+                                                priorgammas_neg_promoters=NULL, 
+                                                priorgammas_neg_random=NULL)
 
     
   if( distance_measure=="ML"){
@@ -243,7 +257,7 @@ for(i in 1:k){
     
     ##########################Visualization of the data######################################################################## 
   
-  common_path=paste(path, "/results/",cell_line,"/",random_str,"/",distance_measure,"/",k,"-fold_CV_",i,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,"_",k,"fold_cv_",i,sep="")
+  common_path=paste(path, "/results/model_promoters_and_random/",cell_line,"/",random_str,"/",distance_measure,"/",k,"-fold_CV_",i,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,"_",k,"fold_cv_",i,sep="")
 
   
   

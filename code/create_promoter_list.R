@@ -16,7 +16,8 @@
 #' @examples
 create_promoter_list<-function(TSS_annotation, TSS_annotation_positive, DNase_peaks_file,
                                between_TSS_distance, 
-                               remove_blacklist_regions=TRUE, ENCODE_blacklist, window){
+                               remove_blacklist_regions=TRUE, 
+                               ENCODE_blacklist, window){
   
   #consider only those TSS that do not have any other TSS near-by
   

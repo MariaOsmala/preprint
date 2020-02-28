@@ -70,8 +70,14 @@ compute_features<-function(profile, subset, summary, fn, distance_measure){
 }
 
 
-compute_distance_two_negatives<-function(profile, subset, summary_pos, summary_neg_promoters, summary_neg_random, fn=fn, distance_measure,
-                                         learn_alpha_prior=TRUE, priorgammas_pos=NULL, priorgammas_neg_promoters=NULL, priorgammas_neg_random=NULL){
+compute_distance_two_negatives<-function(profile, subset, summary_pos, 
+                                         summary_neg_promoters, 
+                                         summary_neg_random, 
+                                         fn=fn, distance_measure,
+                                         learn_alpha_prior=TRUE, 
+                                         priorgammas_pos=NULL, 
+                                         priorgammas_neg_promoters=NULL, 
+                                         priorgammas_neg_random=NULL){
   
   
   if(distance_measure=="ML"){
@@ -157,7 +163,11 @@ compute_distance_two_negatives<-function(profile, subset, summary_pos, summary_n
     for(p in 1:length(profile)){
       
       if(length(subset)!=1){
-        marg_lh[p,]=apply( profile[[p]][,subset], 2, FUN=marginal_likelihood, summary_p=summary_pos[,p], A=priorgammas_pos[[p]]["shape"], B=priorgammas_pos[[p]]["rate"])
+        marg_lh[p,]=apply( profile[[p]][,subset], 2, 
+                           FUN=marginal_likelihood, 
+                           summary_p=summary_pos[,p], 
+                           A=priorgammas_pos[[p]]["shape"], 
+                           B=priorgammas_pos[[p]]["rate"])
       }
       else{
         marg_lh[p,]=marginal_likelihood(profile[[p]], summary_p=summary_pos[,p], A=priorgammas_pos[[p]]["shape"], B=priorgammas_pos[[p]]["rate"])

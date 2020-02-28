@@ -73,7 +73,7 @@ print(NormCellLine)
 
 setwd(path_to_dir)
 source("code/functions.R")
-source("code/extract_profiles_parallel.R")
+
 
 
 #load the counts
@@ -96,7 +96,7 @@ load(file=paste(path,cell_line,"/data_R/",N,"_randomRegions_with_signal_bin_",bi
 ################################3extract profiles#####################################################################3
 
 
-
+strand(regions)="*"
 
 figure_path=paste(path_to_dir,"/figures/",sep="")
 

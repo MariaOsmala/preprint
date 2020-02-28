@@ -60,6 +60,7 @@ normalizeBool=opt$normalize
 NormCellLine=opt$NormCellLine
 
 
+
 print(window)
 print(bin_size)
 print(between_TSS_distance)
@@ -84,7 +85,6 @@ if(normalizeBool==TRUE){
 setwd(path_to_dir)
 source("code/functions.R")
 
-source("code/extract_profiles_parallel.R")
 
 
 path=paste(path_to_dir, "/Data/",sep="")
@@ -113,9 +113,9 @@ promoters <- create_promoter_list(TSS_annotation = GR_Gencode_protein_coding_TSS
                                   TSS_annotation_positive = GR_Gencode_protein_coding_TSS_positive, 
                                   DNase_peaks_file = DNase_peaks_file,
                                   between_TSS_distance = between_TSS_distance, 
-                                  N_initial_selection =length(GR_Gencode_protein_coding_TSS) , 
                                   remove_blacklist_regions = TRUE, 
-                                  ENCODE_blacklist = ENCODE_blacklist)
+                                  ENCODE_blacklist = ENCODE_blacklist,
+                                  window=window)
 
 
 #SAVE counts
@@ -125,13 +125,15 @@ if(N==1000000){
 print("number of promoters")
 print(N)
 
-promoters$promoters=promoters$promoters[1:N]
-promoters$strand=promoters$strand[1:N]
+promoters=promoters[1:N]
+#promoters$strand=promoters$strand[1:N]
 
-promoter_profiles_directed<-extract_profiles_parallel(bam_folder, regions=promoters$promoters, directionality=TRUE, 
-                                                      directions=promoters$strand, window, bin_size)
-promoter_profiles_undirected<-extract_profiles_parallel(bam_folder, promoters$promoters, directionality=FALSE, 
-                                                        directions=promoters$strand, window, bin_size)
+strand(promoters)="*" #THIS IS IMPORTANT
+
+promoter_profiles_directed<-extract_profiles_parallel(bam_folder, regions=promoters, directionality=TRUE, 
+                                                      directions=promoters$direction, window, bin_size)
+promoter_profiles_undirected<-extract_profiles_parallel(bam_folder, promoters, directionality=FALSE, 
+                                                        directions=promoters$direction, window, bin_size)
 
 setwd(bam_folder)
 bai_files=dir(pattern=".bai")

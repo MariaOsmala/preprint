@@ -70,6 +70,17 @@ normalizeBool=opt$normalize
 
 NormCellLine=opt$NormCellLine
 
+print(window)
+print(distance_to_promoters)
+print(bin_size)
+print(N)
+print(path_to_dir)
+print(cell_line)
+print(p300_peaks_file)
+print(DNase_peaks_file)
+print(normalizeBool)
+print(NormCellLine)
+
 setwd(path_to_dir)
 
 source("code/functions.R")
@@ -79,7 +90,8 @@ figure_path=paste(path_to_dir,"/figures/",sep="")
 #TSS_annotation:
 #GFF/GTF File format, start and end are both one-based
 
-GR_Gencode_protein_coding_TSS_positive=readRDS(paste(path,"GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS",sep=""))
+GR_Gencode_protein_coding_TSS_positive=readRDS(paste(path,
+          "GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS",sep=""))
 
 #these need the chromosome length information
 
@@ -108,7 +120,8 @@ enhancers <- create_enhancer_list(p300=p300_peaks_file, DNase_peaks_file=DNase_p
                                   TSS_annotation=TSS_annotation, 
                                   distance_to_promoters=distance_to_promoters, 
                                   remove_blacklist_regions=TRUE, 
-                                  ENCODE_blacklist=ENCODE_blacklist)
+                                  ENCODE_blacklist=ENCODE_blacklist,
+                                  window=window)
 
 #SAVE counts
 if(N==1000000){
@@ -116,7 +129,7 @@ if(N==1000000){
 }
 
 regions=enhancers[1:N]
-
+strand(regions)="*" #THIS IS IMPORTANT
 system.time(enhancer_profiles_parallel<-extract_profiles_parallel(bam_folder=bam_folder, 
                                       regions=regions, directionality=FALSE, 
                                       directions=strand(regions), window=window, bin_size=bin_size))
