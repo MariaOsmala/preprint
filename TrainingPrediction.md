@@ -192,13 +192,9 @@ binSize=100
 N=1000
 k=5
 
-R --slave --args --window=$window --binSize=$binSize --N=$N --k=$k --pathToDir=$path_to_dir --distanceMeasure=ML --cellLine=K562 --randomStr=pure_random < code/create_training_data.R 
+R --slave --args --window=$window --binSize=$binSize --N=$N --k=$k --pathToDir=$path_to_dir --distanceMeasure=ML --cellLine=K562 < code/create_training_data_combined.R 
 
-R --slave --args --window=$window --binSize=$binSize --N=$N --k=$k --pathToDir=$path_to_dir --distanceMeasure=Bayes_estimated_priors --cellLine=K562 --randomStr=pure_random < code/create_training_data.R 
-
-R --slave --args --window=$window --binSize=$binSize --N=$N --k=$k --pathToDir=$path_to_dir --distanceMeasure=ML --cellLine=K562 --randomStr=random_with_signal < code/create_training_data.R 
-
-R --slave --args --window=$window --binSize=$binSize --N=$N --k=$k --pathToDir=$path_to_dir --distanceMeasure=Bayes_estimated_priors --cellLine=K562 --randomStr=random_with_signal < code/create_training_data.R 
+R --slave --args --window=$window --binSize=$binSize --N=$N --k=$k --pathToDir=$path_to_dir --distanceMeasure=Bayes_estimated_priors --cellLine=K562 < code/create_training_data_combined.R 
 
 ```
 
@@ -209,18 +205,16 @@ window=2000
 binSize=100
 N=1000
     
-R --slave --args --window=$window --binSize=$binSize --N=$N --pathToDir=$path_to_dir --distanceMeasure=ML --cellLine=GM12878 --randomStr=pure_random --normalize=TRUE --NormCellLine=K562 < code/create_test_data.R 
-R --slave --args --window=$window --binSize=$binSize --N=$N --pathToDir=$path_to_dir --distanceMeasure=Bayes_estimated_priors --cellLine=GM12878 --randomStr=pure_random --normalize=TRUE --NormCellLine=K562 < code/create_test_data.R 
-R --slave --args --window=$window --binSize=$binSize --N=$N --pathToDir=$path_to_dir --distanceMeasure=ML --cellLine=GM12878 --randomStr=random_with_signal --normalize=TRUE --NormCellLine=K562 < code/create_test_data.R 
-R --slave --args --window=$window --binSize=$binSize --N=$N --pathToDir=$path_to_dir --distanceMeasure=Bayes_estimated_priors --cellLine=GM12878 --randomStr=random_with_signal --normalize=TRUE --NormCellLine=K562 < code/create_test_data.R 
-    
+R --slave --args --window=$window --binSize=$binSize --N=$N --pathToDir=$path_to_dir --distanceMeasure=ML --cellLine=GM12878 --normalize=TRUE --NormCellLine=K562 < code/create_test_data_combined.R 
+R --slave --args --window=$window --binSize=$binSize --N=$N --pathToDir=$path_to_dir --distanceMeasure=Bayes_estimated_priors --cellLine=GM12878 --normalize=TRUE --NormCellLine=K562 < code/create_test_data_combined.R 
+
 ```
 
 ### Training the classifier, cross validation within the training cell line 
 
 ```
 Change gnuplot_exe in line 19 in easy.py to
-gnuplot_exe = "$path_to_dir/softwares/bin/gnuplot"
+gnuplot_exe = $path_to_dir"/softwares/bin/gnuplot"
 
 # in grid.py change lines 29 and 30
 self.c_begin, self.c_end, self.c_step = -5,  25,  0.5
@@ -233,14 +227,15 @@ k=5 #k-fold CV
 i=1 #1,2,3,4,5
 distance_measure=ML #or Bayes_estimated_priors
 cell_line=K562
-random_type=pure_random #or random_with_signal
 
-trainfile=$path_to_dir"/results/"$cell_line"/"$random_type"/"$distance_measure"/"$k"-fold_CV_"$i"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_"$k"fold_cv_"$i"_train_data.txt"
+path_to_dir="../preprint"
+trainfile=$path_to_dir"/results/model_promoters_and_random_combined/"$cell_line"/"$distance_measure"/"$k"-fold_CV_"$i"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_"$k"fold_cv_"$i"_train_data.txt"
 
-testfile=$path_to_dir"/results/"$cell_line"/"$random_type"/"$distance_measure"/"$k"-fold_CV_"$i"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_"$k"fold_cv_"$i"_test_data.txt"
+testfile=$path_to_dir"/results/model_promoters_and_random_combined/"$cell_line"/"$distance_measure"/"$k"-fold_CV_"$i"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_"$k"fold_cv_"$i"_test_data.txt"
 
-cd $path_to_dir/softwares/libsvm-3.22/tools/
-python3 $path_to_dir/softwares/libsvm-3.22/tools/easy.py $trainfile $testfile 
+cd $path_to_dir"/softwares/libsvm-3.22/tools/""
+python3 $path_to_dir"/softwares/libsvm-3.22/tools/grid.py" $trainfile $testfile
+
 ```
 
 ### Train the classifier using whole K562 data 
@@ -250,13 +245,18 @@ bin_size=100
 N=1000
 distance_measure=ML # or Bayes_estimated_priors
 cell_line=K562
-random_type="pure_random"
+
+trainfile=$path_to_dir"/results/model_promoters_and_random_combined/"$cell_line"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt"
+
+cd $path_to_dir"/softwares/libsvm-3.22/tools/""
+
+python3 $path_to_dir"/softwares/libsvm-3.22/tools/grid.py" $trainfile
 
 trainfile=$path_to_dir"/results/"$cell_line"/"$random_type"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt"
 
-cd $path_to_dir/softwares/libsvm-3.22/tools/
+cd $path_to_dir"/softwares/libsvm-3.22/tools/"
 
-python3 $path_to_dir/softwares/libsvm-3.22/tools/easy.py $trainfile
+python3 $path_to_dir"/softwares/libsvm-3.22/tools/easy.py" $trainfile
 ```
 
 ### Test on GM12878 and use the trained model to predict enhancers in the whole genome for K562 and GM12878
@@ -267,43 +267,42 @@ N=1000
 distance_measure="ML" 
 cell_line="GM12878"
 NormCellLine="K562"
-random_type="pure_random" 
 
-cd $path_to_dir/softwares/libsvm-3.22/
-export PATH=$PATH:$path_to_dir/softwares/libsvm-3.22/
-export PATH=$path_to_dir/softwares/bin:$PATH #install gnuplot here
+
+cd $path_to_dir"/softwares/libsvm-3.22/"
+export PATH=$PATH:$path_to_dir"/softwares/libsvm-3.22/"
+export PATH=$path_to_dir"/softwares/bin":$PATH #install gnuplot here
 
 #Learned model
-range_file=$path_to_dir"/results/"$NormCellLine"/"$random_type"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.range"
+range_file=$path_to_dir"/results/model_promoters_and_random_combined/K562/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.range"
 
-model_file=$path_to_dir"/results/"$NormCellLine"/"$random_type"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.model"
+model_file=$path_to_dir"/results/model_promoters_and_random_combined/K562/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.model"
 
 #Test data
-test_pathname=$path_to_dir"/results/"$cell_line"/"$random_type"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_test_data.txt"
+test_pathname=$path_to_dir"/results/model_promoters_and_random_combined/GM12878/"$distance_measure"/NSamples_1000_window_2000_bin_100_test_data.txt"
 
-scaled_test_file=$path_to_dir"/results/"$cell_line"/"$random_type"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_test_data.txt.scale"
+scaled_test_file=$path_to_dir"/results/model_promoters_and_random_combined/GM12878/"$distance_measure"/NSamples_1000_window_2000_bin_100_test_data.txt.scale"
 
-predict_test_file=$path_to_dir"/results/"$cell_line"/"$random_type"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_test_data.txt.predict"
+predict_test_file=$path_to_dir"/results/model_promoters_and_random_combined/GM12878/"$distance_measure"/NSamples_1000_window_2000_bin_100_test_data.txt.predict"
 
 svm-scale -r $range_file $test_pathname > $scaled_test_file
-svm-predict -b 1 $scaled_test_file $model_file $predict_test_file 
-
+svm-predict -b 1 $scaled_test_file $model_file $predict_test_file
 
 ```
 ### The best operating points, both cell lines in the same script, FDR, TPR, FPR
-run `code/RFECS_performance_on_GM12878_testdata.R before` the `code/the_best_operating_point.m` script, because it also draws ROC plots from RFECS results
+run `code/RFECS_performance_on_GM12878_testdata_combined.R before` the `code/the_best_operating_point_combined.m` script, because it also draws ROC plots from RFECS results
 ```
-code/the_best_operating_point.m
+code/the_best_operating_point_combined.m
 
 ```
-### Summaries from the cross validation, and generalization between cell lines, optimal threshold TESTED
+### Summaries from the cross validation, and generalization between cell lines, optimal threshold 
 
 ```
 window=2000
 binSize=100
 N=1000
 
-R --slave --args --window=$window --binSize=$binSize --N=$N --pathToDir=$path_to_dir --k=5 --cellLine=K562 < code/summary_from_K562_CV.R
+R --slave --args --window=$window --binSize=$binSize --N=$N --pathToDir=$path_to_dir --k=5 --cellLine=K562 < code/summary_from_K562_CV_combined.R
 
 ```
 
@@ -319,15 +318,9 @@ N=1000
 cell_line=K562
 NormCellLine=K562
 
-R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=ML --cellLine=$cell_line --randomStr=pure_random --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome.R
+R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=ML --cellLine=$cell_line --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome_combined.R
 
-R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=Bayes_estimated_priors --cellLine=$cellLine --randomStr=pure_random --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome.R
-
-R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=ML --cellLine=$cellLine --randomStr=random_with_signal --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome.R
-
-R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=Bayes_estimated_priors --cellLine=$cellLine --randomStr=random_with_signal --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome.R
-
-
+R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=Bayes_estimated_priors --cellLine=$cellLine --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome_combined.R
 
 ```
 GM12878
@@ -336,13 +329,9 @@ GM12878
 cell_line=GM12878
 NormCellLine=K562
 
-R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=ML --cellLine=$cell_line --randomStr=pure_random --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome.R 
+R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=ML --cellLine=$cell_line --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome_combined.R 
 
-R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=Bayes_estimated_priors --cellLine=$cellLine --randomStr=pure_random --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome.R
-
-R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=ML --cellLine=$cellLine --randomStr=random_with_signal --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome.R
-
-R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=Bayes_estimated_priors --cellLine=$cellLine --randomStr=random_with_signal --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome_.R
+R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=Bayes_estimated_priors --cellLine=$cellLine --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome_combined.R
 ```
 
 
@@ -355,45 +344,50 @@ bin_size=100
 N=1000
 distance_measure=ML
 cell_line=K562
-random_str=pure_random
+
 
 export PATH=$PATH:$path_to_dir/softwares/libsvm-3.22/
 export PATH=$path_to_dir/softwares/bin:$PATH
-
-
 cd $path_to_dir/softwares/libsvm-3.22/
 
 
-range_file=$path_to_dir"/results/K562/"$random_str"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.range"
-model_file=$path_to_dir"/results/K562/"$random_str"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.model"
+
+cd $WRKDIR/softwares/libsvm-3.22/
+
+
+range_file=$path_to_dir"/results/model_promoters_and_random_combined/$cell_line/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.range"
+
+model_file=$path_to_dir"/results/model_promoters_and_random_combined/$cell_line/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.model"
+
 
 #Test data
-test_pathname=$path_to_dir"/results/K562/"$random_str"/"$distance_measure"/bin_100_whole_genome_test.txt"
-scaled_test_file=$path_to_dir"/results/K562/"$random_str"/"$distance_measure"/bin_100_whole_genome_test.txt.scale"
-predict_test_file=$path_to_dir"/results/K562/"$random_str"/"$distance_measure"/bin_100_whole_genome_test.txt.predict"
+test_pathname=$path_to_dir"/results/model_promoters_and_random_combined/$cell_line/"$distance_measure"/bin_100_whole_genome_test.txt"
+scaled_test_file=$path_to_dir"/results/model_promoters_and_random_combined/$cell_line/$distance_measure"/bin_100_whole_genome_test.txt.scale"
+predict_test_file=$path_to_dir"/results/model_promoters_and_random_combined/$cell_line/""$distance_measure"/bin_100_whole_genome_test.txt.predict"
 
 svm-scale -r $range_file $test_pathname > $scaled_test_file
 svm-predict -b 1 $scaled_test_file $model_file $predict_test_file
 	
-
 ```
 
 Cell line GM12878
 ```
+cell_line=GM12878
 
-range_file=$path_to_dir"/results/K562/"$random_str"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.range"
+cd $path_to_dir/softwares/libsvm-3.22/
 
-model_file=$path_to_dir"/results/K562/"$random_str"/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.model"
+range_file=$path_to_dir"/results/model_promoters_and_random_combined/K562/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.range"
+model_file=$path_to_dir"/results/model_promoters_and_random_combined/K562/"$distance_measure"/NSamples_"$N"_window_"$window"_bin_"$bin_size"_train_data.txt.model"
 
 
 #Test data
-test_pathname=$path_to_dir"/results/GM12878/"$random_str"/"$distance_measure"/bin_100_whole_genome_test.txt"
-scaled_test_file=$path_to_dir"/results/GM12878/"$random_str"/"$distance_measure"/bin_100_whole_genome_test.txt.scale"
-predict_test_file=$path_to_dir"/results/GM12878/"$random_str"/"$distance_measure"/bin_100_whole_genome_test.txt.predict"
+test_pathname=$path_to_dir"/results/model_promoters_and_random_combined/"$cell_line"/"$distance_measure"/bin_100_whole_genome_test.txt"
+scaled_test_file=$path_to_dir"/results/model_promoters_and_random_combined/"$cell_line"/"$distance_measure"/bin_100_whole_genome_test.txt.scale"
+predict_test_file=$path_to_dir"/results/model_promoters_and_random_combined/"$cell_line"/"$distance_measure"/bin_100_whole_genome_test.txt.predict"
 
-svm-scale -r $range_file $test_pathname > $scaled_test_file #Add data file
+svm-scale -r $range_file $test_pathname > $scaled_test_file
 svm-predict -b 1 $scaled_test_file $model_file $predict_test_file
-
+	
 ```
 
 
@@ -406,27 +400,18 @@ N=1000
 cell_line=K562
 
 #Generates training data for both random types
-R --slave --args --window=$window --binSize=$binSize --N=$N --cellLine=$cell_line --pathToDir=$path_to_dir  < code/generate_trainings_sites_for_RFECS.R 
+R --slave --args --window=$window --binSize=$binSize --N=$N --cellLine=$cell_line --pathToDir=$path_to_dir  < code/generate_trainings_sites_for_RFECS_combined.R 
 
 ```
 The RFECS training sites need to be sorted
 ```
-cd $path_to_dir/results/RFECS/K562/
-for random_name in pure_random random_with_signal
+cd $path_to_dir/results/RFECS_combined/K562/
+
+for f in enhancers.txt non-enhancers.txt
 do
-   
-   cd $random_name/training
-   for f in enhancers.txt non-enhancers.txt
-   do
-       sort -k1,1V -k2,2n $f > ${f%"."*}"_sorted.txt"
+    sort -k1,1V -k2,2n $f > ${f%"."*}"_sorted.txt"
   
-   done
-   cd ..
-   cd ..
-
 done
- 
-
 ```
 RFECS training
 
@@ -435,40 +420,39 @@ cd $path_to_dir/softwares/RFECS/
 PATH=$PATH:$path_to_dir/softwares/RFECS/
 
 cell_line=K562
-random_str=pure_random #or random_with_signal
 bed_files=$path_to_dir"/histone_"$cell_line"_files.txt"
 
-data_path=$path_to_dir/results/RFECS/$cell_line/$random_str/training/
+cell_line="K562"
+
+data_path=$path_to_dir"/results/RFECS_combined/"$cell_line"/training/"
 training_pos=$data_path"enhancers_sorted.txt"
 training_neg=$data_path"non-enhancers_sorted.txt"
 
-trained_forests_path=$path_to_dir/results/RFECS/$cell_line/$random_str/trained_forests/$cell_line.mat
-
+trained_forests_path=$path_to_dir"/results/RFECS_combined/"$cell_line"/trained_forests/"$cell_line".mat"
 
 bash cleanup.sh
 
 tcsh train $bed_files Yes $training_pos $training_neg $trained_forests_path 
+results=$path_to_dir"/results/RFECS_combined/"$cell_line"/whole_genome_predictions/"$cell_line"_threshold_05.txt"
+results_allbins=$path_to_dir"/results/RFECS_combined/"$cell_line"/whole_genome_predictions/"$cell_line"_allbins_threshold_05.txt"
 
-results=$path_to_dir"/results/RFECS/"$cell_line"/"$random_str"/whole_genome_predictions/"$cell_line"_threshold_05.txt"
-results_allbins=$path_to_dir"/results/RFECS/"$cell_line"/"$random_str"/whole_genome_predictions/"$cell_line"_allbins_threshold_05.txt"
+tcsh predict_only $bed_files No $trained_forests_path $results $results_allbins
+
 ```
 If one wants to change the threshold of RFECS, the threshold can be changed in file `$path_to_dir/softwares/RFECS/predict.m`
-```
-tcsh predict_only $bed_files No $trained_forests_path $results $results_allbins 
 
-```
 For cell line GM12878
 
 ```
 cell_line=GM12878
 bed_files_GM12878=$path_to_dir"/histone_"$cell_line"_files.txt"
 
-trained_forests_path=$path_to_dir"/results/RFECS/K562/"$random_str"/trained_forests/K562.mat"
-results=$path_to_dir"/results/RFECS/"$cell_line"/"$random_str"/whole_genome_predictions/"$cell_line"_threshold_05.txt"
-results_allbins=$path_to_dir"/results/RFECS/"$cell_line"/"$random_str"/whole_genome_predictions/"$cell_line"_allbins_threshold_05.txt"
+trained_forests_path=$path_to_dir"/results/RFECS_combined/K562/trained_forests/K562.mat"
+results=$path_to_dir"/results/RFECS_combined/"$cell_line"/whole_genome_predictions/"$cell_line"_threshold_05.txt"
+results_allbins=$path_to_dir"/results/RFECS_combined/"$cell_line"/whole_genome_predictions/"$cell_line"_allbins_threshold_05.txt"
 
 bash cleanup.sh
-tcsh predict_only $bed_files_GM12878 Yes $trained_forests_path $results $results_allbins 
+tcsh predict_only $bed_files_GM12878 Yes $trained_forests_path $results $results_allbins
 
 ```
 
@@ -477,17 +461,17 @@ tcsh predict_only $bed_files_GM12878 Yes $trained_forests_path $results $results
 Take the nearest prediction from all predictions to the test data enhancers and non-enhancers, what is the enhancer prediction score and true labels, do this after predicting RFECS enhancers
 
 ```
-code/RFECS_performance_on_GM12878_testdata.R
-random_str="pure_random" #or random_with_signal
+code/RFECS_performance_on_GM12878_testdata_combined.R
+
 ```
 
 writes predictions and true labels: 
 
-```$path_to_dir/results/RFECS/GM12878/$random_str/predictions.txt
-$path_to_dir/results/RFECS/GM12878/$random_str/true_labels.txt
+```$path_to_dir/results/RFECS_combined/GM12878/predictions.txt
+$path_to_dir/results/RFECS_combined/GM12878/true_labels.txt
 ```
 
-AUC values in ```$path_to_dir/results/GM12878/RFECS/testdata_AUC.txt``` 
+AUC values in ```$path_to_dir/results/GM12878/RFECS_combined/testdata_AUC.txt``` 
 
 ### Collect RFECS predictions, make bedfiles, could be tested easily
 
@@ -495,9 +479,8 @@ AUC values in ```$path_to_dir/results/GM12878/RFECS/testdata_AUC.txt```
 cellLine=K562
 threshold=05
 threshold_num=0.5
-random_str=pure_random
 
-R --slave --args  --cell=$cellLine --threshold=$threshold --thresholdNum=$threshold_num --randomStr=$random_str --pathToDir=$path_to_dir < code/RFECS_process.R
+R --slave --args  --cell=$cellLine --threshold=$threshold --thresholdNum=$threshold_num --pathToDir=$path_to_dir < code/RFECS_process_combined.R
 
 ```
 ###  Process the predictions made by PREPRINT
@@ -513,7 +496,6 @@ distanceMeasure=ML # or Bayes_estimated_priors
 cellLine=K562 #or GM12878
 threshold=0.5 #or for example FPR 1 % threshold
 type=maxscore
-randomStr=pure_random #Or random_with_signal
 enhancerSeparation=2000
 window=2000
 binSize=100
@@ -521,7 +503,7 @@ overlap=100
 distToPromoter=2000
 
 
-R --slave --args --window=$window --binSize=$binSize --type=$type --cellLine=$cellLine --distanceMeasure=$distanceMeasure --enhancerSeparation=$enhancerSeparation --distToPromoter=$distToPromoter --overlap=$overlap --threshold=$threshold --randomStr=$randomStr --pathToDir=$path_to_dir < code/collect_predictions.R 
+R --slave --args --window=$window --binSize=$binSize --type=$type --cellLine=$cellLine --distanceMeasure=$distanceMeasure --enhancerSeparation=$enhancerSeparation --distToPromoter=$distToPromoter --overlap=$overlap --threshold=$threshold --pathToDir=$path_to_dir < code/collect_predictions.R 
 
 ```
 
@@ -529,7 +511,7 @@ R --slave --args --window=$window --binSize=$binSize --type=$type --cellLine=$ce
 * Process the files generated in the above steps to visualize in the genome browser
 * Move also ```/Data/K562/coverage_bigWig/``` files to a web accessible folder
 * ```trackDb.txt``` file as an example to generate track hub for K562 data
-* The data and predictions stored as UCSC Genome Browser track hubs, links to sessions: ```https://genome-euro.ucsc.edu/s/mpirttin/hg19_K562_publication``` and ```https://genome-euro.ucsc.edu/s/mpirttin/hg19_GM12878_publication```
+* The data and predictions stored as UCSC Genome Browser track hubs, links to sessions: ```https://genome-euro.ucsc.edu/s/mpirttin/hg19_K562_publication_2020_combined``` and ```https://genome-euro.ucsc.edu/s/mpirttin/hg19_GM12878_publication_2020_combined```
 
 
 

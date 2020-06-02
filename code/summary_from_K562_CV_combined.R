@@ -48,7 +48,7 @@ bin_size=opt$binSize
 N=opt$N
 K=opt$k #k-fold CV
 path_to_dir=opt$pathToDir
-cell_line=opt$cellLine
+
 
 distance_measures=c("Bayes_estimated_priors/",
                     "ML/") 
@@ -56,8 +56,6 @@ distance_measures=c("Bayes_estimated_priors/",
 
 distance_names=c("Bayes estimated priors",
                  "ML") 
-
-random_types=c( "pure_random","random_with_signal")
 
 
 
@@ -67,13 +65,14 @@ auROC_matrices<-list()
 
 colnames(auROC_matrix)=distance_measures
 
-for(random_type in random_types){
 
-  path=paste(path_to_dir,"/results/",cell_line,"/",random_type,"/",sep="")
+
+path=paste(path_to_dir,"/results/model_promoters_and_random_combined/",
+             cell_line,"/",sep="")
   
   
   
-  for(distance_measure in distance_measures){ 
+for(distance_measure in distance_measures){ 
     rm(predictions)
     rm(true_labels)
     predictions<-vector()
@@ -99,8 +98,8 @@ for(random_type in random_types){
   }
   
   
-  auROC_matrices[[random_type]]=auROC_matrix
-  print(auROC_matrix)
-  save(auROC_matrix, file=paste(path, "auROCs_",bin_size,".RData",sep=""))
+auROC_matrix
+print(auROC_matrix)
+save(auROC_matrix, file=paste(path, "auROCs_",bin_size,".RData",sep=""))
   
-}
+

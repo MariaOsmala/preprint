@@ -200,9 +200,9 @@ bash fetchChromSizes hg19 > hg19.chrom.sizes
 
 ## Citation:
 
-@Article{Osmala2019,
+@Article{Osmala2020,
     AUTHOR = "Maria Osmala and Harri Lähdesmäki",
-    TITLE = "Enhancer prediction in the human genome by probabilistic modeling of the chromatin feature patterns",
+    TITLE = "Enhancer prediction in the human genome by probabilistic modelling of the chromatin feature patterns",
     VOLUME = {},
     PAGES = "",
     ADDRESS= "",

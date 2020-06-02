@@ -75,8 +75,9 @@ random_str=opt$randomStr
 path_to_dir=opt$pathToDir
 
 
-predictions_path=paste(path_to_dir,"/results/",sep="")
-results_path=paste(predictions_path,cell_line,"/",random_str,"/",distance_measure,"/",sep="")
+predictions_path=paste(path_to_dir,"/results/model_promoters_and_random_combined/",sep="")
+results_path=paste(predictions_path,cell_line,"/",
+                   "/",distance_measure,"/",sep="")
 
 
 
@@ -136,8 +137,12 @@ write.table(tmp[,c("seqnames", "start", "end", "score")], file=filename, quote=F
 
 #the histogram of enhancer lengths could be more informative
 predictions_full=enhancer_grouping_choose_type(predictions_full=predictions_full, 
-                                               filename=paste(results_path,"enhancer_lengths_",sep=""), 
-                                               type=type, threshold=threshold, enhancer_separation=enhancer_separation, overlap=overlap)
+                                               filename=paste(results_path,
+                                                              "enhancer_lengths_",sep=""), 
+                                               type=type, 
+                                               threshold=threshold,
+                                               enhancer_separation=enhancer_separation, 
+                                               overlap=overlap)
 
 #remove those overlapping ENCODE blacklist regions
 ENCODE_blacklist=ENCODE_blaclist_regions(path_to_dir)
@@ -341,8 +346,9 @@ for(predictions_TSS in c("all", "without_TSS")){
   tmp<-as.data.frame(tmp)
   names(tmp)=c("seqnames", "start", "end", "width", "strand","label","score")
   tmp$start=tmp$start-1
-  write.table(tmp[,c("seqnames", "start", "end", "score")], file=paste(results_path,"enhancers_PREPRINT_",
-                                                                       predictions_TSS,"_",type,"_",threshold,".bedGraph",sep=""), 
+  write.table(tmp[,c("seqnames", "start", "end", "score")], 
+              file=paste(results_path,"enhancers_PREPRINT_",
+              predictions_TSS,"_",type,"_",threshold,".bedGraph",sep=""), 
               quote=FALSE, sep=" ", row.names=FALSE, col.names=FALSE)
   
 }

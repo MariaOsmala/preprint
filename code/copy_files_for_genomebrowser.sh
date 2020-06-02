@@ -1,7 +1,6 @@
 
-
 path_to_dir=../preprint
-source_folder=$path_to_dir/results/
+source_folder=$path_to_dir/results/model_promoters_and_random_combined/
 
 target_folder=... #accessible through internet
 
@@ -13,20 +12,16 @@ target_folder=... #accessible through internet
 
 export PATH=$path_to_dir/softwares/utils/:$PATH
 
-for random_str in pure_random random_with_signal
-do
 
 for cell_line in K562 GM12878
 do
-
-    mkdir $target_folder""$random_str
-    mkdir $target_folder""$random_str"/PREPRINT/"
-    mkdir $target_folder""$random_str"/PREPRINT/"$cell_line
+    echo $cell_line
+    
     for distance_measure in ML Bayes_estimated_priors
     do
-
-        predictions_path=$source_folder"/"
-        results_path=$predictions_path$cell_line"/"$random_str"/"$distance_measure"/"
+        echo $distance_measure
+        predictions_path=$source_folder
+        results_path=$predictions_path$cell_line"/"$distance_measure"/"
 
 
         
@@ -35,33 +30,34 @@ do
         cd $results_path
 
 
- 	array=(*enhancers*0.5.bedGraph)
-	for arr in "${array[@]}"
-	do
+ 	      array=(*enhancers_PREPRINT*0.5.bedGraph)
+	      for arr in "${array[@]}"
+	      do
             awk '{OFS=" "; print $1, $2, $3}' $arr >  $results_path"GenomeBrowser/"${arr%"."*}".bed"
-	    sort -k1,1 -k2,2n $results_path"GenomeBrowser/"${arr%"."*}".bed" > $results_path"GenomeBrowser/"${arr%"."*}".sorted.bed"
+	          sort -k1,1 -k2,2n $results_path"GenomeBrowser/"${arr%"."*}".bed" > $results_path"GenomeBrowser/"${arr%"."*}".sorted.bed"
             bedToBigBed $results_path"GenomeBrowser/"${arr%"."*}".sorted.bed"  $path_to_dir/softwares/utils/hg19.chrom.sizes $results_path"GenomeBrowser/"${arr%"."*}".bb"
             rm $results_path"GenomeBrowser/"${arr%"."*}".sorted.bed"
- 	done
+ 	      done
 
 
-        array=(*predictions*)
-        sort -k1,1 -k2,2n $array > $results_path"GenomeBrowser/"${array%"."*}".sorted.bedGraph"
-        bedGraphToBigWig $results_path"GenomeBrowser/"${array%"."*}".sorted.bedGraph" $path_to_dir/softwares/utils/hg19.chrom.sizes $results_path"GenomeBrowser/"${array%"."*}".bw" 
-        rm $results_path"GenomeBrowser/"${array%"."*}".sorted.bedGraph"
+        array=(*prediction_scores*)
+        sort -k1,1 -k2,2n $array > $results_path"GenomeBrowser/prediction_scores_PREPRINT.sorted.bedGraph"
+        bedGraphToBigWig $results_path"GenomeBrowser/prediction_scores_PREPRINT.sorted.bedGraph" $path_to_dir/softwares/utils/hg19.chrom.sizes $results_path"GenomeBrowser/prediction_scores_PREPRINT.bw" 
+        rm $results_path"GenomeBrowser/prediction_scores_PREPRINT.sorted.bedGraph"
     done
 done
 
-done
-
+#check!
 
 
 #RFECS
-for random_str in pure_random random_with_signal
+
+source_folder=$path_to_dir/results/
+
+
+for cell_line in K562 GM12878
 do
-for cell_line in GM12878
-do
-    results_path=$source_folder"/RFECS/"$cell_line"/"$random_str"/bedfiles/"
+    results_path=$source_folder"RFECS_combined/"$cell_line"/bedfiles/"
     mkdir $results_path"GenomeBrowser/"
 
 
@@ -69,9 +65,9 @@ do
     do
 
         arr="enhancers_"$predictions_TSS"_RFECS_threshold_05.bedGraph" 
-	awk '{OFS=" "; print $1, $2, $3}' $results_path$arr >  $results_path"GenomeBrowser/"${arr%"."*}".bed"
-	sort -k1,1 -k2,2n $results_path"GenomeBrowser/"${arr%"."*}".bed" > $results_path"GenomeBrowser/"${arr%"."*}".sorted.bed"
-        bedToBigBed $results_path"GenomeBrowser/"${arr%"."*}".sorted.bed"  $path_to_dir/softwares/utils/hg19.chrom.sizes $results_path"GenomeBrowser/"${arr%"."*}".bb"
+	      awk '{OFS=" "; print $1, $2, $3}' $results_path$arr >  $results_path"GenomeBrowser/"${arr%"."*}".bed"
+	      sort -k1,1 -k2,2n $results_path"GenomeBrowser/"${arr%"."*}".bed" > $results_path"GenomeBrowser/"${arr%"."*}".sorted.bed"
+        bedToBigBed $results_path"GenomeBrowser/"${arr%"."*}".sorted.bed" $path_to_dir/softwares/utils/hg19.chrom.sizes $results_path"GenomeBrowser/"${arr%"."*}".bb"
         rm $results_path"GenomeBrowser/"${arr%"."*}".sorted.bed"
          
     done
@@ -85,14 +81,14 @@ do
 
 done
 
-done
 
+#check!
 
 ##############Create direcs####################
 
-for random_str in pure_random random_with_signal
-do
-
+#for random_str in pure_random random_with_signal
+#do
+random_str="combined"
 mkdir $target_folder""$random_str
 mkdir $target_folder""$random_str"/PREPRINT"
 mkdir $target_folder""$random_str"/RFECS"
@@ -107,68 +103,64 @@ do
 done
 done
 
-########Copy GenomeBrowser files to target#############################################
+########Copy GenomeBrowser files to target!#############################################
 
 #mypredictions
-target_folder=...
-predictions_path=$source_folder
 
-export PATH=$path_to_dir/softwares/utils/:$PATH
+predictions_path=$path_to_dir/results/model_promoters_and_random_combined/
+
+
 
 threshold=0.5
 type=maxscore
 
-for random_str in pure_random random_with_signal
-do
 
-
+random_str="combined"
 for cell_line in K562 GM12878
 do
 
-    mkdir $target_folder""$random_str"/PREPRINT/"$cell_line
-    mkdir $target_folder""$random_str"/RFECS/"$cell_line
     for distance_measure in ML Bayes_estimated_priors
     do
 
        
-        results_path=$predictions_path$cell_line"/"$random_str"/"$distance_measure"/GenomeBrowser/"
+        results_path=$predictions_path$cell_line"/"$distance_measure"/GenomeBrowser/"
 
         
         
         
         for predictions_TSS in all without_TSS
-	do
+       	do
 	    
-	    cp $results_path"enhancers_"$predictions_TSS"_"$type"_"$threshold".bb" $target_folder$random_str"/PREPRINT/"$cell_line"/"$distance_measure"_enhancers_"$predictions_TSS"_"$type"_"$threshold".bb"
+      	    scp $results_path"enhancers_PREPRINT_"$predictions_TSS"_"$type"_"$threshold".bb" $target_folder$random_str"/PREPRINT/"$cell_line"/"$distance_measure"_enhancers_"$predictions_TSS"_"$type"_"$threshold".bb"
 
-	done
+	      done
 
         filename=$results_path"prediction_scores_PREPRINT.bw" 
         
-	cp $filename m$target_folder$random_str"/PREPRINT/"$cell_line"/"$distance_measure"_prediction_scores_PRERPRINT.bw"
+	      scp $filename $target_folder$random_str"/PREPRINT/"$cell_line"/"$distance_measure"_prediction_scores_PREPRINT.bw"
 
     
     done
 done
         
 done
+#check!
+
+source_folder=$path_to_dir/results/
 
 
 
-#RFECS
-for random_str in pure_random random_with_signal
-do
 
 for cell_line in K562 GM12878
 do
 
     
-    results_path=$source_folder"/RFECS/"$cell_line"/"$random_str"/bedfiles/GenomeBrowser/"
+    results_path=$source_folder"/RFECS_combined/"$cell_line"/bedfiles/GenomeBrowser/"
     for predictions_TSS in all without_TSS
     do
 
         arr="enhancers_"$predictions_TSS"_RFECS_threshold_05.bed" 
-	cp $results_path""${arr%"."*}".bb" $target_folder$random_str"/RFECS/"$cell_line"/enhancers_"$predictions_TSS".bb"
+	      scp $results_path""${arr%"."*}".bb" $target_folder$random_str"/RFECS/"$cell_line"/enhancers_"$predictions_TSS".bb"
 
          
     done
@@ -176,10 +168,11 @@ do
     #all prediction scores for RFECS, blacklists removed from these
  
     array="all_prediction_scores_RFECS_threshold_05" 
-    sc $results_path""${array%"."*}".bw" $target_folder$random_str"/RFECS/"$cell_line"/all_prediction_scores.bw"
+    scp $results_path""${array%"."*}".bw" $target_folder$random_str"/RFECS/"$cell_line"/all_prediction_scores.bw"
 
 
 done
 
 done
 
+#check

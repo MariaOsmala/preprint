@@ -44,15 +44,18 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-# cell_line="K562"
-# threshold="05"
-# threshold_num=0.5
-# random_str="pure_random"
-# path_to_dir="/m/cs/scratch/csb/projects/enhancer_prediction_BMCBioinformatics/preprint"
+cell_line="K562"
+ threshold="05"
+ threshold_num=0.5
+ threshold_pred="05"
+ threshold_pred_num=0.5
+ 
+
+ path_to_dir="/m/cs/scratch/csb/projects/enhancer_prediction/experiments/RProjects/preprint/"
 
 cell_line=opt$cell
-threshold=opt$threshold
-threshold_num=opt$thresholdNum
+threshold_pred=opt$threshold
+threshold_pred_num=opt$thresholdNum
 random_str=opt$randomStr
 path_to_dir=opt$pathToDir
 
@@ -65,12 +68,15 @@ overlap=100
 N=1000
 
 distance_to_promoters=2000
-RFECS_results_path=paste(path_to_dir,"/results/RFECS/",cell_line,"/",random_str,"/whole_genome_predictions/",cell_line,"_threshold_",threshold,".txt",sep="")
+RFECS_results_path=paste(path_to_dir,"/results/RFECS_combined/",cell_line,
+                         "/whole_genome_predictions/",
+                         cell_line,"_threshold_",threshold_pred,".txt",sep="")
 
 
 #################Load training data#########################################################
-load(paste(path_to_dir,"/results/",cell_line,"/",random_str,"/ML/whole_genome_data.RData",sep=""))
-keep(random_str, threshold,threshold_num, 
+load(paste(path_to_dir,"/results/model_promoters_and_random_combined/",
+           cell_line,"/ML/whole_genome_data.RData",sep=""))
+keep( threshold_pred,threshold_pred_num, 
      enhancer_regions, negative_regions, RFECS_window,cell_line, path_to_dir,
      window, bin_size, overlap, N, 
      distance_to_promoters, RFECS_results_path, sure=TRUE)
@@ -185,17 +191,19 @@ predictions_RFECS$with_TSS=enhancer_predictions_with_TSS_RFECS[[1]]
 predictions_RFECS$without_TSS=enhancer_predictions_without_TSS_RFECS[[1]]
   
   
-save(predictions_RFECS,file=paste(path_to_dir, "/results/RFECS/",cell_line,"/",
-                                                          random_str,"/whole_genome_predictions/",cell_line,"_threshold_",threshold,".RData",sep=""))
+save(predictions_RFECS,file=paste(path_to_dir, 
+                                  "/results/RFECS_combined/",cell_line,
+                                                          "/whole_genome_predictions/",
+                                  cell_line,"_threshold_",threshold_pred,".RData",sep=""))
 ###########################bedfiles################################################
 
-rfecs_bedfiles=paste(path_to_dir,"/results/RFECS/",
-                     cell_line,"/",random_str,"/bedfiles/",sep="")
+rfecs_bedfiles=paste(path_to_dir,"/results/RFECS_combined/",
+                     cell_line,"/bedfiles/",sep="")
 
 
-rfecs_all_prediction_scores=paste(path_to_dir,"/results/RFECS/",
-                                  cell_line,"/",random_str,"/whole_genome_predictions/",
-                                  cell_line,"_allbins_threshold_",threshold,".txt",sep="") #15
+rfecs_all_prediction_scores=paste(path_to_dir,"/results/RFECS_combined/",
+                                  cell_line,"/whole_genome_predictions/",
+                                  cell_line,"_allbins_threshold_",threshold_pred,".txt",sep="") #15
 
 for(predictions_TSS in c("all", "without_TSS")){
   tmp=predictions_RFECS[[predictions_TSS]] #100 bp
@@ -204,7 +212,7 @@ for(predictions_TSS in c("all", "without_TSS")){
   names(tmp)=c("seqnames", "start", "end", "width", "strand","score")
   tmp$start=tmp$start-1
   filename=paste(rfecs_bedfiles, 
-                 "enhancers_",predictions_TSS,"_RFECS_threshold_",threshold,".bedGraph",sep="")
+                 "enhancers_",predictions_TSS,"_RFECS_threshold_",threshold_pred,".bedGraph",sep="")
   write.table(tmp[,c("seqnames", "start", "end", "score")], file=filename, quote=FALSE, sep=" ", row.names=FALSE, col.names=FALSE)
 }
 
@@ -240,5 +248,5 @@ if(nrow(test)!=0){
 tmp<-as.data.frame(tmp)
 names(tmp)=c("seqnames", "start", "end", "width", "strand","score")
 tmp$start=tmp$start-1
-filename=paste(rfecs_bedfiles,"all_prediction_scores_RFECS_threshold_",threshold,".bedGraph",sep="")
+filename=paste(rfecs_bedfiles,"all_prediction_scores_RFECS_threshold_",threshold_pred,".bedGraph",sep="")
 write.table(tmp[,c("seqnames", "start", "end", "score")], file=filename, quote=FALSE, sep=" ", row.names=FALSE, col.names=FALSE)

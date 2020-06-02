@@ -52,38 +52,55 @@ cell_line=opt$cellLine
 
 library(BSgenome.Hsapiens.UCSC.hg19)
 chrSizes = seqlengths(Hsapiens)
+window=2000
+bin_size=100
+N=1000
+path_to_dir="/scratch/cs/csb/projects/enhancer_prediction/experiments/RProjects/preprint"
 
-
-for(random_str in c("pure_random", "random_with_signal")){
+random_str="combined"
 
 path=paste(path_to_dir,"/Data/GM12878/",sep="")
-load(file=paste(path,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #normalized_profiles, profiles, regions
+load(file=paste(path,"data_R/K562_normalized_",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #normalized_profiles, profiles, regions
 
 
 enhancer_regions_test=regions
 
 ##################Load test data promoters###########################################################################
 #profiles_directed,profiles_undirected, normalized_profiles_directed,normalized_profiles_undirected, regions
-load(file=paste(path,"/data_R/",N,"_promoters_bin_",bin_size,"_window_",window,".RData",sep=""))
+load(file=paste(path,"/data_R/K562_normalized_",N,"_promoters_bin_",bin_size,"_window_",window,".RData",sep=""))
 
-promoter_regions_test=regions$promoters
+promoter_regions_test=regions
 
 ##################Load test data random################################################################################
 
-if(random_str=="pure_random"){
-  load(file=paste(path,"/data_R/",random_str,"_" ,N,"_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+
+load(file=paste(path,"/data_R/K562_normalized_pure_random_" ,
+                N,"_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
   
+
+pure_random_profiles=normalized_profiles
+pure_random_regions=regions
+
+
+
+load(file=paste(path,"/data_R/K562_normalized_",
+                N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+  
+random_with_signal_profiles=normalized_profiles
+random_with_signal_regions=regions
+
+
+
+
+
+#combine random
+random_profiles=list()
+for(i in 1:length(pure_random_profiles)){
+  random_profiles[[i]]=cbind(pure_random_profiles[[i]], random_with_signal_profiles[[i]])
 }
 
+random_regions_test=c(pure_random_regions, random_with_signal_regions)
 
-if(random_str=="random_with_signal"){
-  load(file=paste(path,"/data_R/correct_",N,"_random_version2_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
-  
-}
-
-
-
-random_regions_test=regions
 
 tmp=promoter_regions_test
 elementMetadata(tmp)=NULL
@@ -91,18 +108,18 @@ negative_regions_test=c(tmp, random_regions_test)
   
 
 keep(enhancer_regions_test, negative_regions_test, random_str,
-     distance_measure,
+     
      cell_line,
      N,
      window,
      bin_size,
-     path,sure=TRUE) #633 MB
+     path,path_to_dir,sure=TRUE) #633 MB
 
 #################load RFECS predictions###############################################
 
 
 
-RFECS_nonenhancers<-read.table(paste(path_to_dir,"results/RFECS/GM12878/",random_str,"/whole_genome_predictions/GM12878_allbins_threshold_05.txt",sep=""),stringsAsFactors=FALSE)
+RFECS_nonenhancers<-read.table(paste(path_to_dir,"/results/RFECS_combined/GM12878/whole_genome_predictions/GM12878_allbins_threshold_05.txt",sep=""),stringsAsFactors=FALSE)
 names(RFECS_nonenhancers)<-c("chr", "start", "enhancer_score")
 #these are sorted by the location
 
@@ -126,10 +143,10 @@ true_labels=c(rep(1, length(enhancer_regions_test)), rep(-1, length(negative_reg
 
 library("ROCR")
 
-write.table(predictions,file=paste(path_to_dir,"/results/RFECS/GM12878/",random_str,"/predictions.txt",sep=""), 
+write.table(predictions,file=paste(path_to_dir,"/results/RFECS_combined/GM12878/predictions.txt",sep=""), 
             quote=FALSE,row.names=FALSE, col.names=FALSE)
 
-write.table(true_labels, file=paste(path_to_dir,"results/RFECS/GM12878/",random_str,"/true_labels.txt",sep=""),
+write.table(true_labels, file=paste(path_to_dir,"/results/RFECS_combined/GM12878/true_labels.txt",sep=""),
             quote=FALSE,row.names=FALSE, col.names=FALSE)
 
 pred.svm<-prediction(predictions, true_labels)
@@ -138,5 +155,5 @@ auROC<-performance(pred.svm,'auc')@y.values[[1]]
 
 
 
-write.table(auROC, file=paste(path_to_dir,"results/RFECS/GM12878/",random_str,"/testdata_AUC.txt", sep=""), quote=FALSE,row.names=FALSE, col.names=FALSE)
-}
+write.table(auROC, file=paste(path_to_dir,"/results/RFECS_combined/GM12878/testdata_AUC.txt", sep=""), quote=FALSE,row.names=FALSE, col.names=FALSE)
+

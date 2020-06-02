@@ -1,20 +1,19 @@
+target_folder= ...
 
-target_folder=...
 
-
-track enhancers_Bayes_pure
-bigDataUrl $target_folder/pure_random/PREPRINT/K562/Bayes_estimated_priors_enhancers_without_TSS_maxscore_0.5.bb
-shortLabel enhancers Bayes pure random
-longLabel enhancers Bayes pure random
+track enhancers_Bayes_combined
+bigDataUrl $target_folder/combined/PREPRINT/K562/Bayes_estimated_priors_enhancers_without_TSS_maxscore_0.5.bb
+shortLabel enhancers Bayes combined
+longLabel enhancers Bayes combined
 priority 1
 color 228,26,28
 visibility full
 type bigBed 
 
-track prediction_scores_Bayes_pure
-bigDataUrl $target_folderpure_random/PREPRINT/K562/Bayes_estimated_priors_prediction_scores.bw
-shortLabel Bayes pure random
-longLabel prediction scores Bayes pure random
+track prediction_scores_Bayes_combined
+bigDataUrl $target_folder/combined/PREPRINT/K562/Bayes_estimated_priors_prediction_scores_PREPRINT.bw
+shortLabel Bayes combined
+longLabel prediction scores Bayes combined
 visibility full
 maxHeightPixels 100:100:10 
 yLineOnOff on
@@ -24,19 +23,19 @@ color 228,26,28
 viewLimits 0:1 
 type bigWig
 
-track enhancers_ML_pure
-bigDataUrl $target_folderpure_random/PREPRINT/K562/ML_enhancers_without_TSS_maxscore_0.5.bb
-shortLabel enhancers ML pure random
-longLabel enhancers ML pure random
+track enhancers_ML_combined
+bigDataUrl $target_folder/combined/PREPRINT/K562/ML_enhancers_without_TSS_maxscore_0.5.bb
+shortLabel enhancers ML combined
+longLabel enhancers ML combined
 priority 1
 visibility full
 color 55,126,184 
 type bigBed 
 
-track prediction_scores_ML_pure
-bigDataUrl $target_folder/pure_random/PREPRINT/K562/ML_prediction_scores.bw
-shortLabel ML pure random
-longLabel prediction scores ML pure random
+track prediction_scores_ML_combined
+bigDataUrl $target_folder/combined/PREPRINT/K562/ML_prediction_scores_PREPRINT.bw
+shortLabel ML combined
+longLabel prediction scores ML combined
 visibility full
 maxHeightPixels 100:100:10 
 yLineOnOff on
@@ -47,19 +46,19 @@ viewLimits 0:1
 type bigWig
 
 
-track RFECS_enhancers_pure
-bigDataUrl $target_folder/pure_random/RFECS/K562/enhancers_without_TSS.bb
-shortLabel RFECS enhancers pure random
-longLabel RFECS enhancers pure random
+track RFECS_enhancers_combined
+bigDataUrl $target_folder/combined/RFECS/K562/enhancers_without_TSS.bb
+shortLabel RFECS enhancers combined
+longLabel RFECS enhancers combined
 visibility full
 color 77,175,74 
 priority 3
 type bigBed 
 
-track RFECS_prediction_scores_pure
+track RFECS_prediction_scores_combined
 bigDataUrl $target_folder/pure_random/RFECS/K562/all_prediction_scores.bw
-shortLabel RFECS pure random
-longLabel RFECS prediction scores pure random
+shortLabel RFECS combined
+longLabel RFECS prediction scores combined
 maxHeightPixels 100:100:10 
 visibility full
 yLineOnOff on
@@ -70,79 +69,15 @@ priority 4
 type bigWig 
 
 
-###############################random with signal#########################3
-
-track enhancers_Bayes_with_signal
-bigDataUrl $target_folder/random_with_signal/PREPRINT/K562/Bayes_estimated_priors_enhancers_without_TSS_maxscore_0.5.bb
-shortLabel enhancers Bayes random with signal
-longLabel enhancers Bayes random with signal
-priority 1
-color 228,26,28
-visibility full
-type bigBed 
-
-track prediction_scores_Bayes_with_signal
-bigDataUrl $target_folder/random_with_signal/PREPRINT/K562/Bayes_estimated_priors_prediction_scores.bw
-shortLabel Bayes random with signal
-longLabel prediction scores Bayes random with signal
-visibility full
-maxHeightPixels 100:100:10 
-yLineOnOff on
-yLineMark 0.5
-priority 2
-color 228,26,28
-viewLimits 0:1 
-type bigWig
-
-track enhancers_ML_with_signal
-bigDataUrl $target_folder/random_with_signal/PREPRINT/K562/ML_enhancers_without_TSS_maxscore_0.5.bb
-shortLabel enhancers ML random with signal
-longLabel enhancers ML random with signal
-priority 1
-color 55,126,184 
-visibility full
-type bigBed 
-
-track prediction_scores_ML_with_signal
-bigDataUrl $target_folder/random_with_signal/PREPRINT/K562/ML_prediction_scores.bw
-shortLabel ML random with signal
-longLabel prediction scores ML random with signal
-visibility full
-maxHeightPixels 100:100:10 
-yLineOnOff on
-yLineMark 0.5
-color 55,126,184 
-priority 2
-viewLimits 0:1 
-type bigWig
 
 
-track RFECS_enhancers_with_signal
-bigDataUrl $target_folder/random_with_signal/RFECS/K562/enhancers_without_TSS.bb
-shortLabel RFECS enhancers random with signal
-longLabel RFECS enhancers random with signal
-visibility full
-priority 3
-color 77,175,74 
-type bigBed 
 
-track RFECS_prediction_scores_with_signal
-bigDataUrl $target_folder/random_with_signal/RFECS/K562/all_prediction_scores.bw
-shortLabel RFECS random with signal
-longLabel RFECS prediction scores random with signal
-maxHeightPixels 100:100:10 
-visibility full
-yLineOnOff on
-yLineMark 0.5
-viewLimits 0:1
-priority 4
-color 77,175,74 
-type bigWig 
+
 
 ######################data#########################################3
 
 track H3K4me1
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H3k4me1_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H3k4me1_bin_100.bigWig
 shortLabel H3K4me1
 longLabel H3K4me1
 visibility full
@@ -153,7 +88,7 @@ priority 5
 type bigWig
 
 track H3K27ac
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H3k27ac_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H3k27ac_bin_100.bigWig
 shortLabel H3K27ac
 longLabel H3K27ac
 visibility full
@@ -165,7 +100,7 @@ type bigWig
 
 
 track H3K4me3
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H3k4me3_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H3k4me3_bin_100.bigWig
 shortLabel H3K4me3
 longLabel H3K4me3
 color 77,175,74 
@@ -176,7 +111,7 @@ autoScale on
 type bigWig
 
 track DNase_seq
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/OpenChromDnase_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/OpenChromDnase_bin_100.bigWig
 shortLabel DNase I HS
 longLabel DNase I HS
 color 152,78,163 
@@ -187,7 +122,7 @@ autoScale on
 type bigWig
 
 track MNase_seq
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/Nsome_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/Nsome_bin_100.bigWig
 shortLabel MNase-seq
 longLabel MNase-seq
 color 255,127,0 
@@ -199,7 +134,7 @@ type bigWig
 
 
 track H2AZ
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H2az_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H2az_bin_100.bigWig
 shortLabel H2AZ
 longLabel H2AZ
 color 166,86,40 
@@ -211,7 +146,7 @@ type bigWig
 
 
 track H3K4me2
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H3k4me2_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H3k4me2_bin_100.bigWig
 shortLabel H3K4me2
 longLabel H3K4me2
 color 247,129,191 
@@ -223,7 +158,7 @@ type bigWig
   
 
 track H3K9ac
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H3k9ac_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H3k9ac_bin_100.bigWig
 shortLabel H3K9ac
 longLabel H3K9ac
 color 153,153,153 
@@ -235,7 +170,7 @@ type bigWig
 
 
 track Pol2
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/Pol2RawData_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/Pol2RawData_bin_100.bigWig
 shortLabel RNA Pol 2
 longLabel RNA Pol 2
 color 228,26,28 
@@ -247,7 +182,7 @@ type bigWig
 
 
 track CTCF
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/Ctcf_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/Ctcf_bin_100.bigWig
 shortLabel CTCF
 longLabel CTCF
 color 55,126,184 
@@ -259,7 +194,7 @@ type bigWig
 
 
 track H3K36me3
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H3k36me3_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H3k36me3_bin_100.bigWig
 shortLabel H3K36me3
 longLabel H3K36me3
 color 77,175,74 
@@ -271,7 +206,7 @@ type bigWig
 
 
 track H4K20me1
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H4k20me1_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H4k20me1_bin_100.bigWig
 shortLabel H4K20me1
 longLabel H4K20me1
 color 152,78,163 
@@ -283,7 +218,7 @@ type bigWig
 
 
 track H3K27me2
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H3k79me2_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H3k79me2_bin_100.bigWig
 shortLabel H3K27me2
 longLabel H3K27me2
 color 255,127,0 
@@ -295,7 +230,7 @@ type bigWig
 
 
 track H3K27me3
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H3k27me3_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H3k27me3_bin_100.bigWig
 shortLabel H3K27me3
 longLabel H3K27me3
 color 166,86,40 
@@ -307,7 +242,7 @@ type bigWig
 
 
 track H3K9me3
-bigDataUrl $path_to_dir/Data/K562/coverage_bigWig/H3k9me3_bin_100.bigWig
+bigDataUrl $target_folder/bigWig_100bp/K562/H3k9me3_bin_100.bigWig
 shortLabel H3K9me3
 longLabel H3K9me3
 color 247,129,191 
@@ -316,7 +251,6 @@ visibility full
 maxHeightPixels 100:100:10
 autoScale on 
 type bigWig
-
 
 
 

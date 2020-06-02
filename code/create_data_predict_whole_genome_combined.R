@@ -34,8 +34,6 @@ make_option(c("-distanceMeasure", "--distanceMeasure"), type="character", defaul
             help="ML or Bayes_estimated_priors [default= %default]", metavar="character"),
 make_option(c("-cellLine", "--cellLine"), type="character", default="", 
             help="cell line [default= %default]", metavar="character"),
-make_option(c("-randomStr", "--randomStr"), type="character", default="", 
-            help="random type [default= %default]", metavar="character"),
 make_option(c("-pathToDir", "--pathToDir"), type="character", default="", 
             help="path to main folder [default= %default]", metavar="character"),
 make_option(c("-NormCellLine", "--NormCellLine"), type="character", default="", 
@@ -52,7 +50,7 @@ bin_size=opt$binSize
 N=opt$N
 path_to_dir=opt$pathToDir
 distance_measure=opt$distanceMeasure #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
-random_str=opt$randomStr
+
 NormCellLine=opt$NormCellLine
 
 print(cell_line)
@@ -61,7 +59,7 @@ print(bin_size)
 print(N)
 print(path_to_dir)
 print(distance_measure)
-print(random_str)
+
 print(NormCellLine)
 
 
@@ -79,14 +77,11 @@ negatives_to_zero=FALSE
 load(file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",
                 N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #normalized_profiles, profiles, regions
 
-original_window=nrow(normalized_profiles[[1]])*bin_size
+
 
 enhancer_profiles=normalized_profiles
 enhancer_regions=regions
 
-
-#change the window size
-enhancer_profiles=change_window(enhancer_profiles, original_window, window, bin_size)
 
 
 
@@ -95,7 +90,7 @@ enhancer_profiles=change_window(enhancer_profiles, original_window, window, bin_
 load(file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",N,"_promoters_bin_",bin_size,"_window_",window,".RData",sep=""))
 
 promoter_profiles=normalized_profiles_undirected
-promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
+
 promoter_regions=regions
 #promoter_directions=regions$strand
 #averages, quantiles
@@ -103,23 +98,30 @@ promoter_regions=regions
 ##################Load training data random################################################################################
 
 print("testing")
-print(random_str)
 
-if(random_str=="pure_random"){
-  load(file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",random_str,"_" ,N,"_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+
+
+load(file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/pure_random_" ,
+                N,"_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
   
+
+pure_random_profiles=normalized_profiles
+pure_random_regions=regions
+
+
+load(file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",N,"_random_with_signal_bin_",
+                bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+  
+random_with_signal_profiles=normalized_profiles
+random_with_signal_regions=regions
+
+#combine random
+random_profiles=list()
+for(i in 1:length(pure_random_profiles)){
+  random_profiles[[i]]=cbind(pure_random_profiles[[i]], random_with_signal_profiles[[i]])
 }
 
-
-if(random_str=="random_with_signal"){
-  load(file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
-  
-}
-
-
-random_profiles=normalized_profiles
-random_profiles=change_window(random_profiles, original_window, window, bin_size)
-random_regions=regions
+random_regions=c(pure_random_regions, random_with_signal_regions)
 
 ##############positive and integer data############################################
 for(i in 1:length(enhancer_profiles)){
@@ -164,7 +166,7 @@ train_summaries_random<-NULL
 
 
 train_summaries_pos<-sapply( enhancer_profiles, function (x) rowMeans(x) ) #window length x 15
-train_summaries_promoters<-sapply( negative_profiles, function (x) rowMeans(x) )
+train_summaries_promoters<-sapply( promoter_profiles, function (x) rowMeans(x) )
 train_summaries_random<-sapply( negative_profiles, function (x) rowMeans(x) )
 
 
@@ -182,15 +184,6 @@ human.chromlens = seqlengths(Hsapiens)
 
 start(split_ranges)=start(split_ranges)+1
 
-#########################Create normalized bigWig files#############################################################
-if(distance_measure=="ML" && random_str=="pure_random"){ #create only once
-    for(name in dimnames(unionBedGraph_zero)[[2]]){
-      tmp=split_ranges
-      tmp$score=unionBedGraph_zero[,name]
-      seqlengths(tmp)<-human.chromlens[seqnames(seqinfo(tmp))]
-      export(tmp, paste(path_to_dir,"/Data/",cell_line,"/coverage_bigWig/",name,"_bin_",bin_size,".bigWig",sep=""),"bigWig")
-  }
-}
 
 ###########################Separate data for different chromosomes##################################################
 seqlengths(split_ranges)<-human.chromlens[seqnames(seqinfo(split_ranges))]
@@ -205,11 +198,16 @@ for(chr in names(split_ranges_list)){
 rm(unionBedGraph_zero)  
 
   ###################################Compute the probabilities############################################################################
-train_data_pos=compute_distance_two_negatives(profile=enhancer_profiles, subset=1:ncol(enhancer_profiles[[1]]), 
-                                                summary_pos=train_summaries_pos, summary_neg_promoters=train_summaries_promoters,
+train_data_pos=compute_distance_two_negatives(profile=enhancer_profiles, 
+                                              subset=1:ncol(enhancer_profiles[[1]]), 
+                                                summary_pos=train_summaries_pos, 
+                                              summary_neg_promoters=train_summaries_promoters,
                                                 summary_neg_random=train_summaries_random,
                                                 fn=fn, distance_measure=distance_measure,
-                                                learn_alpha_prior=TRUE, priorgammas_pos=NULL, priorgammas_neg_promoters=NULL, priorgammas_neg_random=NULL)
+                                                learn_alpha_prior=TRUE, 
+                                              priorgammas_pos=NULL, 
+                                              priorgammas_neg_promoters=NULL, 
+                                              priorgammas_neg_random=NULL)
 
 ################################################################################################################################
 #this many windows
@@ -237,7 +235,8 @@ registerDoParallel(no_cores)
 if( distance_measure=="ML"){
     
     
-    train_data_neg=compute_distance_two_negatives(profile=negative_profiles, subset=1:ncol(negative_profiles[[1]]), 
+    train_data_neg=compute_distance_two_negatives(profile=negative_profiles, 
+                                                  subset=1:ncol(negative_profiles[[1]]), 
                                                   summary_pos=train_summaries_pos,
                                                   summary_neg_promoters=train_summaries_promoters,
                                                   summary_neg_random=train_summaries_random,
@@ -289,7 +288,8 @@ if(distance_measure=="Bayes_estimated_priors"){
  
     
     
-    train_data_neg=compute_distance_two_negatives(profile=negative_profiles, subset=1:ncol(negative_profiles[[1]]), 
+    train_data_neg=compute_distance_two_negatives(profile=negative_profiles, 
+                                                  subset=1:ncol(negative_profiles[[1]]), 
                                                   summary_pos=train_summaries_pos,
                                                   summary_neg_promoters=train_summaries_promoters,
                                                   summary_neg_random=train_summaries_random,
@@ -316,7 +316,8 @@ if(distance_measure=="Bayes_estimated_priors"){
                                                      summary_neg_promoters=train_summaries_promoters,
                                                      summary_neg_random=train_summaries_random,
                                                      fn=fn,distance_measure=distance_measure, 
-                                                     learn_alpha_prior=FALSE, priorgammas_pos=train_data_pos$priorgammas_pos, 
+                                                     learn_alpha_prior=FALSE, 
+                                                     priorgammas_pos=train_data_pos$priorgammas_pos, 
                                                      priorgammas_neg_promoters=train_data_pos$priorgammas_neg_promoters,
                                                      priorgammas_neg_random=train_data_pos$priorgammas_neg_random)$data
         
@@ -345,7 +346,7 @@ rm(data_matrix)
 data_matrix=do.call(rbind, data_matrix_list)
 GRanges_prediction_regions=unlist(prediction_regions_list)
 
-common_path=paste(path_to_dir, "/results/",cell_line,"/",random_str,"/",distance_measure,"/",sep="")
+common_path=paste(path_to_dir, "/results/model_promoters_and_random_combined/",cell_line,"/",distance_measure,"/",sep="")
 
 
 
@@ -356,8 +357,8 @@ common_path=paste(path_to_dir, "/results/",cell_line,"/",random_str,"/",distance
 #                  filename=paste(common_path,"_normalized_boxplots.eps",sep=""), yMin=-5, yMax=5 )
     
 #######################################################################################################################################################################################    
-
-save.image(paste(common_path, "whole_genome_data.RData",sep=""))    
+rm(results_path)
+save.image(paste(common_path, "whole_genome_data.RData",sep=""))    #mistä tähän tulee results_path mukaan
 #########################################unnormalized data is saved in libsvm format########################################################################################
 train.data<-as.data.frame( cbind(train_data_pos$data, train_data_neg$data) )
 train.labels<-rep(1,(ncol(train_data_pos$data)+ncol(train_data_neg$data)))

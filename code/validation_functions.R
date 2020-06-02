@@ -1,4 +1,5 @@
-enhancer_grouping_choose_type<-function(predictions_full, filename, type, threshold, enhancer_separation, overlap){
+enhancer_grouping_choose_type<-function(predictions_full, filename, type, 
+                                        threshold, enhancer_separation, overlap){
   #type is maxscore or middle or multi
   #enhancer_separation is only used when type="multi", the minimal distance between adjacent enhancers
   enhancer_ind=which(predictions_full$enhancer_score>threshold) #548150

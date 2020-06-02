@@ -38,9 +38,7 @@ make_option(c("-pathToDir", "--pathToDir"), type="character", default="",
 make_option(c("-distanceMeasure", "--distanceMeasure"), type="character", default="", 
             help="ML or Bayes_estimated_priors [default= %default]", metavar="character"),
 make_option(c("-cellLine", "--cellLine"), type="character", default="", 
-            help="cell line [default= %default]", metavar="character"),
-make_option(c("-randomStr", "--randomStr"), type="character", default="", 
-            help="random type [default= %default]", metavar="character")
+            help="cell line [default= %default]", metavar="character")
 ); 
 
 opt_parser = OptionParser(option_list=option_list);
@@ -53,7 +51,7 @@ bin_size=opt$binSize
 N=opt$N
 distance_measure=opt$distanceMeasure #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
 k=opt$k #k-fold CV
-random_str=opt$randomStr #pure_random, peaky_random or random_with_signal
+
 path_to_dir=opt$pathToDir
 
 print(cell_line)
@@ -62,7 +60,7 @@ print(bin_size)
 print(N)
 print(distance_measure)
 print(k)
-print(random_str)
+
 print(path_to_dir)
 
 
@@ -93,16 +91,17 @@ enhancer_summary=profile_averages(enhancer_profiles)
 
 
 #change the window size
-enhancer_profiles=change_window(enhancer_profiles, original_window, window, bin_size)
-enhancer_summary=change_window(enhancer_summary, original_window, window, bin_size)
+#enhancer_profiles=change_window(enhancer_profiles, original_window, window, bin_size)
+#enhancer_summary=change_window(enhancer_summary, original_window, window, bin_size)
 
 
 ##################Load training data promoters###########################################################################
 #profiles_directed,profiles_undirected, normalized_profiles_directed,normalized_profiles_undirected, regions
-load(file=paste(path,"/Data/",cell_line,"/data_R/",N,"_promoters_bin_",bin_size,"_window_",window,".RData",sep=""))
+load(file=paste(path,"/Data/",cell_line,"/data_R/",N,"_promoters_bin_",
+                bin_size,"_window_",window,".RData",sep=""))
 
 promoter_profiles=normalized_profiles_undirected
-promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
+#promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
 promoter_regions=regions
 #promoter_directions=regions$strand
 #averages, quantiles
@@ -110,26 +109,29 @@ promoter_regions=regions
 ##################Load training data random################################################################################
 
 
-if(random_str=="pure_random"){
-  load(file=paste(path,"/Data/",cell_line,"/data_R/",random_str,"_" ,N,"_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+#pure_random
+load(file=paste(path,"/Data/",cell_line,"/data_R/pure_random_" ,N,"_bin_",
+                bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
   
-}
+pure_random_profiles=normalized_profiles
+pure_random_regions=regions
 
-if(random_str=="random_with_signal"){
-  load(file=paste(path,"/Data/",cell_line,"/data_R/",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+
+#random_with_signal
+load(file=paste(path,"/Data/",cell_line,"/data_R/",N,"_random_with_signal_bin_",
+                bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
   
+random_with_signal_profiles=normalized_profiles
+random_with_signal_regions=regions
+
+#combine negatives
+
+random_profiles=list()
+for(i in 1:length(pure_random_profiles)){
+  random_profiles[[i]]=cbind(pure_random_profiles[[i]], random_with_signal_profiles[[i]])
 }
 
-
-
-
-random_profiles=normalized_profiles
-
-original_window=nrow(random_profiles[[1]])*bin_size
-if(original_window>window){
-    random_profiles=change_window(random_profiles, original_window, window, bin_size)
-}
-random_regions=regions
+random_regions=c(pure_random_regions, random_with_signal_regions)
 
 ##############positive and integer data############################################
 for(i in 1:length(enhancer_profiles)){
@@ -179,8 +181,8 @@ for(i in 1:k){
   
   if(summary=="mean"){
       train_summaries_pos[[i]]<-sapply( enhancer_profiles, function (x) rowMeans(x[, cv_groups$pos[[i]]$train]) ) #window length x 15
-      train_summaries_promoters[[i]]<-sapply( negative_profiles, function (x) rowMeans(x[, cv_groups$neg_promoter[[i]]$train]) )
-      train_summaries_random[[i]]<-sapply( negative_profiles, function (x) rowMeans(x[, cv_groups$neg_random[[i]]$train]) )
+      train_summaries_promoters[[i]]<-sapply( promoter_profiles, function (x) rowMeans(x[, cv_groups$neg_promoter[[i]]$train]) )
+      train_summaries_random[[i]]<-sapply( random_profiles, function (x) rowMeans(x[, cv_groups$neg_random[[i]]$train]) )
   }
  
   
@@ -200,7 +202,9 @@ for(i in 1:k){
   if( distance_measure=="ML"){
     
     
-    train_data_neg=compute_distance_two_negatives(profile=negative_profiles, subset=c( cv_groups$neg_promoter[[i]]$train, cv_groups$neg_random[[i]]$train), 
+    train_data_neg=compute_distance_two_negatives(profile=negative_profiles, 
+                                                  subset=c( cv_groups$neg_promoter[[i]]$train, 
+                                                            length(promoter_regions)+cv_groups$neg_random[[i]]$train), 
                                                   summary_pos=train_summaries_pos[[i]],
                                                   summary_neg_promoters=train_summaries_promoters[[i]],
                                                   summary_neg_random=train_summaries_random[[i]],
@@ -212,7 +216,8 @@ for(i in 1:k){
                                                  summary_neg_random=train_summaries_random[[i]],
                                                  fn=fn,distance_measure=distance_measure)
     
-    test_data_neg=compute_distance_two_negatives(profile=negative_profiles, subset=c( cv_groups$neg_promoter[[i]]$test, cv_groups$neg_random[[i]]$test),
+    test_data_neg=compute_distance_two_negatives(profile=negative_profiles, subset=c( cv_groups$neg_promoter[[i]]$test, 
+                                                                                      length(promoter_regions)+cv_groups$neg_random[[i]]$test),
                                                  summary_pos=train_summaries_pos[[i]], 
                                                  summary_neg_promoters=train_summaries_promoters[[i]],
                                                  summary_neg_random=train_summaries_random[[i]],
@@ -224,7 +229,8 @@ for(i in 1:k){
  
     
     
-    train_data_neg=compute_distance_two_negatives(profile=negative_profiles, c( cv_groups$neg_promoter[[i]]$train, cv_groups$neg_random[[i]]$train), 
+    train_data_neg=compute_distance_two_negatives(profile=negative_profiles, 
+                                                  c( cv_groups$neg_promoter[[i]]$train, length(promoter_regions)+cv_groups$neg_random[[i]]$train), 
                                                   summary_pos=train_summaries_pos[[i]],
                                                   summary_neg_promoters=train_summaries_promoters[[i]],
                                                   summary_neg_random=train_summaries_random[[i]],
@@ -243,7 +249,8 @@ for(i in 1:k){
                                                  priorgammas_neg_promoters=train_data_pos$priorgammas_neg_promoters,
                                                  priorgammas_neg_random=train_data_pos$priorgammas_neg_random)
     
-    test_data_neg=compute_distance_two_negatives(profile=negative_profiles, subset=c( cv_groups$neg_promoter[[i]]$test, cv_groups$neg_random[[i]]$test), 
+    test_data_neg=compute_distance_two_negatives(profile=negative_profiles, subset=c( cv_groups$neg_promoter[[i]]$test, 
+                                                                                      length(promoter_regions)+cv_groups$neg_random[[i]]$test), 
                                                  summary_pos=train_summaries_pos[[i]],  
                                                  summary_neg_promoters=train_summaries_promoters[[i]],
                                                  summary_neg_random=train_summaries_random[[i]],
@@ -257,7 +264,7 @@ for(i in 1:k){
     
     ##########################Visualization of the data######################################################################## 
   
-  common_path=paste(path, "/results/model_promoters_and_random/",cell_line,"/",random_str,"/",distance_measure,"/",k,"-fold_CV_",i,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,"_",k,"fold_cv_",i,sep="")
+  common_path=paste(path, "/results/model_promoters_and_random_combined/",cell_line,"/",distance_measure,"/",k,"-fold_CV_",i,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,"_",k,"fold_cv_",i,sep="")
 
   
   

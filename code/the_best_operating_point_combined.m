@@ -15,8 +15,8 @@
 %occur equally often then the line has a slope of 1. That is ,it is at 45 degrees. The best 
 %place to operate the classifier is the point on its ROC which lies on a 45 degree line closest to the north-west corner (0,1) of the ROC plot.
 clear all;
-path_to_dir=...
-comparisons_path=strcat(path_to_dir, '/results/K562/');
+path_to_dir='/m/cs/scratch/csb/projects/enhancer_prediction/experiments/RProjects/preprint/'
+comparisons_path=strcat(path_to_dir, '/results/model_promoters_and_random_combined/K562/');
 results=cell(2*2*3,3);
 
 N=1000;
@@ -25,17 +25,16 @@ bin_size=100;
 
 
 results_ROC=cell(2,2,3);
-j=1;
+
 i=1;
 %%
-for random_str={ 'pure_random','random_with_signal'}
-i=1;
+
 for distance_measure={'ML', 'Bayes_estimated_priors'} %'correlation'
     
     
-    path=strcat(comparisons_path,'/',random_str,'/',distance_measure);
+    path=strcat(comparisons_path,'/',distance_measure);
     format_rep=45;
-    sample_number=3000;
+    sample_number=4000;
     
     clear true_labels
     clear predictions
@@ -61,8 +60,8 @@ for distance_measure={'ML', 'Bayes_estimated_priors'} %'correlation'
     
     [X,Y,T,AUC,OPTROCPT,SUBY,SUBYNAMES] = perfcurve(true_labels,predictions,1);
     
-    results_ROC{i,1,j}=X;
-    results_ROC{i,2,j}=Y;
+    results_ROC{i,1}=X;
+    results_ROC{i,2}=Y;
     %X FPR
     %Y TPR
     
@@ -82,37 +81,32 @@ for distance_measure={'ML', 'Bayes_estimated_priors'} %'correlation'
     TPR=OPTROCPT(2);
     %AUC
     
-    results{i,j}=strjoin([ distance_measure, num2str(tbop), num2str(FPR), num2str(TPR), num2str(AUC),   num2str(threshold_0_01), num2str(TPR_0_01)]);
+    results{i}=strjoin([ distance_measure, num2str(tbop), num2str(FPR), num2str(TPR), num2str(AUC),   num2str(threshold_0_01), num2str(TPR_0_01)]);
     i=i+1;
-end
-j=j+1;
 end
 
 %% Plot ROC
 
-random_str={ 'pure','signal'};
 
-for(i=1:2)
-    figure(i)
+figure(1)
 wx = 10; wy = 10; set(gcf,'PaperSize',[wx wy], 'PaperPosition',[0 0 wx wy]); %centimeters
-plot(results_ROC{1,1,i}, results_ROC{1,2,i}, 'color','red','lineWidth',2)
+plot(results_ROC{1,1}, results_ROC{1,2}, 'color','red','lineWidth',2)
 hold on
-plot(results_ROC{2,1,i}, results_ROC{2,2,i}, 'color','blue','lineWidth',2 )
+plot(results_ROC{2,1}, results_ROC{2,2}, 'color','blue','lineWidth',2 )
 legend('ML','Bayes')
-title(strcat('K562, 5-fold CV in the training data, ',random_str{i}))
-print(strcat('K562_trainingCV_ROC_',random_str{i},'.png'),'-dpng', '-r300');
-end
+title(strcat('K562, 5-fold CV in the training data, combined'))
+print(strcat('K562_trainingCV_ROC_combined.png'),'-dpng', '-r300');
+
 %%
 
 clear all;
-
-comparisons_path=strcat(path_to_dir,'results/GM12878');
+path_to_dir='/m/cs/scratch/csb/projects/enhancer_prediction/experiments/RProjects/preprint'
+comparisons_path=strcat(path_to_dir,'/results/model_promoters_and_random_combined/GM12878');
 
 
 results=cell(2*2*2,3); %2*2*3
 i=1;
 
-j=1;
 N=1000;
 window=2000;
 bin_size=100;
@@ -120,15 +114,14 @@ bin_size=100;
 results_ROC=cell(2,2,3);
 %%
 
-for random_str={ 'pure_random','random_with_signal'}
-    i=1;
+
 for distance_measure={'ML', 'Bayes_estimated_priors'}
     
     
-    path=strcat(comparisons_path,'/',random_str,'/',distance_measure);
+    path=strcat(comparisons_path,'/',distance_measure);
     
     format_rep=45;
-    sample_number=3000;
+    sample_number=4000;
     
     
     clear true_labels
@@ -154,8 +147,8 @@ for distance_measure={'ML', 'Bayes_estimated_priors'}
     
     [X,Y,T,AUC,OPTROCPT,SUBY,SUBYNAMES] = perfcurve(true_labels,predictions,1);
     
-    results_ROC{i,1,j}=X;
-    results_ROC{i,2,j}=Y;
+    results_ROC{i,1}=X;
+    results_ROC{i,2}=Y;
     %X FPR
     %Y TPR
     
@@ -188,21 +181,19 @@ for distance_measure={'ML', 'Bayes_estimated_priors'}
     TPR=OPTROCPT(2);
     %AUC
     
-    results{i,j}=strjoin([ distance_measure, num2str(tbop), num2str(FPR), num2str(TPR), num2str(AUC), num2str(threshold_0_01), num2str(TPR_0_01)]);
+    results{i}=strjoin([ distance_measure, num2str(tbop), num2str(FPR), num2str(TPR), num2str(AUC), num2str(threshold_0_01), num2str(TPR_0_01)]);
     i=i+1;
-end
-j=j+1;
+
 end
 %% Load GM12878 predictions and true labels for the test data
-random_str_simpler={ 'pure','signal'};
-random_str={ 'pure_random','random_with_signal'};
-for(i=1:2)
-filename=strcat(path_to_dir,'/results/RFECS/GM12878/',random_str{i},'/predictions.txt');
+
+
+filename=strcat(path_to_dir,'/results/RFECS_combined/GM12878/predictions.txt');
  
 predicted=importdata(filename,' ',0);
 predictions=predicted;
     
-filename=strcat(path_to_dir,'results/RFECS/GM12878/',random_str{i},'/true_labels.txt');
+filename=strcat(path_to_dir,'/results/RFECS_combined/GM12878/true_labels.txt');
 true_labels=importdata(filename,' ',0);
 [X_RFECS,Y_RFECS,T_RFECS,AUC_RFECS,OPTROCPT_RFECS,SUBY_RFECS,SUBYNAMES_RFECS] = perfcurve(true_labels,predictions,1);
 
@@ -214,19 +205,19 @@ true_labels=importdata(filename,' ',0);
 %results_ROC{i,2}=Y;
 figure
 wx = 10; wy = 10; set(gcf,'PaperSize',[wx wy], 'PaperPosition',[0 0 wx wy]); %centimeters
-plot(results_ROC{1,1,i}, results_ROC{1,2,i}, 'color','red','lineWidth',2)
+plot(results_ROC{1,1,1}, results_ROC{1,2,1}, 'color','red','lineWidth',2)
 hold on
-plot(results_ROC{2,1,i}, results_ROC{2,2,i}, 'color','blue','lineWidth',2 )
+plot(results_ROC{2,1,1}, results_ROC{2,2,1}, 'color','blue','lineWidth',2 )
 hold on
 plot(X_RFECS, Y_RFECS, 'color','green','lineWidth',2 )
 
 legend('ML','Bayes', 'RFECS')
 
-title(strcat('GM12878, test data, ',random_str_simpler{i}))
+title(strcat('GM12878, test data'))
 
 
-print(strcat('GM12878_test_ROC_',random_str_simpler{i},'.png'),'-dpng', '-r300');
+print(strcat('GM12878_test_ROC_combined.png'),'-dpng', '-r300');
 
-end
+
 
 %%

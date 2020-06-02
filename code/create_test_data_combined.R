@@ -38,8 +38,6 @@ make_option(c("-distanceMeasure", "--distanceMeasure"), type="character", defaul
             help="ML or Bayes_estimated_priors [default= %default]", metavar="character"),
 make_option(c("-cellLine", "--cellLine"), type="character", default="", 
             help="cell line [default= %default]", metavar="character"),
-make_option(c("-randomStr", "--randomStr"), type="character", default="", 
-            help="randomStr [default= %default]", metavar="character"),
 make_option(c("-normalize", "--normalize"), type="logical", default=FALSE, 
             help="do we normalize wrt data from other cell line [default= %default]", metavar="logical"),
 make_option(c("-NormCellLine", "--NormCellLine"), type="character", default="", 
@@ -55,7 +53,6 @@ window=opt$window
 bin_size=opt$binSize
 N=opt$N
 distance_measure=opt$distanceMeasure #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
-random_str=opt$randomStr
 path_to_dir=opt$pathToDir
 normalizeBool=opt$normalize
 NormCellLine=opt$NormCellLine
@@ -65,7 +62,7 @@ print(window)
 print(bin_size)
 print(N)
 print(distance_measure)
-print(random_str)
+
 print(path_to_dir)
 print(normalizeBool)
 print(NormCellLine)
@@ -99,8 +96,8 @@ if(normalizeBool==TRUE){
 
 
   #change the window size
-  enhancer_profiles=change_window(enhancer_profiles, original_window, window, bin_size)
-  enhancer_summary=change_window(enhancer_summary, original_window, window, bin_size)
+  #enhancer_profiles=change_window(enhancer_profiles, original_window, window, bin_size)
+  #enhancer_summary=change_window(enhancer_summary, original_window, window, bin_size)
 
 
   ##################Load training data promoters###########################################################################
@@ -108,7 +105,7 @@ if(normalizeBool==TRUE){
   load(file=paste(path,"/Data/",NormCellLine,"/data_R/",N,"_promoters_bin_",bin_size,"_window_",window,".RData",sep=""))
 
   promoter_profiles=normalized_profiles_undirected
-  promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
+  #promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
   promoter_regions=regions
   #promoter_directions=regions$strand
   #averages, quantiles
@@ -116,20 +113,31 @@ if(normalizeBool==TRUE){
   ##################Load training data random################################################################################
 
 
-  if(random_str=="pure_random"){
-  load(file=paste(path,"/Data/",NormCellLine,"/data_R/",random_str,"_" ,N,"_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+  #pure_random
+  load(file=paste(path,"/Data/",NormCellLine,"/data_R/pure_random_" ,N,"_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+  pure_random_profiles=normalized_profiles
   
-  }
-
-  if(random_str=="random_with_signal"){
+  pure_random_regions=regions
+  
+  
   load(file=paste(path,"/Data/",NormCellLine,"/data_R/",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
   
+  
+  random_with_signal_profiles=normalized_profiles
+  random_with_signal_regions=regions
+  
+  #combine negatives
+  
+  random_profiles=list()
+  for(i in 1:length(pure_random_profiles)){
+    random_profiles[[i]]=cbind(pure_random_profiles[[i]], random_with_signal_profiles[[i]])
   }
+  
+  random_regions=c(pure_random_regions, random_with_signal_regions)
+  
+  
 }
 
-random_profiles=normalized_profiles
-random_profiles=change_window(random_profiles, original_window, window, bin_size)
-random_regions=regions
 
 ##############positive and integer data############################################
 for(i in 1:length(enhancer_profiles)){
@@ -172,8 +180,8 @@ if(distance_measure=="ML"){
   
 
 train_summaries_pos<-sapply( enhancer_profiles, function (x) rowMeans(x) ) #window length x 15
-train_summaries_promoters<-sapply( negative_profiles, function (x) rowMeans(x[,1:length(tmp)]) )
-train_summaries_random<-sapply( negative_profiles, function (x) rowMeans(x[,(length(tmp)+1):length(negative_regions) ]) )
+train_summaries_promoters<-sapply( promoter_profiles, function (x) rowMeans(x) )
+train_summaries_random<-sapply( random_profiles, function (x) rowMeans(x) )
 
 
 
@@ -181,12 +189,12 @@ train_summaries_random<-sapply( negative_profiles, function (x) rowMeans(x[,(len
 ################################load test data###############################################################
 load(file=paste(path,"/Data/",cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #normalized_profiles, profiles, regions
 
-original_window=nrow(otherCellLine_normalized_profiles[[1]])*bin_size
+
 
 enhancer_profiles_test=otherCellLine_normalized_profiles
 enhancer_regions_test=regions
 
-enhancer_profiles_test=change_window(enhancer_profiles_test, original_window, window, bin_size)
+
 
 
 ##################Load test data promoters###########################################################################
@@ -194,25 +202,29 @@ enhancer_profiles_test=change_window(enhancer_profiles_test, original_window, wi
 load(file=paste(path,"/Data/",cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_promoters_bin_",bin_size,"_window_",window,".RData",sep=""))
 
 promoter_profiles_test=otherCellLine_normalized_profiles_undirected
-promoter_profiles_test=change_window(promoter_profiles_test, original_window, window, bin_size)
+
 promoter_regions_test=regions
-#promoter_directions=regions$strand
-#averages, quantiles
 
 ##################Load test data random################################################################################
-if(random_str=="pure_random"){
-  load(file=paste(path,"/Data/",cell_line,"/data_R/",NormCellLine,"_normalized_",random_str,"_" ,N,"_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
-  
+
+load(file=paste(path,"/Data/",cell_line,"/data_R/",NormCellLine,"_normalized_pure_random_" ,N,"_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+pure_random_profiles_test=otherCellLine_normalized_profiles
+pure_random_regions_test=regions
+
+load(file=paste(path,"/Data/",cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+random_with_signal_profiles_test=otherCellLine_normalized_profiles
+random_with_signal_regions_test=regions
+
+#combine negatives
+
+random_profiles_test=list()
+for(i in 1:length(pure_random_profiles_test)){
+  random_profiles_test[[i]]=cbind(pure_random_profiles_test[[i]], 
+                                  random_with_signal_profiles_test[[i]])
 }
 
+random_regions_test=c(pure_random_regions_test, random_with_signal_regions_test)
 
-if(random_str=="random_with_signal"){
-  load(file=paste(path,"/Data/",cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
-}
-
-random_profiles_test=otherCellLine_normalized_profiles
-random_profiles_test=change_window(random_profiles_test, original_window, window, bin_size)
-random_regions_test=regions
 
 ##############positive and integer data############################################
 for(i in 1:length(enhancer_profiles_test)){
@@ -239,30 +251,38 @@ negative_regions_test=c(tmp, random_regions_test)
  
   
 
-train_data_pos=compute_distance_two_negatives(profile=enhancer_profiles, subset=1:ncol(enhancer_profiles[[1]]), 
-                                              summary_pos=train_summaries_pos, summary_neg_promoters=train_summaries_promoters,
+train_data_pos=compute_distance_two_negatives(profile=enhancer_profiles, 
+                                              subset=1:ncol(enhancer_profiles[[1]]), 
+                                              summary_pos=train_summaries_pos, 
+                                              summary_neg_promoters=train_summaries_promoters,
                                               summary_neg_random=train_summaries_random,
                                               fn=fn, distance_measure=distance_measure,
-                                              learn_alpha_prior=TRUE, priorgammas_pos=NULL, priorgammas_neg_promoters=NULL, priorgammas_neg_random=NULL)
+                                              learn_alpha_prior=TRUE, 
+                                              priorgammas_pos=NULL, 
+                                              priorgammas_neg_promoters=NULL, 
+                                              priorgammas_neg_random=NULL)
 
     
 if( distance_measure=="ML"){
   
   
   
-  train_data_neg=compute_distance_two_negatives(profile=negative_profiles, subset=1:ncol(negative_profiles[[1]]), 
+  train_data_neg=compute_distance_two_negatives(profile=negative_profiles, 
+                                                subset=1:ncol(negative_profiles[[1]]), 
                                                   summary_pos=train_summaries_pos,
                                                   summary_neg_promoters=train_summaries_promoters,
                                                   summary_neg_random=train_summaries_random,
                                                   fn=fn, distance_measure=distance_measure)
     
-  test_data_pos=compute_distance_two_negatives(profile=enhancer_profiles_test, subset=1:ncol(enhancer_profiles_test[[1]]), 
+  test_data_pos=compute_distance_two_negatives(profile=enhancer_profiles_test, 
+                                               subset=1:ncol(enhancer_profiles_test[[1]]), 
                                                  summary_pos=train_summaries_pos, 
                                                  summary_neg_promoters=train_summaries_promoters,
                                                  summary_neg_random=train_summaries_random,
                                                  fn=fn,distance_measure=distance_measure)
     
-  test_data_neg=compute_distance_two_negatives(profile=negative_profiles_test, subset=1:ncol(negative_profiles_test[[1]]),
+  test_data_neg=compute_distance_two_negatives(profile=negative_profiles_test, 
+                                               subset=1:ncol(negative_profiles_test[[1]]),
                                                  summary_pos=train_summaries_pos, 
                                                  summary_neg_promoters=train_summaries_promoters,
                                                  summary_neg_random=train_summaries_random,
@@ -306,7 +326,7 @@ if(distance_measure=="Bayes_estimated_priors"){
     
 ##########################Visualization of the data######################################################################## COntinue here
 
-common_path=paste(path, "/results/model_promoters_and_random/",cell_line,"/",random_str,"/",distance_measure,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,sep="")
+common_path=paste(path, "/results/model_promoters_and_random_combined/",cell_line,"/",distance_measure,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,sep="")
 
 
                                                 
@@ -358,7 +378,7 @@ for(h in 1:(ncol(test.data)) ){
 }
     
     
-common_path=paste(path, "/results/model_promoters_and_random/",NormCellLine,"/",random_str,"/",distance_measure,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,sep="")
+common_path=paste(path, "/results/model_promoters_and_random_combined/",NormCellLine,"/",distance_measure,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,sep="")
 
 
 append_bool=FALSE

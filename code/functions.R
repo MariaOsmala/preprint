@@ -18,6 +18,7 @@ source("code/change_window.R")
 source("code/sample_random_locations.R")
 source("code/statistics_functions.R") #Used before libsvm
 source("code/validation_functions.R") #Used after predicting enhancers whole genome
+source("code/createCrossValidationGroups.R")
 #enhancer_grouping_choose_type  findOverlaps_select_nearest, rle2_better_works, rle2_better
 
 
