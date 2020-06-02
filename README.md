@@ -5,12 +5,11 @@ This package is a PRobabilistic Enhancer PRedictIoN Tool PREPRINT.
 ## Installation
 
 Clone the project to the desired directory, this will be your path_to_dir
-
 ```
 path_to_dir=../preprint/
 ```
-The codes are in folder
 
+The codes are in folder
 ```
 .../preprint/code/
 ```
@@ -24,7 +23,6 @@ bash create_dirs.sh
 ## Download data
 see Additional File 2.xlsx for links to download files. 
 Downloads the data into `preprint/`. File `create_dirs.sh` has instructions where to put the downloaded data.
-
 ```
 bash download_data.sh
 ```
@@ -32,11 +30,9 @@ bash download_data.sh
 ## Required softwares and tools
 
 ### Linux environment
-
 The codes have been run and tested using the following linux environment:
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: CentOS Linux 7 (Core)
-
 ```
 module list 
 Currently Loaded Modules:
@@ -61,10 +57,8 @@ Currently Loaded Modules:
  19) anaconda3/latest                   41) font-util/1.3.1       63) mpc/1.1.0
  20) Boost/1.61.0-iomkl-triton-2017a    42) fontconfig/2.12.3     64) isl/0.19
 ```
-
 ### Required R packages
-
-* Install spp and accelerometry_2.2.5
+Install spp and accelerometry_2.2.5
 
 ```
 cd $path_to_dir/softwares/
@@ -78,12 +72,11 @@ install.packages("caTools", repos="http://cran.us.r-project.org")
 source("http://bioconductor.org/biocLite.R")
 biocLite("Rsamtools",suppressUpdates=TRUE)
 install.packages("./spp_1.14.tar.gz")
-
 packageurl <- "https://cran.r-project.org/src/contrib/Archive/accelerometry/accelerometry_2.2.5.tar.gz"
 install.packages(packageurl, repos=NULL, type="source")
 ```
 
-* Other required Cran and Bioconductor packages
+Other required Cran and Bioconductor packages
 
 ```
 sessionInfo()
@@ -139,8 +132,6 @@ loaded via a namespace (and not attached):
 [31] hwriter_1.3.2          getopt_1.20.3          latticeExtra_0.6-28   
 [34] rjson_0.2.20           tools_3.4.3            glue_1.3.1            
 [37] purrr_0.3.2            colorspace_1.4-1      
-
-
 ```
 
 ### bedtools2
@@ -150,7 +141,6 @@ loaded via a namespace (and not attached):
 * Add bedtools to path: `$PATH=$path_to_dir/softwares/bedtools2/bin:$PATH`
 
 ### Bowtie2
-
 * Bowtie2 is downloaded as precombiled binaries from https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.3.3.1/
 * bowtie2-2.3.3.1 extracted to ```$path_to_dir/softwares/```
 * The bowtie2 index: ```wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg19/Homo_sapiens_UCSC_hg19.tar.gz```
@@ -158,7 +148,6 @@ loaded via a namespace (and not attached):
 
 ### libsvm
 * Download from ```https://github.com/cjlin1/libsvm/archive/v322.zip``` and put here ```$path_to_dir/softwares/``
-
 * ```cd $path_to_dir/softwares/libsvm-3.22/```
 * ```make```
 * Install gnuplot into ```$path_to_dir/softwares/bin```
@@ -169,7 +158,6 @@ loaded via a namespace (and not attached):
 ```
 * ```export PATH=$PATH:$path_to_dir/softwares/libsvm-3.22/```
 * ``` export PATH=$path_to_dir/softwares/bin:$PATH``` 
-
 
 ### RFECS
 Codes available here:
@@ -197,7 +185,6 @@ bash fetchChromSizes hg19 > hg19.chrom.sizes
 
 ## [Model training and prediction, lists of predicted enhancers and instructions to visualize results in genome browser](TrainingPrediction.md)
 
-
 ## Citation:
 
 @Article{Osmala2020,
@@ -211,12 +198,9 @@ bash fetchChromSizes hg19 > hg19.chrom.sizes
     MONTH = "",
     YEAR = }
 
-
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
 
 ## Contact
 
@@ -234,10 +218,7 @@ Department of Computer Science
 Email: firstname.surname@aalto.fi
 Home Page: http://users.ics.aalto.fi/harrila
 
-
-
 ===========================================================
-
 
 ## Acknowledgments
 

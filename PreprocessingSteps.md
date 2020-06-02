@@ -81,7 +81,7 @@ R --slave --args -c=$bamfile -p=5 -i=$inputFile -s=-200:1:500 -odir=$outDir -sav
 
 ```
 
-##Shift the reads 
+## Shift the reads 
 
 ```phantompeakqualtools.txt``` contains the estimated shifts and is generated with 
 ```
