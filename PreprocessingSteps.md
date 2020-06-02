@@ -4,21 +4,19 @@
 
 ```
 path_to_dir=.../preprint
-
 data_folder=$path_to_dir/Data
-
 BOWTIE=$path_to_dir/softwares/bowtie2-2.3.3.1/bowtie2
 BOWTIE2_INDEXES=$path_to_dir/softwares/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome
 BOWTIE_PARAMETERS="-x "$BOWTIE2_INDEXES
 cell_line=K562
 RAW_data=$path_to_dir/Data/$cell_line/raw_data/
-
 BAM_output=$path_to_dir/Data/$cell_line/bam_replicates/
-
 
 cd $RAW_data
 file=wgEncodeBroadHistoneK562CtcfStdRawDataRep1.fastq.gz
+
 $BOWTIE $BOWTIE_PARAMETERS -U $file | samtools view -bS - | samtools sort - | samtools rmdup -s - -  > $BAM_output${file%".fastq"*}".bam" 
+
 samtools index $BAM_output${file%".fastq"*}".bam"
 ```
 
@@ -65,7 +63,6 @@ cell_line=K562
 data_type=H3k4me1
 input_file=Control
 data_folder=$path_to_dir/Data
-
 run_spp_path=$path_to_dir/softwares/phantompeakqualtools/
 
 cd $path_to_dir/Data/$cell_line"/bam_combined"
@@ -103,7 +100,6 @@ bamfile=$data_type".bam"
 
 beddir=$path_to_dir/Data/$cell_line"/bed_combined/"
 bedfile=${bamfile%"."*}".bed"
-
 
 cd $bamdir
 bedtools bamtobed -i $bamfile > $beddir$bedfile

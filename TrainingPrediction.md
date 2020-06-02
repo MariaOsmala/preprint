@@ -159,19 +159,14 @@ pathToDir=$path_to_dir
 cell_line=K562
 p300_peaks_file=$path_to_dir/Data/K562/TFs/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz
 
-
 R --slave --args --window=$window --binSize=$binSize --N=$N --threshold=$threshold --pathToDir=$path_to_dir --cellLine=$cell_line --p300File=$p300_peaks_file < code/define_random_with_signal.R 
-
-
 R --slave --args --window=$window --binSize=$binSize --N=$N --threshold=$threshold --pathToDir=$path_to_dir --cellLine=$cell_line  --normalize=FALSE < code/extract_random_with_signal.R 
 
 cell_line=GM12878
 p300File=$path_to_dir/Data/GM12878/TFs/wgEncodeAwgTfbsSydhGm12878P300IggmusUniPk.narrowPeak.gz
 NormCellLine=K562
 
-
 R --slave --args --window=$window --binSize=$binSize --N=$N --threshold=$threshold --pathToDir=$path_to_dir --cellLine=$cell_line --p300File=$p300_peaks_file < code/define_random_with_signal.R 
-
 R --slave --args --window=$window --binSize=$binSize --N=$N --threshold=$threshold --pathToDir=$path_to_dir --cellLine=$cell_line  --normalize=TRUE --NormCellLine=$NormCellLine < code/extract_random_with_signal.R 
 
 ```
@@ -310,7 +305,6 @@ cell_line=K562
 NormCellLine=K562
 
 R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=ML --cellLine=$cell_line --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome_combined.R
-
 R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=Bayes_estimated_priors --cellLine=$cellLine --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome_combined.R
 
 ```
@@ -321,7 +315,6 @@ cell_line=GM12878
 NormCellLine=K562
 
 R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=ML --cellLine=$cell_line --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome_combined.R 
-
 R --slave --args --window=$window --binSize=$binSize --N=$N --distanceMeasure=Bayes_estimated_priors --cellLine=$cellLine --pathToDir=$path_to_dir --NormCellLine=K562 < code/create_data_predict_whole_genome_combined.R
 ```
 
@@ -483,7 +476,6 @@ window=2000
 binSize=100
 overlap=100
 distToPromoter=2000
-
 
 R --slave --args --window=$window --binSize=$binSize --type=$type --cellLine=$cellLine --distanceMeasure=$distanceMeasure --enhancerSeparation=$enhancerSeparation --distToPromoter=$distToPromoter --overlap=$overlap --threshold=$threshold --pathToDir=$path_to_dir < code/collect_predictions.R 
 
