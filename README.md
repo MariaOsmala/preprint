@@ -185,6 +185,13 @@ bash fetchChromSizes hg19 > hg19.chrom.sizes
 
 ## [Model training and prediction, lists of predicted enhancers and instructions to visualize results in genome browser](TrainingPrediction.md)
 
+### The data and enhancer predictions stored as UCSC Genome Browser track hubs, links to sessions: 
+
+```https://genome-euro.ucsc.edu/s/mpirttin/hg19_K562_publication_2020_combined``` and ```https://genome-euro.ucsc.edu/s/mpirttin/hg19_GM12878_publication_2020_combined```
+
+### The genomic coordinates of training data examples
+`enhancers_sorted.txt` and  `non-enhancers_sorted.txt`.
+
 ## Citation:
 
 @Article{Osmala2020,

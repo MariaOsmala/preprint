@@ -172,7 +172,7 @@ R --slave --args --window=$window --binSize=$binSize --N=$N --threshold=$thresho
 ```
 
 ## Training
-Probabilistic modelling of the ChIP-seq signal patterns. Compute the probabilistic scores.
+Probabilistic modelling of the ChIP-seq signal patterns. Compute the probabilistic scores. The genomic coordinates of the training data are provided as `enhancers_sorted.txt` and  `non-enhancers_sorted.txt`.
 
 ### Training data for K562
 Generate data for 5-fold cross-validation
