@@ -1,0 +1,9 @@
+channels:
+  - bioconda
+  - r
+
+dependencies:
+  #- r-essentials
+  - bowtie2
+  - samtools
+  #- bioconductor-rsamtools
