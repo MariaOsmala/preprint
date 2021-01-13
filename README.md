@@ -143,7 +143,7 @@ loaded via a namespace (and not attached):
 ### Bowtie2
 * Bowtie2 is downloaded as precombiled binaries from https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.3.3.1/
 * bowtie2-2.3.3.1 extracted to ```$path_to_dir/softwares/```
-* The bowtie2 index: ```wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/UCSC/hg19/Homo_sapiens_UCSC_hg19.tar.gz```
+* The bowtie2 index: ```http://igenomes.illumina.com.s3-website-us-east-1.amazonaws.com/Homo_sapiens/UCSC/hg19/Homo_sapiens_UCSC_hg19.tar.gz```
 * Path to index ```$path_to_dir/softwares/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome```
 
 ### libsvm
