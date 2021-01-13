@@ -11,15 +11,16 @@ CELL_LINE=K562
 RAW_DATA_DIR=$PREPRINT_DIR/Data/$CELL_LINE/raw_data
 BAM_OUTPUT_DIR=$PREPRINT_DIR/Data/$CELL_LINE/bam_replicates
 
-RAW_FILE=$RAW_DATA_DIR/wgEncodeBroadHistoneK562CtcfStdRawDataRep1.fastq.gz
-BAM_OUTPUT_FILE=$BAM_OUTPUT/${RAW_FILE%".fastq"*}".bam"
+RAW_FILE=wgEncodeBroadHistoneK562CtcfStdRawDataRep1.fastq.gz
+BAM_OUTPUT_FILE=${RAW_FILE%".fastq"*}".bam"
 
-echo bowtie2 $BOWTIE_PARAMETERS -U $RAW_FILE
+echo $RAW_FILE
+echo $BAM_OUTPUT_FILE
 
-bowtie $BOWTIE_PARAMETERS -U $RAW_FILE \
+bowtie2 $BOWTIE_PARAMETERS -U $RAW_DATA_DIR/$RAW_FILE \
 	| samtools view -bS - \
 	| samtools sort - \
 	| samtools rmdup -s - - \
-	> $BAM_OUTPUT_FILE
+	> $BAM_OUTPUT_DIR/$BAM_OUTPUT_FILE
 
-samtools index $BAM_OUTPUT_FILE
+samtools index $BAM_OUTPUT_DIR/$BAM_OUTPUT_FILE
