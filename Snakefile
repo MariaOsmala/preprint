@@ -7,9 +7,7 @@ softwares_dir = 'softwares'
 raw_data_dir = f'{data_dir}/{cell_line}/raw_data'
 bam_replicates_dir = f'{data_dir}/{cell_line}/bam_replicates'
 bam_combined_dir = f'{data_dir}/{cell_line}/bam_combined'
-
-print(raw_data_dir)
-print(bam_replicates_dir)
+bam_phantompeakqualtools_dir = f'{data_dir}/{cell_line}/phantompeakqualtools'
 
 # Step 1: Align the reads
 bowtie_indexes = f'{softwares_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
@@ -46,30 +44,59 @@ def find_replicates(wildcards):
 	from glob import glob
 	from os.path import basename
 	fnames = list()
+	print('Finding files for', wildcards.data_type)
 	for fname in glob(f'{raw_data_dir}/*{wildcards.data_type}*.fastq.gz'):
 		sample = basename(fname).replace('.fastq.gz', '')
 		fnames.append(f'{bam_replicates_dir}/{sample}.bam')
 		fnames.append(f'{bam_replicates_dir}/{sample}.bam.bai')
+	print('Found:', fnames)
 	return fnames
 
 rule combine_replicates:
 	input:
 		find_replicates
 	output:
-		f'{bam_combined_dir}/{{data_type}}.bam'
+		bam = f'{bam_combined_dir}/{{data_type}}.bam',
+		bai = f'{bam_combined_dir}/{{data_type}}.bam.bai'
 	run:
-		print(input)
-		if len(input) == 1:
+		print('Inputs:', input)
+		if len(input) == 2:
 			# Just copy over the input
-			shell('cp {input} {output}')
-			shell('cp {input}.bai {output}.bai')
+			shell('cp {input[0]} {output.bam}')
+			shell('cp {input[1]} {output.bai}')
 		else:
+			input_bam_files = ' '.join(input[::2])
 			# Merge the input files
 			shell(
 				'''
-				samtools merge - {input} \\
+				samtools merge - {input_bam_files} \\
 				| samtools sort - \\
 				> {output}
 				'''
 			)
+			# Make index for the merged file
 			shell('samtools index {output}')
+
+
+# Step 3: Estimate the fragment lengths using Phantompeakqualtools
+rule phantompeakqualtools:
+	input:
+		bam = f'{bam_combined_dir}/{{data_type}}.bam',
+		control = f'{bam_combined_dir}/Control.bam'
+	output:
+		savd = f'{bam_phantompeakqualtools_dir}/{{data_type}}.RData',
+		savp = f'{bam_phantompeakqualtools_dir}/{{data_type}}.pdf',
+		out = f'{bam_phantompeakqualtools_dir}/{{data_type}}.out'
+	shell:
+		f'''
+		run_spp.R \\
+			-c={{input.bam}} \\
+			-p=5 \\
+			-i={{input.control}} \\
+			-s=-200:1:500 \\
+			-rf \\
+			-odir={bam_phantompeakqualtools_dir} \\
+			-savd={{output.savd}} \\
+			-savp={{output.savp}} \\
+			-out={{output.out}}
+		'''

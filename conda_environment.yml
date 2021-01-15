@@ -1,9 +1,10 @@
 channels:
+  - conda-forge
   - bioconda
-  - r
 
 dependencies:
-  #- r-essentials
+  - r-base > 3.5
   - bowtie2
   - samtools
-  #- bioconductor-rsamtools
+  - phantompeakqualtools
+  - snakemake
