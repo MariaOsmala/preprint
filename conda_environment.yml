@@ -6,5 +6,10 @@ dependencies:
   - r-base > 3.5
   - bowtie2
   - samtools
+  - bedtools
   - phantompeakqualtools
+  - bioconductor-rsamtools
+  - bioconductor-genomeinfodb
+  - bioconductor-genomeinfodbdata
   - snakemake
+

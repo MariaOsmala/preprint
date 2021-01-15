@@ -26,14 +26,14 @@ library(stringr)
 
 option_list = list(
 
-make_option(c("-pathToDir", "--pathToDir"), type="character", default="", 
+make_option(c("-datadir", "--datadir"), type="character", default="", 
             help="path to main folder [default= %default]", metavar="character")
 )
 
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-path_to_dir=opt$pathToDir
+path_to_dir=opt$datadir
 
 
 cell_lines=c("K562", "GM12878")
@@ -46,7 +46,7 @@ data<-data.frame()
 
 for(cl in cell_lines){
 
-  path=paste(path_to_dir"/Data/",cl,"/phantompeakqualtools/",sep="")
+  path=paste(path_to_dir,cl,"/phantompeakqualtools/",sep="")
   
   setwd(path)
   
