@@ -13,6 +13,8 @@ bam_phantompeakqualtools_dir = f'{data_dir}/{cell_line}/phantompeakqualtools'
 bam_shifted_dir = f'{data_dir}/{cell_line}/bam_shifted'
 bed_combined_dir = f'{data_dir}/{cell_line}/bed_combined'
 bed_shifted_dir = f'{data_dir}/{cell_line}/bed_shifted'
+bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
+print(bed_shifted_RFECS_dir)
 
 # Used for shifting with bedtools
 genome_file = 'bedtools_genomes/human.hg19.genome'
@@ -144,3 +146,16 @@ rule shift_reads:
 		shift = shifts.loc[(f'{cell_line}', f'{wildcards.data_type}.bam')][0]
 		shift = round(shift / 2)
 		shell(f'shiftBed -i {input} -g {genome_file} -s {shift} > {output}')
+
+# Step 5: Convert bed files to format accepted by RFECS
+rule convert_bed_for_RFECS:
+	input: f'{bed_shifted_dir}/{{data_type}}.bed'
+	output: f'{bed_shifted_RFECS_dir}/{{data_type}}.bed'
+	shell:
+		r"""
+		sed 's/ \+//g' {input} > {output}
+		awk -F '\t'  'BEGIN {{OFS="\t"}} {{ if (($1) != "chrM")  print }}' {output} > {bed_shifted_RFECS_dir}/tmp
+		mv {bed_shifted_RFECS_dir}/tmp {output}
+		awk -F'\t' 'BEGIN{{OFS="\t"}}{{$5=""; gsub(FS"+",FS); print $0}}' {output} > {bed_shifted_RFECS_dir}/tmp
+		mv {bed_shifted_RFECS_dir}/tmp {output}
+		"""
