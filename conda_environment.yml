@@ -12,4 +12,5 @@ dependencies:
   - bioconductor-genomeinfodb
   - bioconductor-genomeinfodbdata
   - snakemake
+  - pandas
 

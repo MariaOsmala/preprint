@@ -1,4 +1,7 @@
+from glob import glob
+from os.path import basename
 from snakemake.exceptions import WorkflowError
+import pandas as pd
 
 # The cell line to process
 cell_line = 'K562'
@@ -14,10 +17,20 @@ bam_shifted_dir = f'{data_dir}/{cell_line}/bam_shifted'
 bed_combined_dir = f'{data_dir}/{cell_line}/bed_combined'
 bed_shifted_dir = f'{data_dir}/{cell_line}/bed_shifted'
 bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
-print(bed_shifted_RFECS_dir)
 
 # Used for shifting with bedtools
 genome_file = 'bedtools_genomes/human.hg19.genome'
+
+# Big list of all the samples
+all_samples = pd.read_csv('samples.tsv', sep='\t', index_col=[0, 2]).sort_index()
+
+# Step 0: Download the data
+rule download:
+	input:
+	output: f'{raw_data_dir}/{{sample}}.fastq.gz'
+	run:
+		URL = all_samples.loc[(cell_line, wildcards.sample)]['URL'][0]
+		shell(f'wget {URL} -O {output}')
 
 # Step 1: Align the reads
 bowtie_indexes = f'{softwares_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
@@ -51,8 +64,6 @@ def find_replicates(wildcards):
 	'{raw_data_dir}/*{data_type}*.fastq.gz', and then translate them to the
 	corresponding .bam and .bam.bai filenames.
 	"""
-	from glob import glob
-	from os.path import basename
 	fnames = list()
 	for fname in glob(f'{raw_data_dir}/*{wildcards.data_type}*.fastq.gz'):
 		sample = basename(fname).replace('.fastq.gz', '')
@@ -141,7 +152,6 @@ rule shift_reads:
 	input: f'{bed_combined_dir}/{{data_type}}.bed'
 	output: f'{bed_shifted_dir}/{{data_type}}.bed'
 	run:
-		import pandas as pd
 		shifts = pd.read_csv(f'{data_dir}/phantompeakqualtools.txt', sep='\t', index_col=[0, 1], usecols=[0, 1, 3])
 		shift = shifts.loc[(f'{cell_line}', f'{wildcards.data_type}.bam')][0]
 		shift = round(shift / 2)
