@@ -19,14 +19,24 @@ bed_shifted_dir = f'{data_dir}/{cell_line}/bed_shifted'
 bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
 
 # Big list of all the samples
-all_samples = pd.read_csv('samples.tsv', sep='\t', index_col=[0, 2]).sort_index()
+all_samples = pd.read_csv('samples.tsv', sep='\t').sort_index()
+data_types = all_samples.query(f"cell_line=='{cell_line}'").data_type.unique()
+
+# The default rule that will do the entire preprocessing pipeline
+rule preprocess:
+	input:
+		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=data_types)
+	threads: 1
+
 
 # Step 0: Download the data
 rule download:
 	input:
 	output: f'{raw_data_dir}/{{sample}}.fastq.gz'
 	run:
-		URL = all_samples.loc[(cell_line, wildcards.sample)]['URL'][0]
+		print(f'Retrieving URL for {wildcards.sample}')
+		URL = all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL'].item()
+		print('URL:', URL)
 		shell(f'wget {URL} -O {output}')
 
 # Step 1: Align the reads
@@ -61,9 +71,9 @@ def find_replicates(wildcards):
 	'{raw_data_dir}/*{data_type}*.fastq.gz', and then translate them to the
 	corresponding .bam and .bam.bai filenames.
 	"""
+	samples = all_samples.query(f"cell_line=='{cell_line}' and data_type=='{wildcards.data_type}'")['sample']
 	fnames = list()
-	for fname in glob(f'{raw_data_dir}/*{wildcards.data_type}*.fastq.gz'):
-		sample = basename(fname).replace('.fastq.gz', '')
+	for sample in samples:
 		fnames.append(f'{bam_replicates_dir}/{sample}.bam')
 		fnames.append(f'{bam_replicates_dir}/{sample}.bam.bai')
 	return fnames
@@ -76,7 +86,7 @@ rule combine_replicates:
 		bai = f'{bam_combined_dir}/{{data_type}}.bam.bai'
 	run:
 		if len(input) == 0:
-			raise WorkflowError(f'No raw files found for data type "{data_type}".')
+			raise WorkflowError(f'No raw files found for data type "{wildcards.data_type}".')
 		elif len(input) == 2:
 			# Just copy over the input files
 			shell('cp {input[0]} {output.bam}')
@@ -89,8 +99,7 @@ rule combine_replicates:
 				samtools merge - {input_bam_files} \
 				| samtools sort - \
 				> {output}
-				'''
-			)
+				''')
 			# Make index for the merged file
 			shell('samtools index {output}')
 

@@ -1,4 +1,4 @@
-Cell line	Data type	Sample	URL
+cell_line	data_type	sample	URL
 K562	Control	wgEncodeBroadHistoneK562ControlStdRawDataRep1	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneK562ControlStdRawDataRep1.fastq.gz
 K562	Ctcf	wgEncodeBroadHistoneK562CtcfStdRawDataRep1	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneK562CtcfStdRawDataRep1.fastq.gz
 K562	Ctcf	wgEncodeBroadHistoneK562CtcfStdRawDataRep2	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneK562CtcfStdRawDataRep2.fastq.gz
