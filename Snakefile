@@ -18,9 +18,6 @@ bed_combined_dir = f'{data_dir}/{cell_line}/bed_combined'
 bed_shifted_dir = f'{data_dir}/{cell_line}/bed_shifted'
 bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
 
-# Used for shifting with bedtools
-genome_file = 'bedtools_genomes/human.hg19.genome'
-
 # Big list of all the samples
 all_samples = pd.read_csv('samples.tsv', sep='\t', index_col=[0, 2]).sort_index()
 
@@ -122,6 +119,8 @@ rule phantompeakqualtools:
 		'''
 
 # Step 4: Shift the reads
+genome_file = 'bedtools_genomes/human.hg19.genome'
+
 rule estimate_shifts:
 	input:
 		'code/quality_control_summary.R'
@@ -146,16 +145,24 @@ rule bed_to_bam:
 		> {output}
 		'''
 
-# Input and DNase-seq are not shifted. For MNase-seq data the shift is 149. This shifts are divided by 2 and rounded to the nearest integer.
-shift = round(183 / 2)
 rule shift_reads:
 	input: f'{bed_combined_dir}/{{data_type}}.bed'
 	output: f'{bed_shifted_dir}/{{data_type}}.bed'
 	run:
-		shifts = pd.read_csv(f'{data_dir}/phantompeakqualtools.txt', sep='\t', index_col=[0, 1], usecols=[0, 1, 3])
-		shift = shifts.loc[(f'{cell_line}', f'{wildcards.data_type}.bam')][0]
-		shift = round(shift / 2)
-		shell(f'shiftBed -i {input} -g {genome_file} -s {shift} > {output}')
+		# Input and DNase-seq are not shifted.
+		if 'Input' in input or 'DNase' in input:
+			shell(f'cp {input} {output}')
+		else:
+			# For MNase-seq data the shift is 149.
+			if 'MNase' in input:
+				shift = 149
+			else:
+				# Lookup the required shift produced by phantompeakqualtools.
+				# These shifts are divided by 2 and rounded to the nearest integer.
+				shifts = pd.read_csv(f'{data_dir}/phantompeakqualtools.txt', sep='\t', index_col=[0, 1], usecols=[0, 1, 3])
+				shift = shifts.loc[(f'{cell_line}', f'{wildcards.data_type}.bam')][0]
+				shift = round(shift / 2)
+			shell(f'shiftBed -i {input} -g {genome_file} -s {shift} > {output}')
 
 # Step 5: Convert bed files to format accepted by RFECS
 rule convert_bed_for_RFECS:
@@ -164,7 +171,7 @@ rule convert_bed_for_RFECS:
 	shell:
 		r"""
 		sed 's/ \+//g' {input} > {output}
-		awk -F '\t'  'BEGIN {{OFS="\t"}} {{ if (($1) != "chrM")  print }}' {output} > {bed_shifted_RFECS_dir}/tmp
+		awk -F '\t' 'BEGIN {{OFS="\t"}} {{ if (($1) != "chrM")  print }}' {output} > {bed_shifted_RFECS_dir}/tmp
 		mv {bed_shifted_RFECS_dir}/tmp {output}
 		awk -F'\t' 'BEGIN{{OFS="\t"}}{{$5=""; gsub(FS"+",FS); print $0}}' {output} > {bed_shifted_RFECS_dir}/tmp
 		mv {bed_shifted_RFECS_dir}/tmp {output}
