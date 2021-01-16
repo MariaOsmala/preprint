@@ -26,7 +26,6 @@ data_types = all_samples.query(f"cell_line=='{cell_line}'").data_type.unique()
 rule preprocess:
 	input:
 		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=data_types)
-	threads: 1
 
 
 # Step 0: Download the data
@@ -34,10 +33,9 @@ rule download:
 	input:
 	output: f'{raw_data_dir}/{{sample}}.fastq.gz'
 	run:
-		print(f'Retrieving URL for {wildcards.sample}')
 		URL = all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL'].item()
-		print('URL:', URL)
 		shell(f'wget {URL} -O {output}')
+
 
 # Step 1: Align the reads
 bowtie_indexes = f'{softwares_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
@@ -65,11 +63,8 @@ rule make_index:
 # Step 2: Combine bam files of replicates, sort and make indexes
 def find_replicates(wildcards):
 	"""
-	To figure out the list of individual .bam files required to produce the
-	combined .bam file for a given data type, we first look at which .fastq.gz
-	files are present for the data type using the glob pattern
-	'{raw_data_dir}/*{data_type}*.fastq.gz', and then translate them to the
-	corresponding .bam and .bam.bai filenames.
+	Uses the all_samples table to find the list of individual .bam files
+	required to produce the combined .bam file for a given data type.
 	"""
 	samples = all_samples.query(f"cell_line=='{cell_line}' and data_type=='{wildcards.data_type}'")['sample']
 	fnames = list()
