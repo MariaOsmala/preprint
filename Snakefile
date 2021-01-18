@@ -32,6 +32,7 @@ rule preprocess:
 rule download:
 	input:
 	output: f'{raw_data_dir}/{{sample}}.fastq.gz'
+	message: 'Downloading {wildcards.sample}.fastq.gz'
 	run:
 		URL = all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL'].item()
 		shell(f'wget {URL} -O {output}')
@@ -90,13 +91,13 @@ rule combine_replicates:
 			# Merge the input .bam files
 			input_bam_files = ' '.join(input[::2])
 			shell(
-				f'''
+				r'''
 				samtools merge - {input_bam_files} \
 				| samtools sort - \
-				> {output}
+				> {output.bam}
 				''')
 			# Make index for the merged file
-			shell('samtools index {output}')
+			shell('samtools index {output.bam}')
 
 
 # Step 3: Estimate the fragment lengths using Phantompeakqualtools
