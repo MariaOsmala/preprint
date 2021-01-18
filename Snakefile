@@ -31,34 +31,54 @@ rule preprocess:
 # Step 0: Download the data
 rule download:
 	input:
-	output: f'{raw_data_dir}/{{sample}}.fastq.gz'
-	message: 'Downloading {wildcards.sample}.fastq.gz'
+	output: f'{raw_data_dir}/{{fname}}'
+	message: 'Downloading {wildcards.fname}'
 	run:
-		URL = all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL'].item()
+		URL = all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'].item()
 		shell(f'wget {URL} -O {output}')
 
 
 # Step 1: Align the reads
-bowtie_indexes = f'{softwares_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
+def find_raw_files(wildcards):
+	"""
+	Uses the all_samples table to find the raw file(s) corresponding to a given
+	sample. These is either a .fastq.gz file or both a .bam and .bam.bai file.
+	"""
+	fnames = list()
+	for url in all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL']:
+		_, fname = url.rsplit('/', 1)
+		fnames.append(f'{raw_data_dir}/{fname}')
+	return fnames
+
+def get_ext(fname):
+	return fname.rsplit('/', 1)[-1].split('.', 1)[-1]
+
 rule align_reads:
 	input:
-		f'{raw_data_dir}/{{sample}}.fastq.gz'
+		find_raw_files
 	output:
-		f'{bam_replicates_dir}/{{sample}}.bam'
-	shell:
-		r'''
-		bowtie2 -x {bowtie_indexes} -U {input} \
-		| samtools view -bS - \
-		| samtools sort - \
-		| samtools rmdup -s - - \
-		> {output}
-		'''
-
-# Generic rule to make indexes
-rule make_index:
-	input: '{sample}.bam'
-	output: '{sample}.bam.bai'
-	shell: 'samtools index {input}'
+		bam = f'{bam_replicates_dir}/{{sample}}.bam',
+		bai = f'{bam_replicates_dir}/{{sample}}.bam.bai'
+	run:
+		input_ext = get_ext(input[0])
+		if input_ext == 'fastq.gz':
+			# .fastq.gz input files need aligning with bowtie
+			bowtie_indexes = f'{softwares_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
+			shell(
+				r'''
+				bowtie2 -x {bowtie_indexes} -U {input[0]} \
+				| samtools view -bS - \
+				| samtools sort - \
+				| samtools rmdup -s - - \
+				> {output.bam}
+				samtools index {output.bam}
+				''')
+		elif input_ext == 'bam':
+			# .bam input files do not need aligning. Just copy them.
+			shell('cp {input[0]} {output.bam}')
+			shell('cp {input[1]} {output.bai}')
+		else:
+			raise WorkflowError(f'Unknown file type: "{input[0]}"')
 
 
 # Step 2: Combine bam files of replicates, sort and make indexes
@@ -168,6 +188,7 @@ rule shift_reads:
 				shift = shifts.loc[(f'{cell_line}', f'{wildcards.data_type}.bam')][0]
 				shift = round(shift / 2)
 			shell(f'shiftBed -i {input} -g {genome_file} -s {shift} > {output}')
+
 
 # Step 5: Convert bed files to format accepted by RFECS
 rule convert_bed_for_RFECS:
