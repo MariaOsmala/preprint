@@ -26,51 +26,70 @@ data_types = all_samples.query(f"cell_line=='{cell_line}'").data_type.unique()
 rule preprocess:
 	input:
 		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=data_types)
-	threads: 1
 
 
 # Step 0: Download the data
 rule download:
 	input:
-	output: f'{raw_data_dir}/{{sample}}.fastq.gz'
+	output: f'{raw_data_dir}/{{fname}}'
+	message: 'Downloading {wildcards.fname}'
 	run:
-		print(f'Retrieving URL for {wildcards.sample}')
-		URLs = all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL'].items()
+		URLs = all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'].items()
 		for id, URL in URLs:
-			print('URL:', URL)
+			print(f'Dowloading {URL}')
+		for id, URL in URLs:
 			shell(f'wget {URL} -O {output}')
 
+
+
 # Step 1: Align the reads
-bowtie_indexes = f'{softwares_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
+def find_raw_files(wildcards):
+	"""
+	Uses the all_samples table to find the raw file(s) corresponding to a given
+	sample. These is either a .fastq.gz file or both a .bam and .bam.bai file.
+	"""
+	fnames = list()
+	for url in all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL']:
+		_, fname = url.rsplit('/', 1)
+		fnames.append(f'{raw_data_dir}/{fname}')
+	return fnames
+
+def get_ext(fname):
+	return fname.rsplit('/', 1)[-1].split('.', 1)[-1]
+
 rule align_reads:
 	input:
-		f'{raw_data_dir}/{{sample}}.fastq.gz'
+		find_raw_files
 	output:
-		f'{bam_replicates_dir}/{{sample}}.bam'
-	shell:
-		r'''
-		bowtie2 -x {bowtie_indexes} -U {input} \
-		| samtools view -bS - \
-		| samtools sort - \
-		| samtools rmdup -s - - \
-		> {output}
-		'''
-
-# Generic rule to make indexes
-rule make_index:
-	input: '{sample}.bam'
-	output: '{sample}.bam.bai'
-	shell: 'samtools index {input}'
+		bam = f'{bam_replicates_dir}/{{sample}}.bam',
+		bai = f'{bam_replicates_dir}/{{sample}}.bam.bai'
+	run:
+		input_ext = get_ext(input[0])
+		if input_ext == 'fastq.gz':
+			# .fastq.gz input files need aligning with bowtie
+			bowtie_indexes = f'{softwares_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
+			shell(
+				r'''
+				bowtie2 -x {bowtie_indexes} -U {input[0]} \
+				| samtools view -bS - \
+				| samtools sort - \
+				| samtools rmdup -s - - \
+				> {output.bam}
+				samtools index {output.bam}
+				''')
+		elif input_ext == 'bam':
+			# .bam input files do not need aligning. Just copy them.
+			shell('cp {input[0]} {output.bam}')
+			shell('cp {input[1]} {output.bai}')
+		else:
+			raise WorkflowError(f'Unknown file type: "{input[0]}"')
 
 
 # Step 2: Combine bam files of replicates, sort and make indexes
 def find_replicates(wildcards):
 	"""
-	To figure out the list of individual .bam files required to produce the
-	combined .bam file for a given data type, we first look at which .fastq.gz
-	files are present for the data type using the glob pattern
-	'{raw_data_dir}/*{data_type}*.fastq.gz', and then translate them to the
-	corresponding .bam and .bam.bai filenames.
+	Uses the all_samples table to find the list of individual .bam files
+	required to produce the combined .bam file for a given data type.
 	"""
 	samples = all_samples.query(f"cell_line=='{cell_line}' and data_type=='{wildcards.data_type}'")['sample']
 	fnames = list()
@@ -96,13 +115,13 @@ rule combine_replicates:
 			# Merge the input .bam files
 			input_bam_files = ' '.join(input[::2])
 			shell(
-				f'''
+				r'''
 				samtools merge - {input_bam_files} \
 				| samtools sort - \
-				> {output}
+				> {output.bam}
 				''')
 			# Make index for the merged file
-			shell('samtools index {output}')
+			shell('samtools index {output.bam}')
 
 
 # Step 3: Estimate the fragment lengths using Phantompeakqualtools
@@ -173,6 +192,7 @@ rule shift_reads:
 				shift = shifts.loc[(f'{cell_line}', f'{wildcards.data_type}.bam')][0]
 				shift = round(shift / 2)
 			shell(f'shiftBed -i {input} -g {genome_file} -s {shift} > {output}')
+
 
 # Step 5: Convert bed files to format accepted by RFECS
 rule convert_bed_for_RFECS:
