@@ -1,33 +1,33 @@
-library(Rsamtools)
-library(snow)
-library(spp)
-library(accelerometry)
-library(Biostrings)
-library(bitops)
-library(BSgenome.Hsapiens.UCSC.hg19)
-library(circlize)
-library(doParallel)
-library(foreach)
-library(gdata)
-library(GenomicRanges)
-library(GetoptLong)
-library(ggplot2)
-library(grid)
-library(gridExtra)
-library(MASS)
+#library(Rsamtools)
+#library(snow)
+#library(spp)
+#library(accelerometry)
+#library(Biostrings)
+#library(bitops)
+#library(BSgenome.Hsapiens.UCSC.hg19)
+#library(circlize)
+#library(doParallel)
+#library(foreach)
+#library(gdata)
+#library(GenomicRanges)
+#library(GetoptLong)
+#library(ggplot2)
+#library(grid)
+#library(gridExtra)
+#library(MASS)
 library(optparse)
-library(pryr)
-library(RColorBrewer)
-library(reshape2)
-library(ROCR)
-library(rtracklayer)
-library(ShortRead)
-library(stringr)
+#library(pryr)
+#library(RColorBrewer)
+#library(reshape2)
+#library(ROCR)
+#library(rtracklayer)
+#library(ShortRead)
+#library(stringr)
 
 
 option_list = list(
   
-  make_option(c("-pathToDir", "--pathToDir"), type="character", default="", 
+  make_option("--pathToDir", type="character", default="", 
               help="path to main folder [default= %default]", metavar="character")
 ); 
 
@@ -35,10 +35,9 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-path_to_dir=opt$pathToDir
-path=paste(path_to_dir,"/Data/",sep="")
+path=opt$pathToDir
 
-Gencode_TSS=read.table(paste(path,"GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz",sep=""), header=FALSE, 
+Gencode_TSS=read.table(paste(path,"/GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz",sep=""), header=FALSE, 
                        sep="\t", stringsAsFactors=FALSE) # 2629275 x 9
 
 names(Gencode_TSS)=c("chrom","annotation","feature_type","start","end","score","strand","genomic_phase","info")
@@ -160,7 +159,7 @@ GR_Gencode_protein_coding_TSS=result$GR
 GR_Gencode_protein_coding_TSS_positive=result$GR_positive
 rm(result)
 
-saveRDS(GR_Gencode_protein_coding_TSS, paste(path,"GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS",sep=""))
-saveRDS(GR_Gencode_protein_coding_TSS_positive,paste(path,"GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS",sep="")) #This is used in the subsequent analysis
-saveRDS(GR_Gencode_TSS,paste(path,"GENCODE_TSS/","GR_Gencode_TSS.RDS",sep=""))
-saveRDS(GR_Gencode_TSS_positive,paste(path,"GENCODE_TSS/","GR_Gencode_TSS_positive.RDS",sep=""))
+saveRDS(GR_Gencode_protein_coding_TSS, paste(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS",sep=""))
+saveRDS(GR_Gencode_protein_coding_TSS_positive,paste(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS",sep="")) #This is used in the subsequent analysis
+saveRDS(GR_Gencode_TSS,paste(path,"/GENCODE_TSS/","GR_Gencode_TSS.RDS",sep=""))
+saveRDS(GR_Gencode_TSS_positive,paste(path,"/GENCODE_TSS/","GR_Gencode_TSS_positive.RDS",sep=""))

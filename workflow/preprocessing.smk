@@ -1,32 +1,11 @@
 from glob import glob
 from os.path import basename
 from snakemake.exceptions import WorkflowError
-import pandas as pd
-
-# The cell line to process
-cell_line = 'K562'
-
-# Various paths we will be using in this analysis pipeline
-data_dir = 'Data'
-softwares_dir = 'softwares'
-raw_data_dir = f'{data_dir}/{cell_line}/raw_data'
-bam_replicates_dir = f'{data_dir}/{cell_line}/bam_replicates'
-bam_combined_dir = f'{data_dir}/{cell_line}/bam_combined'
-bam_phantompeakqualtools_dir = f'{data_dir}/{cell_line}/phantompeakqualtools'
-bam_shifted_dir = f'{data_dir}/{cell_line}/bam_shifted'
-bed_combined_dir = f'{data_dir}/{cell_line}/bed_combined'
-bed_shifted_dir = f'{data_dir}/{cell_line}/bed_shifted'
-bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
-
-# Big list of all the samples
-all_samples = pd.read_csv('samples.tsv', sep='\t').sort_index()
-data_types = all_samples.query(f"cell_line=='{cell_line}'").data_type.unique()
 
 # The default rule that will do the entire preprocessing pipeline
 rule preprocess:
 	input:
 		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=data_types)
-
 
 # Step 0: Download the data
 rule download:
