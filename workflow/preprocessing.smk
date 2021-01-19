@@ -7,6 +7,7 @@ rule preprocess:
 	input:
 		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=all_data_types)
 
+
 # Step 0: Download the data
 rule download:
 	input:
@@ -15,7 +16,6 @@ rule download:
 	run:
 		URL = all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'].item()
 		shell(f'wget {URL} -O {output}')
-
 
 
 # Step 1: Align the reads
@@ -93,7 +93,7 @@ rule combine_replicates:
 			shell(
 				r'''
 				samtools merge - {input_bam_files} \
-				| samtools sort - \
+				| samtools sort -T /tmp - \
 				> {output.bam}
 				''')
 			# Make index for the merged file
