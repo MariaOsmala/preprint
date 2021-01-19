@@ -34,11 +34,8 @@ rule download:
 	output: f'{raw_data_dir}/{{fname}}'
 	message: 'Downloading {wildcards.fname}'
 	run:
-		URLs = all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'].items()
-		for id, URL in URLs:
-			print(f'Dowloading {URL}')
-		for id, URL in URLs:
-			shell(f'wget {URL} -O {output}')
+		URL = all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'].item()
+		shell(f'wget {URL} -O {output}')
 
 
 
