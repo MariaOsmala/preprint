@@ -152,7 +152,8 @@ rule bed_to_bam:
 		'''
 
 rule shift_reads:
-	input: f'{bed_combined_dir}/{{data_type}}.bed'
+	input: f'{bed_combined_dir}/{{data_type}}.bed',
+		   f'{data_dir}/phantompeakqualtools.txt'
 	output: f'{bed_shifted_dir}/{{data_type}}.bed'
 	run:
 		# Input and DNase-seq are not shifted.
