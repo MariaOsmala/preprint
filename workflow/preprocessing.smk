@@ -14,6 +14,7 @@ rule download:
 	output: f'{raw_data_dir}/{{fname}}'
 	message: 'Downloading {wildcards.fname}'
 	run:
+		print(all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'])
 		URL = all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'].item()
 		shell(f'wget {URL} -O {output}')
 

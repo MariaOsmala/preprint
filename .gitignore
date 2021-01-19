@@ -4,3 +4,4 @@ softwares
 samtools.*
 env
 gurobi.log
+*.swp
