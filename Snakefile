@@ -35,9 +35,10 @@ rule download:
 	output: f'{raw_data_dir}/{{sample}}.fastq.gz'
 	run:
 		print(f'Retrieving URL for {wildcards.sample}')
-		URL = all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL'].item()
-		print('URL:', URL)
-		shell(f'wget {URL} -O {output}')
+		URLs = all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL'].items()
+		for id, URL in URLs:
+			print('URL:', URL)
+			shell(f'wget {URL} -O {output}')
 
 # Step 1: Align the reads
 bowtie_indexes = f'{softwares_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
