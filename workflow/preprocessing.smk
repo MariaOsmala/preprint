@@ -17,6 +17,7 @@ rule download:
 		shell(f'wget {URL} -O {output}')
 
 
+
 # Step 1: Align the reads
 def find_raw_files(wildcards):
 	"""
