@@ -1,11 +1,24 @@
 import pandas as pd
+from pathlib import Path
+
+# Figure out the root dir of the project
+cwd = Path.cwd()
+if cwd.name == 'workflow':
+	project_dir = str(cwd.parent)
+else:
+	project_dir = str(cwd)
+print('Project dir:', project_dir)
+
+# Load the user configuration
+configfile: f"{project_dir}/workflow/config.yaml"
 
 # The cell line to process
-cell_line = 'K562'
+cell_line = config['cell_line']
 
 # Various paths we will be using in this analysis pipeline
-data_dir = 'Data'
-softwares_dir = 'softwares'
+data_dir = config['data_dir']
+workflow_dir = f'{project_dir}/workflow'
+code_dir = f'{project_dir}/code'
 raw_data_dir = f'{data_dir}/{cell_line}/raw_data'
 bam_replicates_dir = f'{data_dir}/{cell_line}/bam_replicates'
 bam_combined_dir = f'{data_dir}/{cell_line}/bam_combined'
@@ -17,12 +30,12 @@ bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
 gencode_dir = f'{data_dir}/GENCODE_TSS'
 
 # Big list of all the samples
-all_samples = pd.read_csv('samples.tsv', sep='\t').sort_index()
-data_types = all_samples.query(f"cell_line=='{cell_line}'").data_type.unique()
+all_samples = pd.read_csv(f'{workflow_dir}/samples.tsv', sep='\t').sort_index()
+all_data_types = all_samples.query(f"cell_line=='{cell_line}'").data_type.unique()
 
 rule all:
 	input:
-		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=data_types),
+		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=all_data_types),
 		f'{gencode_dir}/GR_Gencode_TSS.RDS'
 
 include: 'preprocessing.smk'

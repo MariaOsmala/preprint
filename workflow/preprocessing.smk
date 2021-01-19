@@ -5,7 +5,7 @@ from snakemake.exceptions import WorkflowError
 # The default rule that will do the entire preprocessing pipeline
 rule preprocess:
 	input:
-		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=data_types)
+		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=all_data_types)
 
 # Step 0: Download the data
 rule download:
@@ -43,7 +43,7 @@ rule align_reads:
 		input_ext = get_ext(input[0])
 		if input_ext == 'fastq.gz':
 			# .fastq.gz input files need aligning with bowtie
-			bowtie_indexes = f'{softwares_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
+			bowtie_indexes = f'{data_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
 			shell(
 				r'''
 				bowtie2 -x {bowtie_indexes} -U {input[0]} \
@@ -128,11 +128,12 @@ genome_file = 'bedtools_genomes/human.hg19.genome'
 
 rule estimate_shifts:
 	input:
-		'code/quality_control_summary.R'
+		f'{code_dir}/quality_control_summary.R',
+		expand(f'{bam_phantompeakqualtools_dir}/{{data_type}}.out', data_type=all_data_types)
 	output:
 		f'{data_dir}/phantompeakqualtools.txt'
 	shell:
-		'Rscript code/quality_control_summary.R --datadir={data_dir}'
+		'Rscript {code_dir}/quality_control_summary.R --datadir={data_dir}'
 
 # For shifting, bam format is converted to bed format
 rule bam_to_bed:
