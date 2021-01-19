@@ -2,3 +2,5 @@
 Data
 softwares
 samtools.*
+env
+gurobi.log
