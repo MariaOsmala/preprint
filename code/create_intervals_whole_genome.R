@@ -1,28 +1,28 @@
-library(Rsamtools)
-library(snow)
-library(spp)
-library(accelerometry)
-library(Biostrings)
-library(bitops)
+# library(Rsamtools)
+# library(snow)
+# library(spp)
+# library(accelerometry)
+# library(Biostrings)
+# library(bitops)
 library(BSgenome.Hsapiens.UCSC.hg19)
-library(circlize)
-library(doParallel)
-library(foreach)
-library(gdata)
-library(GenomicRanges)
-library(GetoptLong)
-library(ggplot2)
-library(grid)
-library(gridExtra)
-library(MASS)
+# library(circlize)
+# library(doParallel)
+# library(foreach)
+# library(gdata)
+# library(GenomicRanges)
+# library(GetoptLong)
+# library(ggplot2)
+# library(grid)
+# library(gridExtra)
+# library(MASS)
 library(optparse)
-library(pryr)
-library(RColorBrewer)
-library(reshape2)
-library(ROCR)
-library(rtracklayer)
-library(ShortRead)
-library(stringr)
+# library(pryr)
+# library(RColorBrewer)
+# library(reshape2)
+# library(ROCR)
+# library(rtracklayer)
+# library(ShortRead)
+# library(stringr)
 
 human.chromlens = seqlengths(Hsapiens)
 
@@ -31,7 +31,7 @@ args <- commandArgs(trailingOnly = TRUE)
 
 option_list = list(
   make_option(c("-b", "--binSize"), type="integer", default=100, help="bin size (resolution) [default= %default]", metavar="integer"),
-  make_option(c("-output", "--output"), type="character", default="", 
+  make_option("--output", type="character", default="", 
               help="output folder [default= %default]", metavar="character")
 ); 
 
@@ -65,7 +65,7 @@ for(chr in chr_names){
     regions=GRanges(seqnames = Rle(rep(chr,length(start)), rep(1, length(start)) ), ranges = IRanges(start=start, end=end),  strand = strandinformation )
     
     export(object=regions, format = "bed", 
-           con=paste(output_folder,chr,".bed",sep=""))
+           con=paste0(output_folder, "/", chr, ".bed"))
     
     
 }

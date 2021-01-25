@@ -1,10 +1,17 @@
-data_dir: /m/cs/scratch/csb/projects/enhancer_prediction/aaltorse/Data
-#data_dir: /u/45/vanvlm1/unix/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data
+#data_dir: /m/cs/scratch/csb/projects/enhancer_prediction/aaltorse/Data
+data_dir: /u/45/vanvlm1/unix/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data
 cell_line: K562 
 
-# Configuration for extract_enhancers
+# General configuration for extracting training data
+window: 2000  # Profile window size
+binSize: 100  # Resolution of the data
+
+# Configuration specific to extract_enhancers
 extract_enhancers:
-  window: 2000          # Profile window size
-  binSize: 100          # Resolution of the data
-  N: 1000               # Number of trainind data enhancers to extract
+  N: 1000               # Number of training data enhancers to extract
   distToPromotor: 2000  # Maximum distance to nearest promotor
+
+# Configuration specific to extract_promoters
+extract_promoters:
+  N: 1000                     # Number of training promoters to extract
+  between_TSS_distance: 2000
