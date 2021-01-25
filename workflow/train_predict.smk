@@ -34,19 +34,20 @@ rule download_blacklists:
 # This is time and memory consuming step, can be done in less than 4 hours using
 # 17 cpus and 3G mem per cpu. Example whown for the K562 cell line data. The data
 # is not normalized wrt. data from any other cell line ( normalizeBool=FALSE).
-# TODO: input all bam_shifted files
 rule extract_enhancers:
 	input:
+		bam_files=expand(f'{bam_shifted_dir}/{{data_type}}.bam', data_type=all_data_types),
 		p300=f'{raw_data_dir}/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
 		DNase=f'{raw_data_dir}/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz',
 		blacklist_Dac=f'{blacklists_dir}/wgEncodeDacMapabilityConsensusExcludable.bed.gz',
 		blacklist_Duke=f'{blacklists_dir}/wgEncodeDukeMapabilityRegionsExcludable.bed.gz',
 		protein_coding_positive=f'{gencode_dir}/GR_Gencode_protein_coding_TSS_positive.RDS',
+		code=f'{code_dir}/extract_enhancers.R',
 	output:
 		f'{data_r_dir}/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData'
 	shell:
 		r'''
-		Rscript code/extract_enhancers.R \
+		Rscript {code_dir}/extract_enhancers.R \
 			--window={config[window]} \
 			--binSize={config[binSize]} \
 			--N={config[extract_enhancers][N]} \
@@ -60,19 +61,20 @@ rule extract_enhancers:
 		'''
 
 # Definition and extraction of training and test data promoters
-# TODO: input all bam_shifted files
 rule extract_promoters:
 	input:
+		bam_files=expand(f'{bam_shifted_dir}/{{data_type}}.bam', data_type=all_data_types),
 		DNase=f'{raw_data_dir}/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz',
 		blacklist_Dac=f'{blacklists_dir}/wgEncodeDacMapabilityConsensusExcludable.bed.gz',
 		blacklist_Duke=f'{blacklists_dir}/wgEncodeDukeMapabilityRegionsExcludable.bed.gz',
 		protein_coding=f'{gencode_dir}/GR_Gencode_protein_coding_TSS.RDS',
 		protein_coding_positive=f'{gencode_dir}/GR_Gencode_protein_coding_TSS_positive.RDS',
+		code=f'{code_dir}/extract_promoters.R',
 	output:
 		f'{data_r_dir}/{config["extract_promoters"]["N"]}_promoters_bin_{config["binSize"]}_window_{config["window"]}.RData',
 	shell:
 		r'''
-		Rscript code/extract_promoters.R \
+		Rscript {code_dir}/extract_promoters.R \
 			--window={config[window]} \
 			--binSize={config[binSize]} \
 			--N={config[extract_promoters][N]} \
@@ -93,9 +95,9 @@ chroms=["chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9",
 		"chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17",
 		"chr18", "chr19", "chr20", "chr21", "chr22", "chrX"]
 rule create_intervals_whole_genome:
-	input:
+	input: f'{code_dir}/create_intervals_whole_genome.R'
 	output: expand(f'{intervals_dir}/{{chrom}}.bed', chrom=chroms)
-	shell: 'Rscript code/create_intervals_whole_genome.R --binSize={config[binSize]} --output={intervals_dir}'
+	shell: 'Rscript {code_dir}/create_intervals_whole_genome.R --binSize={config[binSize]} --output={intervals_dir}'
 
 
 rule bedtools_multicov:
@@ -113,3 +115,22 @@ rule bedtools_multicov:
 		| cut -f 1-3,7 \
 		> {output}
 		'''
+
+# Combine all data for each chromosome, do this for all chromosomes
+union_bedgraph_names = ' '.join(all_data_types)
+rule union_bedgraph:
+	input:
+		bed_files=expand(f'{intervals_dir}/{{data_type}}/{{{{chrom}}}}.bed', data_type=all_data_types),
+		code=f'{code_dir}/union_bedgraph.sh'
+	output:
+		f'{intervals_dir}/all_{{chrom}}.bedGraph'
+	shell:
+		'bedtools unionbedg -header -i {input.bed_files} -names {union_bedgraph_names} > {output}'
+
+rule extract_nonzero_bins:
+	input:
+		f'{intervals_dir}/all_{{chrom}}.bedGraph'
+	output:
+		f'{intervals_dir}/nozero_regions_only_{{chrom}}.bed'
+	shell:
+		'bash {code_dir}/extract_nonzero_bins.sh {wildcards.chrom} {cell_line} {config[binSize]} {intervals_dir}'
