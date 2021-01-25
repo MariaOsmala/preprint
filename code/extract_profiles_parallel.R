@@ -1,3 +1,5 @@
+library('doParallel')
+
 #' Extracts ChIP-seq signal from bam files at specific genomic coordinates
 #'
 #' @param bam_folder Folder where you have .bam files and .bam.bai files of different modifications

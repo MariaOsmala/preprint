@@ -26,14 +26,16 @@ rule extract_enhancers:
 		p300=f'{raw_data_dir}/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
 		DNase=f'{raw_data_dir}/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz',
 		blacklist_Dac=f'{blacklists_dir}/wgEncodeDacMapabilityConsensusExcludable.bed.gz',
-		blacklist_Duke=f'{blacklists_dir}/wgEncodeDukeMapabilityRegionsExcludable.bed.gz',
+		blacklist_Duke=f'{blacklists_dir}/wgEncodeDukeMapabilityRegionsExcludable.bed.gz'
+	output:
+		f'{data_r_dir}/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["extract_enhancers"]["binSize"]}_window_{config["extract_enhancers"]["window"]}.RData'
 	shell:
 		r'''
 		Rscript code/extract_enhancers.R \
-			--window=2000 \ # profile window size
-			--binSize=100 \ # resolution of the data
-			--N=1000 \ # number of training data enhancers
-			--distToPromoter=2000 \
+			--window={config[extract_enhancers][window]} \
+			--binSize={config[extract_enhancers][binSize]} \
+			--N={config[extract_enhancers][N]} \
+			--distToPromoter={config[extract_enhancers][distToPromotor]} \
 			--pathToDir={data_dir} \
 			--cellLine={cell_line} \
 			--p300File={input.p300} \

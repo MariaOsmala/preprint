@@ -16,6 +16,7 @@ cell_line = config['cell_line']
 
 # Various paths we will be using in this analysis pipeline
 data_dir = config['data_dir']
+data_r_dir = f'{data_dir}/{cell_line}/data_R'
 workflow_dir = f'{project_dir}/workflow'
 code_dir = f'{project_dir}/code'
 raw_data_dir = f'{data_dir}/{cell_line}/raw_data'
