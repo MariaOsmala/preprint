@@ -18,3 +18,4 @@ dependencies:
   # For train-predict
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
   - r-optparse
+  - r-doparallel

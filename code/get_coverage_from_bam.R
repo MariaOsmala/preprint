@@ -1,3 +1,5 @@
+library('GenomicAlignments')
+
 #' compute the number of reads overlapping each bin
 #'
 #' @param roi 
@@ -48,6 +50,4 @@ get_coverage_from_bam<-function(roi, gal){
   #gives an integer matrix of lenght(roi) x 1 
   
   assays(summarizeOverlaps(roi, gal, inter.feature=FALSE))$counts
-  
-  
 }

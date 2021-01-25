@@ -7,7 +7,6 @@ if cwd.name == 'workflow':
 	project_dir = str(cwd.parent)
 else:
 	project_dir = str(cwd)
-print('Project dir:', project_dir)
 
 # Load the user configuration
 configfile: f"{project_dir}/workflow/config.yaml"
@@ -28,10 +27,11 @@ bed_combined_dir = f'{data_dir}/{cell_line}/bed_combined'
 bed_shifted_dir = f'{data_dir}/{cell_line}/bed_shifted'
 bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
 gencode_dir = f'{data_dir}/GENCODE_TSS'
+blacklists_dir = f'{data_dir}/blacklists'
 
 # Big list of all the samples
 all_samples = pd.read_csv(f'{workflow_dir}/samples.tsv', sep='\t').sort_index()
-all_data_types = all_samples.query(f"cell_line=='{cell_line}'").data_type.unique()
+all_data_types = all_samples.dropna().query(f"cell_line=='{cell_line}'").data_type.unique()
 
 rule all:
 	input:
@@ -39,4 +39,4 @@ rule all:
 		f'{gencode_dir}/GR_Gencode_TSS.RDS'
 
 include: 'preprocessing.smk'
-include: 'define_TSS.smk'
+include: 'train_predict.smk'

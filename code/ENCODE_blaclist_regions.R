@@ -6,8 +6,7 @@ ENCODE_blaclist_regions<-function(path_to_dir){
   
   #ultra-high signal artifact regions, 226
   #load blaclist regions
-  path=paste(path_to_dir,"/Data/blacklists/",sep="")
-  
+  path=paste0(path_to_dir,"/blacklists/")
   
   DAC<-read.table(paste(path,"wgEncodeDacMapabilityConsensusExcludable.bed.gz",sep=""), stringsAsFactors=FALSE) #411
   names(DAC)=c("chr", "start", "end", "name", "score", "strand")

@@ -14,7 +14,6 @@ rule download:
 	output: f'{raw_data_dir}/{{fname}}'
 	message: 'Downloading {wildcards.fname}'
 	run:
-		print(all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'])
 		URL = all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'].item()
 		shell(f'wget {URL} -O {output}')
 
@@ -153,9 +152,11 @@ rule bed_to_bam:
 		'''
 
 rule shift_reads:
-	input: f'{bed_combined_dir}/{{data_type}}.bed',
-		   f'{data_dir}/phantompeakqualtools.txt'
-	output: f'{bed_shifted_dir}/{{data_type}}.bed'
+	input:
+		f'{bed_combined_dir}/{{data_type}}.bed',
+		f'{data_dir}/phantompeakqualtools.txt'
+	output:
+		f'{bed_shifted_dir}/{{data_type}}.bed'
 	run:
 		# Input and DNase-seq are not shifted.
 		if 'Input' in input or 'DNase' in input:
