@@ -183,8 +183,8 @@ rule convert_bed_for_RFECS:
 	shell:
 		r"""
 		sed 's/ \+//g' {input} > {output}
-		awk -F '\t' 'BEGIN {{OFS="\t"}} {{ if (($1) != "chrM")  print }}' {output} > {bed_shifted_RFECS_dir}/tmp
+		awk -F '\t' 'BEGIN {{OFS="\t"}} {{ if (($1) != "chrM")  print }}' {output} > {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed
 		mv {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed {output}
-		awk -F'\t' 'BEGIN{{OFS="\t"}}{{$5=""; gsub(FS"+",FS); print $0}}' {output} > {bed_shifted_RFECS_dir}/tmp
+		awk -F'\t' 'BEGIN{{OFS="\t"}}{{$5=""; gsub(FS"+",FS); print $0}}' {output} > {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed
 		mv {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed {output}
 		"""
