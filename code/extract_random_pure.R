@@ -1,28 +1,28 @@
-library(Rsamtools)
-library(snow)
-library(spp)
-library(accelerometry)
-library(Biostrings)
-library(bitops)
+# library(Rsamtools)
+# library(snow)
+# library(spp)
+# library(accelerometry)
+# library(Biostrings)
+# library(bitops)
 library(BSgenome.Hsapiens.UCSC.hg19)
-library(circlize)
-library(doParallel)
-library(foreach)
-library(gdata)
-library(GenomicRanges)
-library(GetoptLong)
-library(ggplot2)
-library(grid)
-library(gridExtra)
-library(MASS)
+# library(circlize)
+# library(doParallel)
+# library(foreach)
+# library(gdata)
+# library(GenomicRanges)
+# library(GetoptLong)
+# library(ggplot2)
+# library(grid)
+# library(gridExtra)
+# library(MASS)
 library(optparse)
-library(pryr)
-library(RColorBrewer)
-library(reshape2)
-library(ROCR)
-library(rtracklayer)
-library(ShortRead)
-library(stringr)
+# library(pryr)
+# library(RColorBrewer)
+# library(reshape2)
+# library(ROCR)
+# library(rtracklayer)
+# library(ShortRead)
+# library(stringr)
 
 option_list = list(
   make_option(c("-w", "--window"), type="integer", default=5000, 
@@ -30,15 +30,15 @@ option_list = list(
   make_option(c("-b", "--binSize"), type="integer", default=100, help="bin size (resolution) [default= %default]", metavar="integer"),
   make_option(c("-N", "--N"), type="integer", default=1000000, 
               help="number of regions [default= %default]", metavar="integer"), 
-  make_option(c("-pathToDir", "--pathToDir"), type="character", default="", 
+  make_option("--pathToDir", type="character", default="", 
               help="path to main folder [default= %default]", metavar="character"),
-  make_option(c("-p300File", "--p300File"), type="character", default="", 
+  make_option("--p300File", type="character", default="", 
               help="path to p300 peak file [default= %default]", metavar="character"),
-  make_option(c("-cellLine", "--cellLine"), type="character", default="", 
+  make_option("--cellLine", type="character", default="", 
               help="cell line [default= %default]", metavar="character"),
-  make_option(c("-normalize", "--normalize"), type="logical", default=FALSE, 
+  make_option("--normalize", type="logical", default=FALSE, 
               help="do we normalize wrt data from other cell line [default= %default]", metavar="logical"),
-  make_option(c("-NormCellLine", "--NormCellLine"), type="character", default="", 
+  make_option("--NormCellLine", type="character", default="", 
               help="name of the cell line normalized wrt [default= %default]", metavar="character")
 ); 
 
@@ -66,7 +66,7 @@ source("code/functions.R")
 
 
 if(normalizeBool==TRUE){
-  load( file=paste(path_to_dir,"/Data/",NormCellLine,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions,
+  load( file=paste(path_to_dir,"/",NormCellLine,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions,
   countsOtherCellLine=profiles$counts #remove "V2" from the names
   names(countsOtherCellLine)=gsub("V2","",  names(countsOtherCellLine))
 }
@@ -120,7 +120,7 @@ if(nrow(test)!=0){
   ####################Remove p300 BSs and protein coding TSS from the list############################################
 
 
-path=paste(path_to_dir,"/Data/",sep="")
+path=path_to_dir
 
 p300peaks_GRanges=narrowPeak2GRanges(p300_peaks_file, TRUE) #strand is *
 
@@ -141,8 +141,8 @@ if( (class(mtch)!="try-error") & (length(mtch)!=0) ){
 }
 
 ######################Remove protein coding TSS###################################################################
-GR_Gencode_protein_coding_TSS=readRDS( paste(path,"GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS",sep="")) #73271
-GR_Gencode_protein_coding_TSS_positive=readRDS(paste(path,"GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS",sep=""))
+GR_Gencode_protein_coding_TSS=readRDS( paste(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS",sep="")) #73271
+GR_Gencode_protein_coding_TSS_positive=readRDS(paste(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS",sep=""))
 
 #these need the chromosome length information
 
@@ -184,7 +184,7 @@ figure_path=paste(path_to_dir,"/figures/",sep="")
 print(path_to_dir)
 print(path)
 print(cell_line)
-bam_folder=paste(path,cell_line,"/bam_shifted" ,sep="")
+bam_folder=paste(path,"/",cell_line,"/bam_shifted" ,sep="")
 print(bam_folder)
 system.time(random_profiles<-extract_profiles_parallel(bam_folder=bam_folder, 
                                                                   regions=regions, 

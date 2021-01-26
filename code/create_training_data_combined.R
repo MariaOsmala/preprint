@@ -1,28 +1,28 @@
-library(Rsamtools)
-library(snow)
-library(spp)
-library(accelerometry)
-library(Biostrings)
-library(bitops)
-library(BSgenome.Hsapiens.UCSC.hg19)
-library(circlize)
-library(doParallel)
-library(foreach)
-library(gdata)
-library(GenomicRanges)
-library(GetoptLong)
-library(ggplot2)
-library(grid)
-library(gridExtra)
-library(MASS)
+#library(Rsamtools)
+#library(snow)
+#library(spp)
+#library(accelerometry)
+#library(Biostrings)
+#library(bitops)
+#library(BSgenome.Hsapiens.UCSC.hg19)
+#library(circlize)
+#library(doParallel)
+#library(foreach)
+#library(gdata)
+#library(GenomicRanges)
+#library(GetoptLong)
+#library(ggplot2)
+#library(grid)
+#library(gridExtra)
+#library(MASS)
 library(optparse)
-library(pryr)
-library(RColorBrewer)
-library(reshape2)
-library(ROCR)
-library(rtracklayer)
-library(ShortRead)
-library(stringr)
+#library(pryr)
+#library(RColorBrewer)
+#library(reshape2)
+#library(ROCR)
+#library(rtracklayer)
+#library(ShortRead)
+#library(stringr)
 
 
 option_list = list(
@@ -31,13 +31,13 @@ make_option(c("-w", "--window"), type="integer", default=5000,
 make_option(c("-b", "--binSize"), type="integer", default=100, help="bin size (resolution) [default= %default]", metavar="integer"),
 make_option(c("-N", "--N"), type="integer", default=1000000, 
             help="number of regions [default= %default]", metavar="integer"),
-make_option(c("-pathToDir", "--pathToDir"), type="character", default="", 
-                        help="path to main folder [default= %default]", metavar="character"),
-          make_option(c("-k", "--k"), type="integer", default=5, 
+make_option(c("-k", "--k"), type="integer", default=5, 
             help="k-fold CV [default= %default]", metavar="integer"),
-make_option(c("-distanceMeasure", "--distanceMeasure"), type="character", default="", 
+make_option("--pathToDir", type="character", default="", 
+            help="path to main folder [default= %default]", metavar="character"),
+make_option("--distanceMeasure", type="character", default="", 
             help="ML or Bayes_estimated_priors [default= %default]", metavar="character"),
-make_option(c("-cellLine", "--cellLine"), type="character", default="", 
+make_option("--cellLine", type="character", default="", 
             help="cell line [default= %default]", metavar="character")
 ); 
 
@@ -77,7 +77,7 @@ summary="mean"
 
 
 ################################Load training data enhancers #############################################################
-load(file=paste(path,"/Data/",cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #normalized_profiles, profiles, regions
+load(file=paste(path,"/",cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #normalized_profiles, profiles, regions
 
 original_window=nrow(normalized_profiles[[1]])*bin_size
 
@@ -97,7 +97,7 @@ enhancer_summary=profile_averages(enhancer_profiles)
 
 ##################Load training data promoters###########################################################################
 #profiles_directed,profiles_undirected, normalized_profiles_directed,normalized_profiles_undirected, regions
-load(file=paste(path,"/Data/",cell_line,"/data_R/",N,"_promoters_bin_",
+load(file=paste(path,"/",cell_line,"/data_R/",N,"_promoters_bin_",
                 bin_size,"_window_",window,".RData",sep=""))
 
 promoter_profiles=normalized_profiles_undirected

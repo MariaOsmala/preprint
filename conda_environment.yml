@@ -12,6 +12,7 @@ dependencies:
   - bioconductor-rsamtools
   - bioconductor-genomeinfodb
   - bioconductor-genomeinfodbdata
+  - r-gdata
   - snakemake
   - pandas
   - r-circlize
@@ -29,3 +30,5 @@ dependencies:
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
   - r-optparse
   - r-doparallel
+  - gnuplot
+  - libsvm

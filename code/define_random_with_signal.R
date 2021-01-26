@@ -1,28 +1,28 @@
-library(Rsamtools)
-library(snow)
-library(spp)
-library(accelerometry)
-library(Biostrings)
-library(bitops)
+# library(Rsamtools)
+# library(snow)
+# library(spp)
+# library(accelerometry)
+# library(Biostrings)
+# library(bitops)
 library(BSgenome.Hsapiens.UCSC.hg19)
-library(circlize)
-library(doParallel)
-library(foreach)
-library(gdata)
-library(GenomicRanges)
-library(GetoptLong)
-library(ggplot2)
-library(grid)
-library(gridExtra)
-library(MASS)
+# library(circlize)
+# library(doParallel)
+# library(foreach)
+# library(gdata)
+# library(GenomicRanges)
+# library(GetoptLong)
+# library(ggplot2)
+# library(grid)
+# library(gridExtra)
+# library(MASS)
 library(optparse)
-library(pryr)
-library(RColorBrewer)
-library(reshape2)
-library(ROCR)
-library(rtracklayer)
-library(ShortRead)
-library(stringr)
+# library(pryr)
+# library(RColorBrewer)
+# library(reshape2)
+# library(ROCR)
+# library(rtracklayer)
+# library(ShortRead)
+# library(stringr)
 
 option_list = list(
   make_option(c("-w", "--window"), type="integer", default=5000, 
@@ -30,19 +30,19 @@ option_list = list(
   make_option(c("-b", "--binSize"), type="integer", default=100, help="bin size (resolution) [default= %default]", metavar="integer"),
   make_option(c("-N", "--N"), type="integer", default=1000000, 
               help="number of regions [default= %default]", metavar="integer"),
-  make_option(c("-threshold", "--threshold"), type="integer", default=10, 
+  make_option("--threshold", type="integer", default=10, 
               help="Threshold [default= %default]", metavar="integer"),
-  make_option(c("-pathToDir", "--pathToDir"), type="character", default="", 
+  make_option("--pathToDir", type="character", default="", 
               help="path to main folder [default= %default]", metavar="character"),
-  make_option(c("-cellLine", "--cellLine"), type="character", default="", 
+  make_option("--cellLine", type="character", default="", 
               help="cell line [default= %default]", metavar="character"),
-  make_option(c("-p300File", "--p300File"), type="character", default="", 
+  make_option("--p300File", type="character", default="", 
               help="path to p300 peak file [default= %default]", metavar="character"),
-  make_option(c("-DNaseFile", "--DNaseFile"), type="character", default="", 
+  make_option("--DNaseFile", type="character", default="", 
               help="path to DNase peak file [default= %default]", metavar="character"),
-  make_option(c("-normalize", "--normalize"), type="logical", default=FALSE, 
+  make_option("--normalize", type="logical", default=FALSE, 
               help="do we normalize wrt data from other cell line [default= %default]", metavar="logical"),
-  make_option(c("-NormCellLine", "--NormCellLine"), type="character", default="", 
+  make_option("--NormCellLine", type="character", default="", 
               help="name of the cell line normalized wrt [default= %default]", metavar="character")
 ); 
 
@@ -78,10 +78,10 @@ source("code/functions.R")
 
 
 #load the counts
-path=paste(path_to_dir,"/Data/",sep="")
+path=path_to_dir
 
 
-load( file=paste(path_to_dir,"/Data/",cell_line,"/data_R/whole_genome_coverage.RData",sep="")) #unionBedGraph, unionBedGraph_zero, split_ranges, accepted_GRanges, steps
+load( file=paste(path_to_dir,"/",cell_line,"/data_R/whole_genome_coverage.RData",sep="")) #unionBedGraph, unionBedGraph_zero, split_ranges, accepted_GRanges, steps
 rm(unionBedGraph)
 
 start(split_ranges)<-start(split_ranges)+1 #strand is +

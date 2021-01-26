@@ -80,6 +80,7 @@ rule combine_replicates:
 	output:
 		bam = f'{bam_combined_dir}/{{data_type}}.bam',
 		bai = f'{bam_combined_dir}/{{data_type}}.bam.bai'
+	threads: 4
 	run:
 		if len(input) == 0:
 			raise WorkflowError(f'No raw files found for data type "{wildcards.data_type}".')
@@ -92,8 +93,8 @@ rule combine_replicates:
 			input_bam_files = ' '.join(input[::2])
 			shell(
 				r'''
-				samtools merge - {input_bam_files} \
-				| samtools sort -T /tmp - \
+				samtools merge - {input_bam_files} --threads {threads} \
+				| samtools sort -T /tmp -@ {threads} - \
 				> {output.bam}
 				''')
 			# Make index for the merged file
@@ -109,11 +110,12 @@ rule phantompeakqualtools:
 		savd = f'{bam_phantompeakqualtools_dir}/{{data_type}}.RData',
 		savp = f'{bam_phantompeakqualtools_dir}/{{data_type}}.pdf',
 		out = f'{bam_phantompeakqualtools_dir}/{{data_type}}.out'
+	threads: 4
 	shell:
 		r'''
 		run_spp.R \
 			-c={input.bam} \
-			-p=5 \
+			-p={threads} \
 			-i={input.control} \
 			-s=-200:1:500 \
 			-rf \
