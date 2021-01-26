@@ -12,6 +12,7 @@ dependencies:
   - bioconductor-rsamtools
   - bioconductor-genomeinfodb
   - bioconductor-genomeinfodbdata
+  - r-gdata
   - snakemake
   - pandas
 
