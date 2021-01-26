@@ -6,12 +6,24 @@ cell_line: K562
 window: 2000  # Profile window size
 binSize: 100  # Resolution of the data
 
-# Configuration specific to extract_enhancers
 extract_enhancers:
   N: 1000               # Number of training data enhancers to extract
   distToPromotor: 2000  # Maximum distance to nearest promotor
 
-# Configuration specific to extract_promoters
 extract_promoters:
-  N: 1000                     # Number of training promoters to extract
+  N: 1000               # Number of training promoters to extract
   between_TSS_distance: 2000
+
+extract_random_pure:
+  N: 1000               # Number of random regions to extract
+
+define_random_with_signal:
+  threshold: 5
+
+create_training_data_combined:
+  k: 5  # Number of folds to create for cross-validation
+
+# Grid search parameters for finding an optimal C and G during SVM classification
+cv_train_predict:
+  log2c: '-5,25,0.5'   # start,stop,step
+  log2g: '-25,10,0.5'  # start,stop,step

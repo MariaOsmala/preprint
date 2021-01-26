@@ -31,6 +31,7 @@ gencode_dir = f'{data_dir}/GENCODE_TSS'
 blacklists_dir = f'{data_dir}/blacklists'
 intervals_dir= f'{data_dir}/intervals_bed_{config["binSize"]}'
 
+
 # Big list of all the samples
 all_samples = pd.read_csv(f'{workflow_dir}/samples.tsv', sep='\t').sort_index()
 all_data_types = all_samples.dropna().query(f"cell_line=='{cell_line}'").data_type.unique()

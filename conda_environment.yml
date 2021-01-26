@@ -19,3 +19,5 @@ dependencies:
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
   - r-optparse
   - r-doparallel
+  - gnuplot
+  - libsvm
