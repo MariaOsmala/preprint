@@ -1,32 +1,32 @@
-library(Rsamtools)
-library(snow)
-library(spp)
-library(accelerometry)
-library(Biostrings)
-library(bitops)
-library(BSgenome.Hsapiens.UCSC.hg19)
-library(circlize)
-library(doParallel)
-library(foreach)
-library(gdata)
-library(GenomicRanges)
-library(GetoptLong)
-library(ggplot2)
-library(grid)
-library(gridExtra)
-library(MASS)
+# library(Rsamtools)
+# library(snow)
+# library(spp)
+# library(accelerometry)
+# library(Biostrings)
+# library(bitops)
+# library(BSgenome.Hsapiens.UCSC.hg19)
+# library(circlize)
+# library(doParallel)
+# library(foreach)
+# library(gdata)
+# library(GenomicRanges)
+# library(GetoptLong)
+# library(ggplot2)
+# library(grid)
+# library(gridExtra)
+# library(MASS)
 library(optparse)
-library(pryr)
-library(RColorBrewer)
-library(reshape2)
-library(ROCR)
-library(rtracklayer)
-library(ShortRead)
-library(stringr)
+# library(pryr)
+# library(RColorBrewer)
+# library(reshape2)
+# library(ROCR)
+# library(rtracklayer)
+# library(ShortRead)
+# library(stringr)
 
 option_list = list(
 
-make_option(c("-datadir", "--datadir"), type="character", default="", 
+make_option("--datadir", type="character", default="", 
             help="path to main folder [default= %default]", metavar="character")
 )
 
@@ -41,12 +41,12 @@ cell_lines=c("K562", "GM12878")
 
 #format:Filename<tab>numReads<tab>estFragLen<tab>corr_estFragLen<tab>PhantomPeak<tab>corr_phantomPeak<tab>argmin_corr<tab>min_corr<tab>Normalized SCC (NSC)<tab>Relative SCC (RSC)<tab>QualityTag)
 
-rm(data)
+#rm(data)
 data<-data.frame()
 
 for(cl in cell_lines){
 
-  path=paste(path_to_dir,cl,"/phantompeakqualtools/",sep="")
+  path=paste0(path_to_dir,"/",cl,"/phantompeakqualtools/")
   
   setwd(path)
   
