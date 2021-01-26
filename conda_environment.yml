@@ -4,7 +4,7 @@ channels:
 
 dependencies:
   # For preprocessing pipeline
-  - r-base > 3.5
+  - r-base > 3.5, < 4.0
   - bowtie2
   - samtools
   - bedtools
@@ -14,6 +14,16 @@ dependencies:
   - bioconductor-genomeinfodbdata
   - snakemake
   - pandas
+  - r-circlize
+  - r-doParallel
+  - r-gdata
+  - r-ggplot2
+  - r-GetoptLong
+  - r-gridExtra
+  - r-pryr
+  - r-reshape2
+  - r-ROCR
+  - bioconductor-ShortRead
 
   # For train-predict
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
