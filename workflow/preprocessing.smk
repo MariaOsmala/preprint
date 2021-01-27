@@ -155,8 +155,8 @@ rule bed_to_bam:
 
 rule shift_reads:
 	input:
-		f'{bed_combined_dir}/{{data_type}}.bed',
-		f'{data_dir}/phantompeakqualtools.txt'
+		bed_file=f'{bed_combined_dir}/{{data_type}}.bed',
+		phantompeakqualtools=f'{data_dir}/phantompeakqualtools.txt'
 	output:
 		f'{bed_shifted_dir}/{{data_type}}.bed'
 	run:
@@ -173,8 +173,7 @@ rule shift_reads:
 				shifts = pd.read_csv(f'{data_dir}/phantompeakqualtools.txt', sep='\t', index_col=[0, 1], usecols=[0, 1, 3])
 				shift = shifts.loc[(f'{cell_line}', f'{wildcards.data_type}.bam')][0]
 				shift = round(shift / 2)
-			bed_file = f'{bed_combined_dir}/{wildcards.data_type}.bed'
-			shell(f'shiftBed -i {bed_file} -g {genome_file} -s {shift} > {output}')
+			shell(f'shiftBed -i {input.bed_file} -g {genome_file} -s {shift} > {output}')
 
 
 # Step 5: Convert bed files to format accepted by RFECS
@@ -185,7 +184,7 @@ rule convert_bed_for_RFECS:
 		r"""
 		sed 's/ \+//g' {input} > {output}
 		awk -F '\t' 'BEGIN {{OFS="\t"}} {{ if (($1) != "chrM")  print }}' {output} > {bed_shifted_RFECS_dir}/tmp
-		mv {bed_shifted_RFECS_dir}/tmp {output}
+		mv {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed {output}
 		awk -F'\t' 'BEGIN{{OFS="\t"}}{{$5=""; gsub(FS"+",FS); print $0}}' {output} > {bed_shifted_RFECS_dir}/tmp
-		mv {bed_shifted_RFECS_dir}/tmp {output}
+		mv {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed {output}
 		"""

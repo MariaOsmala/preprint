@@ -12,19 +12,19 @@ dependencies:
   - bioconductor-rsamtools
   - bioconductor-genomeinfodb
   - bioconductor-genomeinfodbdata
-  - r-gdata
   - snakemake
   - pandas
-  - r-circlize
-  - r-doParallel
-  - r-gdata
-  - r-ggplot2
-  - r-GetoptLong
-  - r-gridExtra
-  - r-pryr
-  - r-reshape2
-  - r-ROCR
-  - bioconductor-ShortRead
+  # - r-gdata
+  # - r-circlize
+  # - r-doParallel
+  # - r-gdata
+  # - r-ggplot2
+  # - r-GetoptLong
+  # - r-gridExtra
+  # - r-pryr
+  # - r-reshape2
+  # - r-ROCR
+  # - bioconductor-ShortRead
 
   # For train-predict
   - bioconductor-bsgenome.hsapiens.ucsc.hg19

@@ -1,28 +1,28 @@
-library(Rsamtools)
-library(snow)
-library(spp)
-library(accelerometry)
-library(Biostrings)
-library(bitops)
-library(BSgenome.Hsapiens.UCSC.hg19)
-library(circlize)
-library(doParallel)
-library(foreach)
-library(gdata)
-library(GenomicRanges)
-library(GetoptLong)
-library(ggplot2)
-library(grid)
-library(gridExtra)
-library(MASS)
+# library(Rsamtools)
+# library(snow)
+# library(spp)
+# library(accelerometry)
+# library(Biostrings)
+# library(bitops)
+# library(BSgenome.Hsapiens.UCSC.hg19)
+# library(circlize)
+# library(doParallel)
+# library(foreach)
+# library(gdata)
+# library(GenomicRanges)
+# library(GetoptLong)
+# library(ggplot2)
+# library(grid)
+# library(gridExtra)
+# library(MASS)
 library(optparse)
-library(pryr)
-library(RColorBrewer)
-library(reshape2)
-library(ROCR)
-library(rtracklayer)
-library(ShortRead)
-library(stringr)
+# library(pryr)
+# library(RColorBrewer)
+# library(reshape2)
+# library(ROCR)
+# library(rtracklayer)
+# library(ShortRead)
+# library(stringr)
 
 option_list = list(
 
@@ -41,28 +41,28 @@ cell_lines=c("sample", "K562", "GM12878")
 
 #format:Filename<tab>numReads<tab>estFragLen<tab>corr_estFragLen<tab>PhantomPeak<tab>corr_phantomPeak<tab>argmin_corr<tab>min_corr<tab>Normalized SCC (NSC)<tab>Relative SCC (RSC)<tab>QualityTag)
 
-rm(data)
+#rm(data)
 data<-data.frame()
 
 for(cl in cell_lines){
 
-  path=paste(path_to_dir,cl,"/phantompeakqualtools/",sep="")
-  
+  path=paste0(path_to_dir,"/",cl,"/phantompeakqualtools/")
+
   setwd(path)
-  
+
   mods=dir(pattern=".out")
-  
-    
+
+
   for(mod in mods){
-    
+
     tmp=try(read.table(mod, stringsAsFactors=FALSE),silent=TRUE)
     if(class(tmp)!="try-error"){
-      
+
       data=rbind(data, cbind(cl,tmp))
-      
+
     }
   }
-  
+
 }
 
 colnames(data)=c("cell_line","name", "#mapped_reads", "estFragLen", "corr_estFragLen", "phantomPeak", "corr_phantomPeak", "argmin_corr", "min_corr", "NSC=corr_estFraglen/min_corr >=1.05", "RSC=(corr_estFraglen - min_corr)/(corr_phantomPeak - min_corr) >=0.8", "QualityTag based on RSC -2:veryLow,-1:Low,0:Medium,1:High,2:veryHigh")
@@ -74,17 +74,17 @@ how_many=max(unlist(lapply(fragLengths[[1]], length)))
 
 
 for(i in 1:length(fragLengths[[1]])){
-  
+
   if(length(fragLengths[[1]][[i]])< how_many){
-    
+
     fragLengths[[1]][[i]]=as.numeric( c(fragLengths[[1]][[i]], rep("NA", how_many - length(fragLengths[[1]][[i]]))  ) )
     corrs[[1]][[i]]=as.numeric( c(corrs[[1]][[i]], rep("NA", how_many - length(corrs[[1]][[i]]))  ) )
-    
+
   }
-  
+
   fragLengths[[1]][[i]]=as.numeric(fragLengths[[1]][[i]])
   corrs[[1]][[i]]=as.numeric(corrs[[1]][[i]])
-  
+
 }
 new_data<-cbind(data[,1:3], do.call(rbind, fragLengths[[1]]), do.call(rbind, corrs[[1]]), data[, 6:12])
 colnames(new_data)=c("cell_line","name", "#mapped_reads", "1st_estFragLen","2nd_estFragLen","3rd_estFragLen", "1st_corr_estFragLen","2nd_corr_estFragLen","3rd_corr_estFragLen", "phantomPeak", "corr_phantomPeak", "argmin_corr", "min_corr", "NSC=corr_estFraglen/min_corr >=1.05", "RSC=(corr_estFraglen - min_corr)/(corr_phantomPeak - min_corr) >=0.8", "QualityTag based on RSC -2:veryLow,-1:Low,0:Medium,1:High,2:veryHigh")
