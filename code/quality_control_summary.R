@@ -26,7 +26,7 @@ library(stringr)
 
 option_list = list(
 
-make_option(c("-datadir", "--datadir"), type="character", default="", 
+make_option(c("-d", "--datadir"), type="character", default="",
             help="path to main folder [default= %default]", metavar="character")
 )
 
@@ -36,7 +36,7 @@ opt = parse_args(opt_parser);
 path_to_dir=opt$datadir
 
 
-cell_lines=c("K562", "GM12878")
+cell_lines=c("sample", "K562", "GM12878")
 
 
 #format:Filename<tab>numReads<tab>estFragLen<tab>corr_estFragLen<tab>PhantomPeak<tab>corr_phantomPeak<tab>argmin_corr<tab>min_corr<tab>Normalized SCC (NSC)<tab>Relative SCC (RSC)<tab>QualityTag)
