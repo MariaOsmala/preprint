@@ -44,25 +44,32 @@ cell_lines=c("sample", "K562", "GM12878")
 #rm(data)
 data<-data.frame()
 
+# Below we cycle through directories. Remember the original working directory.
+wd = getwd()
 for(cl in cell_lines){
 
   path=paste0(path_to_dir,"/",cl,"/phantompeakqualtools/")
 
-  setwd(path)
+  # The path may not exist if the cell line is not being processed.
+  # Only try reading if the folder exists.
+  if(file.exists(path)){
+    setwd(path)
 
-  mods=dir(pattern=".out")
+    mods=dir(pattern=".out")
 
+    for(mod in mods){
 
-  for(mod in mods){
+      tmp=try(read.table(mod, stringsAsFactors=FALSE),silent=TRUE)
+      if(class(tmp)!="try-error"){
 
-    tmp=try(read.table(mod, stringsAsFactors=FALSE),silent=TRUE)
-    if(class(tmp)!="try-error"){
+        data=rbind(data, cbind(cl,tmp))
 
-      data=rbind(data, cbind(cl,tmp))
-
+      }
     }
-  }
 
+    # Go back to the original working directory
+    setwd(wd)
+  }
 }
 
 colnames(data)=c("cell_line","name", "#mapped_reads", "estFragLen", "corr_estFragLen", "phantomPeak", "corr_phantomPeak", "argmin_corr", "min_corr", "NSC=corr_estFraglen/min_corr >=1.05", "RSC=(corr_estFraglen - min_corr)/(corr_phantomPeak - min_corr) >=0.8", "QualityTag based on RSC -2:veryLow,-1:Low,0:Medium,1:High,2:veryHigh")
