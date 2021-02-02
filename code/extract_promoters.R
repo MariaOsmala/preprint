@@ -132,7 +132,7 @@ strand(promoters)="*" #THIS IS IMPORTANT
 
 promoter_profiles_directed<-extract_profiles_parallel(bam_folder, regions=promoters, directionality=TRUE, 
                                                       directions=promoters$direction, window, bin_size)
-promoter_profiles_undirected<-extract_profiles_parallel(bam_folder, promoters, directionality=FALSE, 
+promoter_profiles_undirected<-extract_profiles_parallel(bam_folder, regions=promoters, directionality=FALSE, 
                                                         directions=promoters$direction, window, bin_size)
 
 setwd(bam_folder)

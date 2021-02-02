@@ -25,34 +25,42 @@ library(optparse)
 #library(stringr)
 
 
-option_list = list(
-make_option(c("-w", "--window"), type="integer", default=5000, 
-            help="window size [default=%default]", metavar="integer"),
-make_option(c("-b", "--binSize"), type="integer", default=100, help="bin size (resolution) [default= %default]", metavar="integer"),
-make_option(c("-N", "--N"), type="integer", default=1000000, 
-            help="number of regions [default= %default]", metavar="integer"),
-make_option(c("-k", "--k"), type="integer", default=5, 
-            help="k-fold CV [default= %default]", metavar="integer"),
-make_option("--pathToDir", type="character", default="", 
-            help="path to main folder [default= %default]", metavar="character"),
-make_option("--distanceMeasure", type="character", default="", 
-            help="ML or Bayes_estimated_priors [default= %default]", metavar="character"),
-make_option("--cellLine", type="character", default="", 
-            help="cell line [default= %default]", metavar="character")
-); 
+# option_list = list(
+# make_option(c("-w", "--window"), type="integer", default=5000, 
+#             help="window size [default=%default]", metavar="integer"),
+# make_option(c("-b", "--binSize"), type="integer", default=100, help="bin size (resolution) [default= %default]", metavar="integer"),
+# make_option(c("-N", "--N"), type="integer", default=1000000, 
+#             help="number of regions [default= %default]", metavar="integer"),
+# make_option(c("-k", "--k"), type="integer", default=5, 
+#             help="k-fold CV [default= %default]", metavar="integer"),
+# make_option("--pathToDir", type="character", default="", 
+#             help="path to main folder [default= %default]", metavar="character"),
+# make_option("--distanceMeasure", type="character", default="", 
+#             help="ML or Bayes_estimated_priors [default= %default]", metavar="character"),
+# make_option("--cellLine", type="character", default="", 
+#             help="cell line [default= %default]", metavar="character")
+# ); 
 
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
+# opt_parser = OptionParser(option_list=option_list);
+# opt = parse_args(opt_parser);
 
 
-cell_line=opt$cellLine
-window=opt$window								
-bin_size=opt$binSize
-N=opt$N
-distance_measure=opt$distanceMeasure #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
-k=opt$k #k-fold CV
+# cell_line=opt$cellLine
+# window=opt$window								
+# bin_size=opt$binSize
+# N=opt$N
+# distance_measure=opt$distanceMeasure #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
+# k=opt$k #k-fold CV
 
-path_to_dir=opt$pathToDir
+# path_to_dir=opt$pathToDir
+
+cell_line='K562'
+window=2000
+bin_size=100
+N=1000
+distance_measure='ML' #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
+k=5 #k-fold CV
+path_to_dir='/u/45/vanvlm1/unix/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
 
 print(cell_line)
 print(window)
@@ -64,7 +72,7 @@ print(k)
 print(path_to_dir)
 
 
-setwd(path_to_dir)
+#setwd(path_to_dir)
 source("code/functions.R")
 path=path_to_dir
 
@@ -77,7 +85,7 @@ summary="mean"
 
 
 ################################Load training data enhancers #############################################################
-load(file=paste(path,"/",cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #normalized_profiles, profiles, regions
+load(file=paste0(path,"/",cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData")) #normalized_profiles, profiles, regions
 
 original_window=nrow(normalized_profiles[[1]])*bin_size
 
@@ -97,10 +105,12 @@ enhancer_summary=profile_averages(enhancer_profiles)
 
 ##################Load training data promoters###########################################################################
 #profiles_directed,profiles_undirected, normalized_profiles_directed,normalized_profiles_undirected, regions
-load(file=paste(path,"/",cell_line,"/data_R/",N,"_promoters_bin_",
-                bin_size,"_window_",window,".RData",sep=""))
+load(file=paste0(path,"/",cell_line,"/data_R/",N,"_promoters_bin_",
+                 bin_size,"_window_",window,".RData"))
 
-promoter_profiles=normalized_profiles_undirected
+#promoter_profiles=normalized_profiles_undirected
+# FIXME
+promoter_profiles=normalized_profiles
 #promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
 promoter_regions=regions
 #promoter_directions=regions$strand
@@ -110,16 +120,16 @@ promoter_regions=regions
 
 
 #pure_random
-load(file=paste(path,"/Data/",cell_line,"/data_R/pure_random_" ,N,"_bin_",
-                bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+load(file=paste0(path,"/",cell_line,"/data_R/pure_random_" ,N,"_bin_",
+                 bin_size,"_window_",window,".RData")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
   
 pure_random_profiles=normalized_profiles
 pure_random_regions=regions
 
 
 #random_with_signal
-load(file=paste(path,"/Data/",cell_line,"/data_R/",N,"_random_with_signal_bin_",
-                bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
+load(file=paste0(path,"/",cell_line,"/data_R/",N,"_random_with_signal_bin_",
+                 bin_size,"_window_",window,".RData")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
   
 random_with_signal_profiles=normalized_profiles
 random_with_signal_regions=regions
@@ -264,7 +274,7 @@ for(i in 1:k){
     
     ##########################Visualization of the data######################################################################## 
   
-  common_path=paste(path, "/results/model_promoters_and_random_combined/",cell_line,"/",distance_measure,"/",k,"-fold_CV_",i,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,"_",k,"fold_cv_",i,sep="")
+  common_path=paste0(path, "/results/model_promoters_and_random_combined/",cell_line,"/",distance_measure,"/",k,"-fold_CV_",i,"/NSamples_",N ,"_window_",window,"_bin_",bin_size,"_",k,"fold_cv_",i)
 
   
   
@@ -306,34 +316,34 @@ for(i in 1:k){
     test.labels[(ncol(test_data_pos$data)+1):length(test.labels)]<- -1
     test.labels=factor(test.labels)
     
-    save.image(file=paste(common_path,"_training_data.RData" ,sep=""))
+    save.image(file=paste0(common_path,"_training_data.RData"))
     
     #########################################unnormalized data is saved in libsvm format########################################################################################
     append_bool=FALSE
     for(h in 1:(ncol(test.data)) ){
-      string=paste(test.labels[h]," ",sep="")
+      string=paste0(test.labels[h]," ")
       for(j in 1:nrow(test.data)){
-        string<-paste(string,j,":",test.data[j,h]," ",sep="")
+        string<-paste0(string,j,":",test.data[j,h]," ")
       }
       if(append_bool==FALSE){
-        write(string, file=paste(common_path,"_test_data.txt",sep=""), append=FALSE)
+        write(string, file=paste0(common_path,"_test_data.txt"), append=FALSE)
         append_bool=TRUE
       }else{
-        write(string, file=paste(common_path,"_test_data.txt",sep="") , append=TRUE)
+        write(string, file=paste0(common_path,"_test_data.txt") , append=TRUE)
         
       }
     }
     append_bool=FALSE
     for(h in 1:(ncol(train.data)) ){
-      string=paste(train.labels[h]," ",sep="")
+      string=paste0(train.labels[h]," ")
       for(j in 1:nrow(train.data) ){
-        string<-paste(string,j,":",train.data[j,h]," ",sep="")
+        string<-paste0(string,j,":",train.data[j,h]," ")
       }
       if(append_bool==FALSE){
-        write(string, file=paste(common_path,"_train_data.txt",sep=""), append=FALSE)
+        write(string, file=paste0(common_path,"_train_data.txt"), append=FALSE)
         append_bool=TRUE
       }else{
-        write(string, file=paste(common_path,"_train_data.txt",sep=""), append=TRUE)
+        write(string, file=paste0(common_path,"_train_data.txt"), append=TRUE)
       }
     }
     

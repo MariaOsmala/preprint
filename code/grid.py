@@ -14,6 +14,22 @@ telnet_workers = []
 ssh_workers = []
 nr_local_worker = 1
 
+
+def executable_exists(fname):
+    """Check if an executable file exists. If the full path is specified, just
+    check whether it exists. Otherwise, check whether the executable is present
+    in the path.
+    """
+    if os.path.exists(fname):
+        return True
+
+    for path in os.environ['PATH'].split(os.pathsep):
+        if os.path.exists(os.path.join(path, fname)):
+            return True
+
+    return False
+
+
 class GridOption:
     def __init__(self, dataset_pathname, options):
         self.svmtrain_pathname = 'svm-train'
@@ -83,7 +99,7 @@ class GridOption:
             i = i + 1
 
         self.pass_through_string = ' '.join(pass_through_options)
-        if not os.path.exists(self.svmtrain_pathname):
+        if not executable_exists(self.svmtrain_pathname):
             raise IOError('svm-train executable not found')
         if not os.path.exists(self.dataset_pathname):
             raise IOError('dataset not found')
@@ -91,7 +107,7 @@ class GridOption:
             raise IOError('file for resumption not found')
         if not self.grid_with_c and not self.grid_with_g:
             raise ValueError('-log2c and -log2g should not be null simultaneously')
-        if self.gnuplot_pathname and not os.path.exists(self.gnuplot_pathname):
+        if self.gnuplot_pathname and not executable_exists(self.gnuplot_pathname):
             sys.stderr.write('gnuplot executable not found\n')
             self.gnuplot_pathname = None
 

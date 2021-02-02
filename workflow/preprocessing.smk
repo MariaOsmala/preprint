@@ -144,13 +144,17 @@ rule bam_to_bed:
 	shell: 'bedtools bamtobed -i {input} > {output}'
 
 rule bed_to_bam:
-	input: f'{bed_shifted_dir}/{{data_type}}.bed'
-	output: f'{bam_shifted_dir}/{{data_type}}.bam'
+	input:
+		f'{bed_shifted_dir}/{{data_type}}.bed'
+	output:
+		bam=f'{bam_shifted_dir}/{{data_type}}.bam',
+		bai=f'{bam_shifted_dir}/{{data_type}}.bam.bai',
 	shell:
 		r'''
 		bedtools bedtobam -i {input} -g {genome_file} \
 		| samtools sort - \
-		> {output}
+		> {output.bam}
+		samtools index {output.bam}
 		'''
 
 rule shift_reads:

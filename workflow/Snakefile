@@ -30,6 +30,7 @@ bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
 gencode_dir = f'{data_dir}/GENCODE_TSS'
 blacklists_dir = f'{data_dir}/blacklists'
 intervals_dir= f'{data_dir}/intervals_bed_{config["binSize"]}'
+intervals_data_dir= f'{data_dir}/{cell_line}/intervals_data_{config["binSize"]}'
 
 
 # Big list of all the samples

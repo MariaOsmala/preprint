@@ -72,8 +72,9 @@ print(path_to_dir)
 print(cell_line)
 print(p300_peaks_file)
 
-setwd(path_to_dir)
 source("code/functions.R")
+
+setwd(path_to_dir)
 
 
 
@@ -132,8 +133,8 @@ if( (class(mtch)!="try-error") & (length(mtch)!=0) ){
 }
 
 ######################Remove protein coding TSS###################################################################
-GR_Gencode_protein_coding_TSS=readRDS( paste(path,"GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS",sep="")) #73271
-GR_Gencode_protein_coding_TSS_positive=readRDS(paste(path,"GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS",sep=""))
+GR_Gencode_protein_coding_TSS=readRDS( paste(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS",sep="")) #73271
+GR_Gencode_protein_coding_TSS_positive=readRDS(paste(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS",sep=""))
 
 #these need the chromosome length information
 
@@ -227,6 +228,6 @@ print(N)
 
 #all have strand +
 save( regions, accepted_GRanges, accepted_GRanges_notshrinked, 
-      file=paste(path,cell_line,"/data_R/",N,"_randomRegions_with_signal_bin_",bin_size,"_window_",window,".RData",sep=""))
+      file=paste(path,"/",cell_line,"/data_R/",N,"_randomRegions_with_signal_bin_",bin_size,"_window_",window,".RData",sep=""))
 
 

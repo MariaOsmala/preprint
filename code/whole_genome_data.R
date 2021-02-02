@@ -8,7 +8,7 @@ library(BSgenome.Hsapiens.UCSC.hg19)
 #library(circlize)
 #library(doParallel)
 #library(foreach)
-#library(gdata)
+library(gdata)
 #library(GenomicRanges)
 #library(GetoptLong)
 #library(ggplot2)
@@ -36,7 +36,7 @@ make_option("--cellLine", type="character", default="",
             help="cell line [default= %default]", metavar="character"),
 make_option("--normalize", type="logical", default=FALSE, 
             help="do we normalize wrt data from other cell line [default= %default]", metavar="logical"),
-make_option("--NormCellLine", type="character", default="", 
+make_option("--normCellLine", type="character", default="", 
             help="name of the cell line normalized wrt [default= %default]", metavar="character")
 ); 
 
@@ -59,9 +59,7 @@ print(cell_line)
 print(normalizeBool)
 print(NormCellLine)
 
-setwd(path_to_dir)
 source("code/functions.R")
-
 
 path=path_to_dir
 
@@ -121,7 +119,7 @@ for(chr in chrnames ){
   #split_ranges is still in bed-format, 0-start based
   split_ranges <- c(split_ranges, with(df, GRanges(chr, IRanges(start, end), strand=strand))) #243 MB
   
-  print(object_size(unionBedGraph)) #in total 2.55 GB
+  print(object.size(unionBedGraph)) #in total 2.55 GB
   
   
 }

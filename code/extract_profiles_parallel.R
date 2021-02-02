@@ -1,4 +1,5 @@
 library('doParallel')
+library('rtracklayer')
 
 #' Extracts ChIP-seq signal from bam files at specific genomic coordinates
 #'
@@ -53,7 +54,7 @@ extract_profiles_parallel<-function(bam_folder, regions, directionality=TRUE, di
   { #this could be parallelized
     
     bam=bam_files[i]
-    bam_file=paste(bam_folder, "/", bam,sep="")
+    bam_file=paste0(bam_folder, "/", bam)
     gal <- import(bam_file) #GAlignments , import from rtracklayer
     number_of_reads<-length(gal) #sequencing depth
     

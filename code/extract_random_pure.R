@@ -66,7 +66,7 @@ source("code/functions.R")
 
 
 if(normalizeBool==TRUE){
-  load( file=paste(path_to_dir,"/",NormCellLine,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions,
+  load( file=paste0(path_to_dir,"/",NormCellLine,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData")) #profiles, normalized_profiles, regions,
   countsOtherCellLine=profiles$counts #remove "V2" from the names
   names(countsOtherCellLine)=gsub("V2","",  names(countsOtherCellLine))
 }
@@ -141,8 +141,8 @@ if( (class(mtch)!="try-error") & (length(mtch)!=0) ){
 }
 
 ######################Remove protein coding TSS###################################################################
-GR_Gencode_protein_coding_TSS=readRDS( paste(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS",sep="")) #73271
-GR_Gencode_protein_coding_TSS_positive=readRDS(paste(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS",sep=""))
+GR_Gencode_protein_coding_TSS=readRDS( paste0(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS")) #73271
+GR_Gencode_protein_coding_TSS_positive=readRDS(paste0(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS"))
 
 #these need the chromosome length information
 
@@ -180,11 +180,11 @@ regions=regions[1:N]
 strand(regions)="*"
 
 
-figure_path=paste(path_to_dir,"/figures/",sep="")
+figure_path=paste0(path_to_dir,"/figures/")
 print(path_to_dir)
 print(path)
 print(cell_line)
-bam_folder=paste(path,"/",cell_line,"/bam_shifted" ,sep="")
+bam_folder=paste0(path,"/",cell_line,"/bam_shifted")
 print(bam_folder)
 system.time(random_profiles<-extract_profiles_parallel(bam_folder=bam_folder, 
                                                                   regions=regions, 
@@ -226,7 +226,7 @@ normalized_profiles=normalize(profiles, round_logic, negatives_to_zero)
 #save counts and enhancer profiles
 if(normalizeBool==FALSE){
 save(profiles, normalized_profiles, regions,  
-     file=paste(path,cell_line,"/data_R/pure_random_",N,"_bin_",bin_size,"_window_",window,".RData",sep=""))
+     file=paste0(path,"/",cell_line,"/data_R/pure_random_",N,"_bin_",bin_size,"_window_",window,".RData"))
 
 for(i in 1:length(profiles$profiles)){
   
@@ -240,7 +240,7 @@ for(i in 1:length(normalized_profiles)){
 
 regions=regions[1:1000]
 
-save(profiles, normalized_profiles, regions,  file=paste(path,cell_line,"/data_R/pure_random_1000_bin_",bin_size,"_window_",window,".RData",sep=""))
+save(profiles, normalized_profiles, regions,  file=paste0(path,"/",cell_line,"/data_R/pure_random_1000_bin_",bin_size,"_window_",window,".RData"))
 
 }else{
   
@@ -251,7 +251,7 @@ save(profiles, normalized_profiles, regions,  file=paste(path,cell_line,"/data_R
   
   
   save(profiles, normalized_profiles, otherCellLine_normalized_profiles,regions, 
-       file=paste(path,cell_line,"/data_R/",NormCellLine,"_normalized_","pure_random_",N,"_bin_",bin_size,"_window_",window,".RData",sep=""))
+       file=paste0(path,"/",cell_line,"/data_R/",NormCellLine,"_normalized_","pure_random_",N,"_bin_",bin_size,"_window_",window,".RData"))
   
   for(i in 1:length(profiles$profiles)){
     
@@ -267,7 +267,7 @@ save(profiles, normalized_profiles, regions,  file=paste(path,cell_line,"/data_R
   regions=regions[1:1000]
   
   save(profiles, normalized_profiles, otherCellLine_normalized_profiles, regions,  
-       file=paste(path,cell_line,"/data_R/",NormCellLine,"_normalized_","pure_random_1000_bin_",bin_size,"_window_",window,".RData",sep=""))
+       file=paste0(path,"/",cell_line,"/data_R/",NormCellLine,"_normalized_","pure_random_1000_bin_",bin_size,"_window_",window,".RData"))
   
   
 }

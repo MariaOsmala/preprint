@@ -17,7 +17,6 @@ dependencies:
   # - r-gdata
   # - r-circlize
   # - r-doParallel
-  # - r-gdata
   # - r-ggplot2
   # - r-GetoptLong
   # - r-gridExtra
@@ -30,5 +29,6 @@ dependencies:
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
   - r-optparse
   - r-doparallel
+  - r-gdata
   - gnuplot
   - libsvm

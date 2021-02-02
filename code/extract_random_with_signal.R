@@ -67,36 +67,34 @@ print(cell_line)
 print(normalizeBool)
 print(NormCellLine)
 
-setwd(path_to_dir)
 source("code/functions.R")
+#setwd(path_to_dir)
 
 
 
 #load the counts
 path=path_to_dir
 if(normalizeBool==TRUE){
-load( file=paste(path,"/",NormCellLine,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, 	normalized_profiles, regions,
-countsOtherCellLine=profiles$counts #remove "V2" from the names
-names(countsOtherCellLine)=gsub("V2","",  names(countsOtherCellLine))
+	load( file=paste0(path,"/",NormCellLine,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData")) #profiles, 	normalized_profiles, regions,
+	countsOtherCellLine=profiles$counts #remove "V2" from the names
+	names(countsOtherCellLine)=gsub("V2","",  names(countsOtherCellLine))
 
-load( file=paste(path,cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions,
-counts=profiles$counts #remove "V2" from the names
-
+	load( file=paste0(path,"/",cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_enhancers_bin_",bin_size,"_window_",window,".RData")) #profiles, normalized_profiles, regions,
+	counts=profiles$counts #remove "V2" from the names
 }else{
-
-    load( file=paste(path,cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData",sep="")) #profiles, normalized_profiles, regions,
+    load( file=paste0(path,"/",cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData")) #profiles, normalized_profiles, regions,
     counts=profiles$counts #remove "V2" from the names
 }
-load(file=paste(path,cell_line,"/data_R/",N,"_randomRegions_with_signal_bin_",bin_size,"_window_",window,".RData",sep="")) #regions, accepted_GRanges,
+load(file=paste0(path,"/",cell_line,"/data_R/",N,"_randomRegions_with_signal_bin_",bin_size,"_window_",window,".RData")) #regions, accepted_GRanges,
 
 ################################3extract profiles#####################################################################3
 
 
 strand(regions)="*"
 
-figure_path=paste(path_to_dir,"/figures/",sep="")
+figure_path=paste0(path_to_dir,"/figures/")
 
-bam_folder=paste(path,cell_line,"/bam_shifted" ,sep="")
+bam_folder=paste0(path,"/",cell_line,"/bam_shifted")
 system.time(random_profiles<-extract_profiles_parallel(bam_folder=bam_folder, 
                                                                   regions=regions, directionality=FALSE, 
                                                                   directions=strand(regions), window=window, bin_size=bin_size))
@@ -144,7 +142,7 @@ if(normalizeBool==TRUE){
   print(N)
   
   save(profiles, normalized_profiles, otherCellLine_normalized_profiles, regions, accepted_GRanges, 
-       file=paste(path,cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData",sep=""))
+       file=paste0(path,"/",cell_line,"/data_R/",NormCellLine,"_normalized_",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData"))
   
   
   
@@ -155,8 +153,8 @@ if(normalizeBool==TRUE){
   
   print(N)
   
-  save(profiles, normalized_profiles, regions, accepted_GRanges, file=paste(path,
-                          cell_line,"/data_R/",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData",sep=""))
+  save(profiles, normalized_profiles, regions, accepted_GRanges, file=paste0(path,"/",
+                          cell_line,"/data_R/",N,"_random_with_signal_bin_",bin_size,"_window_",window,".RData"))
   
   
   
