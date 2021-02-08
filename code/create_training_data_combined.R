@@ -25,42 +25,34 @@ library(optparse)
 #library(stringr)
 
 
-# option_list = list(
-# make_option(c("-w", "--window"), type="integer", default=5000, 
-#             help="window size [default=%default]", metavar="integer"),
-# make_option(c("-b", "--binSize"), type="integer", default=100, help="bin size (resolution) [default= %default]", metavar="integer"),
-# make_option(c("-N", "--N"), type="integer", default=1000000, 
-#             help="number of regions [default= %default]", metavar="integer"),
-# make_option(c("-k", "--k"), type="integer", default=5, 
-#             help="k-fold CV [default= %default]", metavar="integer"),
-# make_option("--pathToDir", type="character", default="", 
-#             help="path to main folder [default= %default]", metavar="character"),
-# make_option("--distanceMeasure", type="character", default="", 
-#             help="ML or Bayes_estimated_priors [default= %default]", metavar="character"),
-# make_option("--cellLine", type="character", default="", 
-#             help="cell line [default= %default]", metavar="character")
-# ); 
+option_list = list(
+make_option(c("-w", "--window"), type="integer", default=5000, 
+            help="window size [default=%default]", metavar="integer"),
+make_option(c("-b", "--binSize"), type="integer", default=100, help="bin size (resolution) [default= %default]", metavar="integer"),
+make_option(c("-N", "--N"), type="integer", default=1000000, 
+            help="number of regions [default= %default]", metavar="integer"),
+make_option(c("-k", "--k"), type="integer", default=5, 
+            help="k-fold CV [default= %default]", metavar="integer"),
+make_option("--pathToDir", type="character", default="", 
+            help="path to main folder [default= %default]", metavar="character"),
+make_option("--distanceMeasure", type="character", default="", 
+            help="ML or Bayes_estimated_priors [default= %default]", metavar="character"),
+make_option("--cellLine", type="character", default="", 
+            help="cell line [default= %default]", metavar="character")
+); 
 
-# opt_parser = OptionParser(option_list=option_list);
-# opt = parse_args(opt_parser);
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
 
 
-# cell_line=opt$cellLine
-# window=opt$window								
-# bin_size=opt$binSize
-# N=opt$N
-# distance_measure=opt$distanceMeasure #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
-# k=opt$k #k-fold CV
+cell_line=opt$cellLine
+window=opt$window								
+bin_size=opt$binSize
+N=opt$N
+distance_measure=opt$distanceMeasure #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
+k=opt$k #k-fold CV
 
-# path_to_dir=opt$pathToDir
-
-cell_line='K562'
-window=2000
-bin_size=100
-N=1000
-distance_measure='ML' #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
-k=5 #k-fold CV
-path_to_dir='/u/45/vanvlm1/unix/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
+path_to_dir=opt$pathToDir
 
 print(cell_line)
 print(window)

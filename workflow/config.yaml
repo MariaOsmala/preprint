@@ -25,5 +25,7 @@ create_training_data_combined:
 
 # Grid search parameters for finding an optimal C and G during SVM classification
 cv_train_predict:
-  log2c: '-5,25,0.5'   # start,stop,step
-  log2g: '-25,10,0.5'  # start,stop,step
+  # log2c: '-5,25,0.5'   # start,stop,step
+  # log2g: '-25,10,0.5'  # start,stop,step
+  log2c: '-3,3,1'  # start,stop,step
+  log2g: '-3,3,1'  # start,stop,step

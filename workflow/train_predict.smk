@@ -288,6 +288,54 @@ rule cv_train_predict:
 					{train} {test}
 				''')
 
+# rule create_test_data_combined:
+# 	shell:
+# 		r'''
+# 		Rscript code/create_test_data_combined.R \
+# 			--window={config[window]} \
+# 			--binSize={config[binSize} \
+# 			--N={config[extract_promoters][N]} \
+# 			--pathToDir={data_dir} \
+# 			--distanceMeasure={wildcards.distance_measure} \
+# 			--cellLine=GM12878 \
+# 			--normalize=TRUE \
+# 			--NormCellLine=K562
+# 		'''
+# 
+# rule train_whole_genome:
+# 	input:
+# 		code=f'{code_dir}/grid.py',
+# 		train=f'{data_dir}/results/model_promoters_and_random_combined/{cell_line}/{{distance_measure}}/NSamples_{config["extract_enhancers"]["N"]}_window_{config["window"]}_bin_{config["binSize"]}_train_data.txt',
+# 	output:
+# 		range=f'{data_dir}/results/model_promoters_and_random_combined/{cell_line}/{{distance_measure}}/NSamples_{config["extract_enhancers"]["N"]}_window_{config["window"]}_bin_{config["binSize"]}_train_data.txt.range',
+# 		model=f'{data_dir}/results/model_promoters_and_random_combined/{cell_line}/{{distance_measure}}/NSamples_{config["extract_enhancers"]["N"]}_window_{config["window"]}_bin_{config["binSize"]}_train_data.txt.model',
+# 	shell:
+# 		'python {code_dir}/grid.py {input.train}'
+# 
+# rule create_data_whole_genome:
+# 	input:
+# 		code=f'{code_dir}/create_data_predict_whole_genome_combined.R',
+# 		enhancers=f'{data_r_dir}/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
+# 		promoters=f'{data_r_dir}/{config["extract_promopters"]["N"]}_promoters_bin_{config["binSize"]}_window_{config["window"]}.RData',
+# 		pure_random=f'{data_r_dir}/pure_random_{config["extract_random_pure"]["N"]}_bin_{config["binSize"]}_window_{config["window"]}.RData',
+# 		random_with_signal=f'{data_r_dir}/{config["extract_enhancers"]["N"]}_randomRegions_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
+# 		whole_genome=f'{data_r_dir}/whole_genome_coverage.RData',
+# 	output:
+# 		train=f'{data_dir}/results/model_promoters_and_random_combined/{cell_line}/{{distance_measure}}/bin_{config["binSize"]}_train_data.txt',
+# 		whole_genome=f'{data_dir}/results/model_promoters_and_random_combined/{cell_line}/{{distance_measure}}/whole_genome_data.RData',
+# 	shell:
+# 		r'''
+# 		Rscript code/create_data_predict_whole_genome_combined.R \
+# 			--window={config[window]} \
+# 			--binSize={config[binSize]} \
+# 			--N={config[extract_enhancers][N]} \
+# 			--distanceMeasure={wildcards.distance_measure} \
+# 			--cellLine={cell_line} \
+# 			--pathToDir={data_dir} \
+# 			--NormCellLine=K562
+# 		'''
+
+
 rule do_train_predict:
 	input:
 		expand(expand(f'{cv_files}_predicted_data.txt', i=[1, 2, 3, 4, 5]), distance_measure=['ML'])
