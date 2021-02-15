@@ -61,6 +61,7 @@ The download all data and run the entire analysis pipeline.
 
 ## Citation:
 
+```
 @Article{Osmala2020,
     AUTHOR = "Maria Osmala and Harri Lähdesmäki",
     TITLE = "Enhancer prediction in the human genome by probabilistic modelling of the chromatin feature patterns",
@@ -71,6 +72,7 @@ The download all data and run the entire analysis pipeline.
     PUBLISHER="",
     MONTH = "",
     YEAR = }
+```
 
 ## License
 
@@ -78,18 +80,18 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Contact
 
-Maria Osmala, MSc
-PhD student
-Aalto University School of Science
-Department of Computer Science
-Email: firstname.surname@aalto.fi
+Maria Osmala, MSc  
+PhD student  
+Aalto University School of Science  
+Department of Computer Science  
+Email: firstname.surname@aalto.fi  
 Home Page: https://people.aalto.fi/maria.osmala
 
-Harri Lähdesmäki, D. Sc. (Tech)
-Associate Professor
-Aalto University School of Science
-Department of Computer Science
-Email: firstname.surname@aalto.fi
+Harri Lähdesmäki, D. Sc. (Tech)  
+Associate Professor  
+Aalto University School of Science  
+Department of Computer Science  
+Email: firstname.surname@aalto.fi  
 Home Page: http://users.ics.aalto.fi/harrila
 
 ## Acknowledgments
