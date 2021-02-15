@@ -1,6 +1,5 @@
 data_dir: /u/45/vanvlm1/unix/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data
 #data_dir: Data
-#cell_line: K562
 
 # General configuration for extracting training data
 window: 2000  # Profile window size

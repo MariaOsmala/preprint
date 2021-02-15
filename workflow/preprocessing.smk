@@ -132,8 +132,8 @@ genome_file = 'bedtools_genomes/human.hg19.genome'
 rule estimate_shifts:
 	input:
 		f'{code_dir}/quality_control_summary.R',
-		expand(f'{data_dir}/K562/phantompeakqualtools/{{data_type}}.out', data_type=all_data_types('K562')),
-		expand(f'{data_dir}/Gm12878/phantompeakqualtools/{{data_type}}.out', data_type=all_data_types('Gm12878')),
+		expand(f'{data_dir}/K562/phantompeakqualtools/{{data_type}}.out', data_type=all_data_types('K562', exclude=['OpenChromDnaseV2', 'InputV2', 'Nsome'])),
+		expand(f'{data_dir}/Gm12878/phantompeakqualtools/{{data_type}}.out', data_type=all_data_types('Gm12878', exclude=['OpenChromDnase', 'Input', 'Nsome'])),
 	output:
 		f'{data_dir}/phantompeakqualtools.txt'
 	shell:
@@ -171,7 +171,7 @@ rule shift_reads:
 			shell(f'cp {input} {output}')
 		else:
 			# For MNase-seq data the shift is 149.
-			if 'MNase' in input:
+			if 'Nsome' in input:
 				shift = 149
 			else:
 				# Lookup the required shift produced by phantompeakqualtools.

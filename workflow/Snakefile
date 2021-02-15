@@ -19,16 +19,20 @@ gencode_dir = f'{data_dir}/GENCODE_TSS'
 blacklists_dir = f'{data_dir}/blacklists'
 intervals_dir= f'{data_dir}/intervals_bed_{config["binSize"]}'
 
-
 # Big list of all the samples
 all_samples = pd.read_csv(f'{workflow_dir}/samples.tsv', sep='\t').sort_index()
-def all_data_types(cell_line):
-	return all_samples.dropna().query(f"cell_line=='{cell_line}'").data_type.unique()
 
-rule all:
-	input:
-		expand(f'{data_dir}/{{cell_line}}/bed_shifted_RFECS/{{data_type}}.bed', data_type=all_data_types, cell_line=['K562', 'Gm12878']),
-		f'{gencode_dir}/GR_Gencode_TSS.RDS'
+def all_data_types(cell_line, exclude=None):
+	"""
+	Get all data types (chromatin features?) for a given cell line.
+	Optionally exclude some data types.
+	"""
+	query = f"cell_line=='{cell_line}'"
+	if exclude is not None:
+		for ex in exclude:
+			query += f' and data_type != "{ex}"'
+	return all_samples.dropna().query(query).data_type.unique()
 
+# These include files contain the rules for the individual steps
 include: 'preprocessing.smk'
 include: 'train_predict.smk'

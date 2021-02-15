@@ -2,6 +2,16 @@
 # to predict the genome-wide enhancers.
 # ---------------------------------------------------------------------------
 
+# The default rule that will do 5-fold crossvalidation on the K562 cell line
+cv_files = (
+	f'{data_dir}/results/model_promoters_and_random_combined/{{{{cell_line}}}}/{{{{distance_measure}}}}'
+	f'/{config["create_training_data_combined"]["k"]}-fold_CV_{{i}}'
+	f'/NSamples_{config["extract_enhancers"]["N"]}_window_{config["window"]}_bin_{config["binSize"]}_{config["create_training_data_combined"]["k"]}fold_cv_{{i}}'
+)
+rule train_predict:
+	input:
+		expand(expand(f'{cv_files}_predicted_data.txt', i=[1, 2, 3, 4, 5]), distance_measure=['ML', 'Bayes_estimated_priors'], cell_line='K562')
+
 # First, define transcription start sites (TSS) of protein coding genes 
 rule define_TSS:
 	input:
@@ -254,11 +264,6 @@ rule extract_random_with_signal:
 # Training data for K562
 
 # Generate data for 5-fold cross-validation
-cv_files = (
-	f'{data_dir}/results/model_promoters_and_random_combined/{{{{cell_line}}}}/{{{{distance_measure}}}}'
-	f'/{config["create_training_data_combined"]["k"]}-fold_CV_{{i}}'
-	f'/NSamples_{config["extract_enhancers"]["N"]}_window_{config["window"]}_bin_{config["binSize"]}_{config["create_training_data_combined"]["k"]}fold_cv_{{i}}'
-)
 rule create_training_data_combined:
 	input:
 		code=f'{code_dir}/create_training_data_combined.R',
@@ -345,8 +350,3 @@ rule cv_train_predict:
 # 			--pathToDir={data_dir} \
 # 			--NormCellLine=K562
 # 		'''
-
-
-rule do_train_predict:
-	input:
-		expand(expand(f'{cv_files}_predicted_data.txt', i=[1, 2, 3, 4, 5]), distance_measure=['ML'], cell_line='K562')
