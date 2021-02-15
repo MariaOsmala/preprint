@@ -5,16 +5,17 @@ from snakemake.exceptions import WorkflowError
 # The default rule that will do the entire preprocessing pipeline
 rule preprocess:
 	input:
-		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=all_data_types)
+		expand(f'{data_dir}/K562/bed_shifted_RFECS/{{data_type}}.bed', data_type=all_data_types('K562')),
+		expand(f'{data_dir}/Gm12878/bed_shifted_RFECS/{{data_type}}.bed', data_type=all_data_types('Gm12878')),
 
 
 # Step 0: Download the data
 rule download:
 	input:
-	output: f'{raw_data_dir}/{{fname}}'
+	output: f'{data_dir}/{{cell_line}}/raw_data/{{fname, [^/]+}}'
 	message: 'Downloading {wildcards.fname}'
 	run:
-		URL = all_samples.query(f"cell_line=='{cell_line}' and fname=='{wildcards.fname}'")['URL'].item()
+		URL = all_samples.query(f"cell_line=='{wildcards.cell_line}' and fname=='{wildcards.fname}'")['URL'].item()
 		shell(f'wget {URL} -O {output}')
 
 
@@ -25,9 +26,9 @@ def find_raw_files(wildcards):
 	sample. These is either a .fastq.gz file or both a .bam and .bam.bai file.
 	"""
 	fnames = list()
-	for url in all_samples.query(f"cell_line=='{cell_line}' and sample=='{wildcards.sample}'")['URL']:
+	for url in all_samples.query(f"cell_line=='{wildcards.cell_line}' and sample=='{wildcards.sample}'")['URL']:
 		_, fname = url.rsplit('/', 1)
-		fnames.append(f'{raw_data_dir}/{fname}')
+		fnames.append(f'{data_dir}/{wildcards.cell_line}/raw_data/{fname}')
 	return fnames
 
 def get_ext(fname):
@@ -37,8 +38,8 @@ rule align_reads:
 	input:
 		find_raw_files
 	output:
-		bam = f'{bam_replicates_dir}/{{sample}}.bam',
-		bai = f'{bam_replicates_dir}/{{sample}}.bam.bai'
+		bam = f'{data_dir}/{{cell_line}}/bam_replicates/{{sample}}.bam',
+		bai = f'{data_dir}/{{cell_line}}/bam_replicates/{{sample}}.bam.bai',
 	run:
 		input_ext = get_ext(input[0])
 		if input_ext == 'fastq.gz':
@@ -67,19 +68,19 @@ def find_replicates(wildcards):
 	Uses the all_samples table to find the list of individual .bam files
 	required to produce the combined .bam file for a given data type.
 	"""
-	samples = all_samples.query(f"cell_line=='{cell_line}' and data_type=='{wildcards.data_type}'")['sample']
+	samples = all_samples.query(f"cell_line=='{wildcards.cell_line}' and data_type=='{wildcards.data_type}'")['sample']
 	fnames = list()
 	for sample in samples:
-		fnames.append(f'{bam_replicates_dir}/{sample}.bam')
-		fnames.append(f'{bam_replicates_dir}/{sample}.bam.bai')
+		fnames.append(f'{data_dir}/{wildcards.cell_line}/bam_replicates/{sample}.bam')
+		fnames.append(f'{data_dir}/{wildcards.cell_line}/bam_replicates/{sample}.bam.bai')
 	return fnames
 
 rule combine_replicates:
 	input:
 		find_replicates
 	output:
-		bam = f'{bam_combined_dir}/{{data_type}}.bam',
-		bai = f'{bam_combined_dir}/{{data_type}}.bam.bai'
+		bam = f'{data_dir}/{{cell_line}}/bam_combined/{{data_type}}.bam',
+		bai = f'{data_dir}/{{cell_line}}/bam_combined/{{data_type}}.bam.bai'
 	threads: 4
 	run:
 		if len(input) == 0:
@@ -104,12 +105,12 @@ rule combine_replicates:
 # Step 3: Estimate the fragment lengths using Phantompeakqualtools
 rule phantompeakqualtools:
 	input:
-		bam = f'{bam_combined_dir}/{{data_type}}.bam',
-		control = f'{bam_combined_dir}/Control.bam'
+		bam = f'{data_dir}/{{cell_line}}/bam_combined/{{data_type}}.bam',
+		control = f'{data_dir}/{{cell_line}}/bam_combined/Control.bam'
 	output:
-		savd = f'{bam_phantompeakqualtools_dir}/{{data_type}}.RData',
-		savp = f'{bam_phantompeakqualtools_dir}/{{data_type}}.pdf',
-		out = f'{bam_phantompeakqualtools_dir}/{{data_type}}.out'
+		savd = f'{data_dir}/{{cell_line}}/phantompeakqualtools/{{data_type}}.RData',
+		savp = f'{data_dir}/{{cell_line}}/phantompeakqualtools/{{data_type}}.pdf',
+		out = f'{data_dir}/{{cell_line}}/phantompeakqualtools/{{data_type}}.out'
 	threads: 4
 	shell:
 		r'''
@@ -119,7 +120,7 @@ rule phantompeakqualtools:
 			-i={input.control} \
 			-s=-200:1:500 \
 			-rf \
-			-odir={bam_phantompeakqualtools_dir} \
+			-odir={data_dir}/{wildcards.cell_line}/phantompeakqualtools \
 			-savd={output.savd} \
 			-savp={output.savp} \
 			-out={output.out}
@@ -131,7 +132,8 @@ genome_file = 'bedtools_genomes/human.hg19.genome'
 rule estimate_shifts:
 	input:
 		f'{code_dir}/quality_control_summary.R',
-		expand(f'{bam_phantompeakqualtools_dir}/{{data_type}}.out', data_type=all_data_types)
+		expand(f'{data_dir}/K562/phantompeakqualtools/{{data_type}}.out', data_type=all_data_types('K562')),
+		expand(f'{data_dir}/Gm12878/phantompeakqualtools/{{data_type}}.out', data_type=all_data_types('Gm12878')),
 	output:
 		f'{data_dir}/phantompeakqualtools.txt'
 	shell:
@@ -139,16 +141,16 @@ rule estimate_shifts:
 
 # For shifting, bam format is converted to bed format
 rule bam_to_bed:
-	input: f'{bam_combined_dir}/{{data_type}}.bam'
-	output: f'{bed_combined_dir}/{{data_type}}.bed'
+	input: f'{data_dir}/{{cell_line}}/bam_combined/{{data_type}}.bam'
+	output: f'{data_dir}/{{cell_line}}/bed_combined/{{data_type}}.bed'
 	shell: 'bedtools bamtobed -i {input} > {output}'
 
 rule bed_to_bam:
 	input:
-		f'{bed_shifted_dir}/{{data_type}}.bed'
+		f'{data_dir}/{{cell_line}}/bed_shifted/{{data_type}}.bed'
 	output:
-		bam=f'{bam_shifted_dir}/{{data_type}}.bam',
-		bai=f'{bam_shifted_dir}/{{data_type}}.bam.bai',
+		bam=f'{data_dir}/{{cell_line}}/bam_shifted/{{data_type}}.bam',
+		bai=f'{data_dir}/{{cell_line}}/bam_shifted/{{data_type}}.bam.bai',
 	shell:
 		r'''
 		bedtools bedtobam -i {input} -g {genome_file} \
@@ -159,10 +161,10 @@ rule bed_to_bam:
 
 rule shift_reads:
 	input:
-		bed_file=f'{bed_combined_dir}/{{data_type}}.bed',
+		bed_file=f'{data_dir}/{{cell_line}}/bed_combined/{{data_type}}.bed',
 		phantompeakqualtools=f'{data_dir}/phantompeakqualtools.txt'
 	output:
-		f'{bed_shifted_dir}/{{data_type}}.bed'
+		f'{data_dir}/{{cell_line}}/bed_shifted/{{data_type}}.bed'
 	run:
 		# Input and DNase-seq are not shifted.
 		if 'Input' in input or 'DNase' in input:
@@ -182,13 +184,13 @@ rule shift_reads:
 
 # Step 5: Convert bed files to format accepted by RFECS
 rule convert_bed_for_RFECS:
-	input: f'{bed_shifted_dir}/{{data_type}}.bed'
-	output: f'{bed_shifted_RFECS_dir}/{{data_type}}.bed'
+	input: f'{data_dir}/{{cell_line}}/bed_shifted/{{data_type}}.bed'
+	output: f'{data_dir}/{{cell_line}}/bed_shifted_RFECS/{{data_type}}.bed'
 	shell:
 		r"""
 		sed 's/ \+//g' {input} > {output}
-		awk -F '\t' 'BEGIN {{OFS="\t"}} {{ if (($1) != "chrM")  print }}' {output} > {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed
-		mv {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed {output}
-		awk -F'\t' 'BEGIN{{OFS="\t"}}{{$5=""; gsub(FS"+",FS); print $0}}' {output} > {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed
-		mv {bed_shifted_RFECS_dir}/tmp_{wildcards.data_type}.bed {output}
+		awk -F '\t' 'BEGIN {{OFS="\t"}} {{ if (($1) != "chrM")  print }}' {output} > {data_dir}/{wildcards.cell_line}/bed_shifted_RFECS/tmp_{wildcards.data_type}.bed
+		mv {data_dir}/{wildcards.cell_line}/bed_shifted_RFECS/tmp_{wildcards.data_type}.bed {output}
+		awk -F'\t' 'BEGIN{{OFS="\t"}}{{$5=""; gsub(FS"+",FS); print $0}}' {output} > {data_dir}/{wildcards.cell_line}/bed_shifted_RFECS/tmp_{wildcards.data_type}.bed
+		mv {data_dir}/{wildcards.cell_line}/bed_shifted_RFECS/tmp_{wildcards.data_type}.bed {output}
 		"""

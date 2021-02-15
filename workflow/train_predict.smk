@@ -35,17 +35,23 @@ rule download_blacklists:
 # This is time and memory consuming step, can be done in less than 4 hours using
 # 17 cpus and 3G mem per cpu. Example whown for the K562 cell line data. The data
 # is not normalized wrt. data from any other cell line ( normalizeBool=FALSE).
+def all_bam_files(wildcards):
+	return [
+		f'{data_dir}/{wildcards.cell_line}/bam_shifted/{data_type}.bam'
+		for data_type in all_data_types(wildcards.cell_line)
+	]
+
 rule extract_enhancers:
 	input:
 		code=f'{code_dir}/extract_enhancers.R',
-		bam_files=expand(f'{bam_shifted_dir}/{{data_type}}.bam', data_type=all_data_types),
-		p300=f'{raw_data_dir}/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
-		DNase=f'{raw_data_dir}/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz',
+		bam_files=all_bam_files,
+		p300=f'{data_dir}/{{cell_line}}/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
+		DNase=f'{data_dir}/{{cell_line}}/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz',
 		blacklist_Dac=f'{blacklists_dir}/wgEncodeDacMapabilityConsensusExcludable.bed.gz',
 		blacklist_Duke=f'{blacklists_dir}/wgEncodeDukeMapabilityRegionsExcludable.bed.gz',
 		protein_coding_positive=f'{gencode_dir}/GR_Gencode_protein_coding_TSS_positive.RDS',
 	output:
-		f'{data_r_dir}/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData'
+		f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData'
 	shell:
 		r'''
 		Rscript {code_dir}/extract_enhancers.R \
@@ -54,7 +60,7 @@ rule extract_enhancers:
 			--N={config[extract_enhancers][N]} \
 			--distToPromoter={config[extract_enhancers][distToPromotor]} \
 			--pathToDir={data_dir} \
-			--cellLine={cell_line} \
+			--cellLine={wildcards.cell_line} \
 			--p300File={input.p300} \
 			--DNaseFile={input.DNase} \
 			--normalize=FALSE \
@@ -65,14 +71,14 @@ rule extract_enhancers:
 rule extract_promoters:
 	input:
 		code=f'{code_dir}/extract_promoters.R',
-		bam_files=expand(f'{bam_shifted_dir}/{{data_type}}.bam', data_type=all_data_types),
-		DNase=f'{raw_data_dir}/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz',
+		bam_files=all_bam_files,
+		DNase=f'{data_dir}/{{cell_line}}/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz',
 		blacklist_Dac=f'{blacklists_dir}/wgEncodeDacMapabilityConsensusExcludable.bed.gz',
 		blacklist_Duke=f'{blacklists_dir}/wgEncodeDukeMapabilityRegionsExcludable.bed.gz',
 		protein_coding=f'{gencode_dir}/GR_Gencode_protein_coding_TSS.RDS',
 		protein_coding_positive=f'{gencode_dir}/GR_Gencode_protein_coding_TSS_positive.RDS',
 	output:
-		f'{data_r_dir}/{config["extract_promoters"]["N"]}_promoters_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		f'{data_dir}/{{cell_line}}/data_R/{config["extract_promoters"]["N"]}_promoters_bin_{config["binSize"]}_window_{config["window"]}.RData',
 	shell:
 		r'''
 		Rscript {code_dir}/extract_promoters.R \
@@ -103,11 +109,11 @@ rule create_intervals_whole_genome:
 
 rule bedtools_multicov:
 	input:
-		bam_file=f'{bam_shifted_dir}/{{mod}}.bam',
-		bai_file=f'{bam_shifted_dir}/{{mod}}.bam.bai',
+		bam_file=f'{data_dir}/{{cell_line}}/bam_shifted/{{mod}}.bam',
+		bai_file=f'{data_dir}/{{cell_line}}/bam_shifted/{{mod}}.bam.bai',
 		intervals=f'{intervals_dir}/{{chrom}}.bed',
 	output:
-		f'{intervals_data_dir}/{{mod}}/{{chrom}}.bed'
+		f'{data_dir}/{{cell_line}}/intervals_data_{config["binSize"]}/{{mod}}/{{chrom}}.bed'
 	shell:
 		r'''
 		bedtools multicov \
@@ -119,21 +125,26 @@ rule bedtools_multicov:
 		'''
 
 # Combine all data for each chromosome, do this for all chromosomes
-union_bedgraph_names = ' '.join(all_data_types)
+union_bedgraph_names = ' '.join(all_data_types('K562'))
+def all_bed_files(wildcards):
+	return [
+		f'{data_dir}/{wildcards.cell_line}/intervals_data_{config["binSize"]}/{data_type}/{wildcards.crom}.bed'
+		for data_type in all_data_types(wildcards.cell_line)
+	]
 rule union_bedgraph:
 	input:
 		code=f'{code_dir}/union_bedgraph.sh',
-		bed_files=expand(f'{intervals_data_dir}/{{data_type}}/{{{{chrom}}}}.bed', data_type=all_data_types),
+		bed_files=all_bed_files,
 	output:
-		f'{intervals_data_dir}/all_{{chrom}}.bedGraph'
+		f'{data_dir}/{{cell_line}}/intervals_data_{config["binSize"]}/all_{{chrom}}.bedGraph'
 	shell:
 		'bedtools unionbedg -header -i {input.bed_files} -names {union_bedgraph_names} > {output}'
 
 rule extract_nonzero_bins:
 	input:
-		f'{intervals_data_dir}/all_{{chrom}}.bedGraph'
+		f'{data_dir}/{{cell_line}}/intervals_data_{config["binSize"]}/all_{{chrom}}.bedGraph'
 	output:
-		f'{intervals_data_dir}/nozero_regions_only_{{chrom}}.bed'
+		f'{data_dir}/{{cell_line}}/intervals_data_{config["binSize"]}/nozero_regions_only_{{chrom}}.bed'
 	shell:
 		'bash {code_dir}/extract_nonzero_bins.sh {wildcards.chrom} {cell_line} {config[binSize]} {intervals_dir}'
 
@@ -143,10 +154,10 @@ rule extract_nonzero_bins:
 rule whole_genome_data:
 	input:
 		f'{code_dir}/whole_genome_data.R',
-		f'{data_r_dir}/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
-		expand(f'{intervals_data_dir}/all_{{chrom}}.bedGraph', chrom=chroms),
+		f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		expand(f'{data_dir}/{{{{cell_line}}}}/intervals_data_{config["binSize"]}/all_{{chrom}}.bedGraph', chrom=chroms),
 	output:
-		f'{data_r_dir}/whole_genome_coverage.RData'
+		f'{data_dir}/{{cell_line}}/data_R/whole_genome_coverage.RData'
 	shell:
 		r'''
 		Rscript {code_dir}/whole_genome_data.R \
@@ -154,7 +165,7 @@ rule whole_genome_data:
 			--binSize={config[binSize]} \
 			--N={config[extract_enhancers][N]} \
 			--pathToDir={data_dir} \
-			--cellLine={cell_line} \
+			--cellLine={wildcards.cell_line} \
 			--normalize=FALSE \
 			--normCellLine=""
 		'''
@@ -167,13 +178,13 @@ rule whole_genome_data:
 rule extract_random_pure:
 	input:
 		code=f'{code_dir}/extract_random_pure.R',
-		p300=f'{raw_data_dir}/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
-		enhancers=f'{data_r_dir}/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		p300=f'{data_dir}/{{cell_line}}/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
+		enhancers=f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
 		protein_coding=f'{gencode_dir}/GR_Gencode_protein_coding_TSS.RDS',
 		protein_coding_positive=f'{gencode_dir}/GR_Gencode_protein_coding_TSS_positive.RDS',
-		bam_files=expand(f'{bam_shifted_dir}/{{data_type}}.bam', data_type=all_data_types),
+		bam_files=expand(f'{data_dir}/{{{{cell_line}}}}/bam_shifted/{{data_type}}.bam', data_type=all_data_types),
 	output:
-		f'{data_r_dir}/pure_random_{config["extract_random_pure"]["N"]}_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		f'{data_dir}/{{cell_line}}/data_R/pure_random_{config["extract_random_pure"]["N"]}_bin_{config["binSize"]}_window_{config["window"]}.RData',
 	shell:
 		r'''
 		Rscript {code_dir}/extract_random_pure.R \
@@ -182,7 +193,7 @@ rule extract_random_pure:
 			--N={config[extract_random_pure][N]} \
 			--pathToDir={data_dir} \
 			--p300File={input.p300} \
-			--cellLine={cell_line} \
+			--cellLine={wildcards.cell_line} \
 			--normalize=FALSE
 		'''
 
@@ -199,12 +210,12 @@ rule extract_random_pure:
 rule define_random_with_signal:
 	input:
 		code=f'{code_dir}/define_random_with_signal.R',
-		p300=f'{raw_data_dir}/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
-		whole_genome_coverage=f'{data_r_dir}/whole_genome_coverage.RData',
+		p300=f'{data_dir}/{{cell_line}}/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
+		whole_genome_coverage=f'{data_dir}/{{cell_line}}/data_R/whole_genome_coverage.RData',
 		protein_coding=f'{gencode_dir}/GR_Gencode_protein_coding_TSS.RDS',
 		protein_coding_positive=f'{gencode_dir}/GR_Gencode_protein_coding_TSS_positive.RDS',
 	output:
-		f'{data_r_dir}/{config["extract_enhancers"]["N"]}_randomRegions_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_randomRegions_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
 	shell:
 		r'''
 		Rscript {code_dir}/define_random_with_signal.R \
@@ -213,18 +224,18 @@ rule define_random_with_signal:
 			--N={config[extract_enhancers][N]} \
 			--threshold={config[define_random_with_signal][threshold]} \
 			--pathToDir={data_dir} \
-			--cellLine={cell_line} \
+			--cellLine={wildcards.cell_line} \
 			--p300File={input.p300}
 		'''
 
 rule extract_random_with_signal:
 	input:
 		code=f'{code_dir}/extract_random_with_signal.R',
-		enhancers=f'{data_r_dir}/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
-		random_with_signal=f'{data_r_dir}/{config["extract_enhancers"]["N"]}_randomRegions_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
-		bam_files=expand(f'{bam_shifted_dir}/{{data_type}}.bam', data_type=all_data_types),
+		enhancers=f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		random_with_signal=f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_randomRegions_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		bam_files=all_bam_files,
 	output:
-		f'{data_r_dir}/{config["extract_enhancers"]["N"]}_random_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_random_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
 	shell:
 		r'''
 		Rscript {code_dir}/extract_random_with_signal.R \
@@ -232,7 +243,7 @@ rule extract_random_with_signal:
 			--binSize={config[binSize]} \
 			--N={config[extract_enhancers][N]} \
 			--pathToDir={data_dir} \
-			--cellLine={cell_line} \
+			--cellLine={wildcards.cell_line} \
 			--normalize=FALSE
 		'''
 
@@ -244,16 +255,16 @@ rule extract_random_with_signal:
 
 # Generate data for 5-fold cross-validation
 cv_files = (
-	f'{data_dir}/results/model_promoters_and_random_combined/{cell_line}/{{{{distance_measure}}}}'
+	f'{data_dir}/results/model_promoters_and_random_combined/{{{{cell_line}}}}/{{{{distance_measure}}}}'
 	f'/{config["create_training_data_combined"]["k"]}-fold_CV_{{i}}'
 	f'/NSamples_{config["extract_enhancers"]["N"]}_window_{config["window"]}_bin_{config["binSize"]}_{config["create_training_data_combined"]["k"]}fold_cv_{{i}}'
 )
 rule create_training_data_combined:
 	input:
 		code=f'{code_dir}/create_training_data_combined.R',
-		enhancers=f'{data_r_dir}/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
-		promoters=f'{data_r_dir}/{config["extract_promoters"]["N"]}_promoters_bin_{config["binSize"]}_window_{config["window"]}.RData',
-		random_with_signal=f'{data_r_dir}/{config["extract_enhancers"]["N"]}_random_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		enhancers=f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		promoters=f'{data_dir}/{{cell_line}}/data_R/{config["extract_promoters"]["N"]}_promoters_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		random_with_signal=f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_random_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
 	output:
 		rdata=expand(f'{cv_files}_training_data.RData', i=[1, 2, 3, 4, 5]),
 		train=expand(f'{cv_files}_train_data.txt', i=[1, 2, 3, 4, 5]),
@@ -267,7 +278,7 @@ rule create_training_data_combined:
 			--k={config[create_training_data_combined][k]} \
 			--pathToDir={data_dir} \
 			--distanceMeasure={wildcards.distance_measure} \
-			--cellLine={cell_line}
+			--cellLine={wildcards.cell_line}
 		'''
 
 rule cv_train_predict:
@@ -297,7 +308,7 @@ rule cv_train_predict:
 # 			--N={config[extract_promoters][N]} \
 # 			--pathToDir={data_dir} \
 # 			--distanceMeasure={wildcards.distance_measure} \
-# 			--cellLine=GM12878 \
+# 			--cellLine=Gm12878 \
 # 			--normalize=TRUE \
 # 			--NormCellLine=K562
 # 		'''
@@ -338,4 +349,4 @@ rule cv_train_predict:
 
 rule do_train_predict:
 	input:
-		expand(expand(f'{cv_files}_predicted_data.txt', i=[1, 2, 3, 4, 5]), distance_measure=['ML'])
+		expand(expand(f'{cv_files}_predicted_data.txt', i=[1, 2, 3, 4, 5]), distance_measure=['ML'], cell_line='K562')

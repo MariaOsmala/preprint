@@ -19,27 +19,28 @@ data_dir = config['data_dir']
 data_r_dir = f'{data_dir}/{cell_line}/data_R'
 workflow_dir = f'{project_dir}/workflow'
 code_dir = f'{project_dir}/code'
-raw_data_dir = f'{data_dir}/{cell_line}/raw_data'
-bam_replicates_dir = f'{data_dir}/{cell_line}/bam_replicates'
-bam_combined_dir = f'{data_dir}/{cell_line}/bam_combined'
-bam_phantompeakqualtools_dir = f'{data_dir}/{cell_line}/phantompeakqualtools'
-bam_shifted_dir = f'{data_dir}/{cell_line}/bam_shifted'
-bed_combined_dir = f'{data_dir}/{cell_line}/bed_combined'
-bed_shifted_dir = f'{data_dir}/{cell_line}/bed_shifted'
-bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
+#raw_data_dir = f'{data_dir}/{cell_line}/raw_data'
+#bam_replicates_dir = f'{data_dir}/{cell_line}/bam_replicates'
+#bam_combined_dir = f'{data_dir}/{cell_line}/bam_combined'
+#bam_phantompeakqualtools_dir = f'{data_dir}/{cell_line}/phantompeakqualtools'
+#bam_shifted_dir = f'{data_dir}/{cell_line}/bam_shifted'
+#bed_combined_dir = f'{data_dir}/{cell_line}/bed_combined'
+#bed_shifted_dir = f'{data_dir}/{cell_line}/bed_shifted'
+#bed_shifted_RFECS_dir = f'{data_dir}/{cell_line}/bed_shifted_RFECS'
 gencode_dir = f'{data_dir}/GENCODE_TSS'
 blacklists_dir = f'{data_dir}/blacklists'
 intervals_dir= f'{data_dir}/intervals_bed_{config["binSize"]}'
-intervals_data_dir= f'{data_dir}/{cell_line}/intervals_data_{config["binSize"]}'
+#intervals_data_dir= f'{data_dir}/{cell_line}/intervals_data_{config["binSize"]}'
 
 
 # Big list of all the samples
 all_samples = pd.read_csv(f'{workflow_dir}/samples.tsv', sep='\t').sort_index()
-all_data_types = all_samples.dropna().query(f"cell_line=='{cell_line}'").data_type.unique()
+def all_data_types(cell_line):
+	return all_samples.dropna().query(f"cell_line=='{cell_line}'").data_type.unique()
 
 rule all:
 	input:
-		expand(f'{bed_shifted_RFECS_dir}/{{data_type}}.bed', data_type=all_data_types),
+		expand(f'{data_dir}/{{cell_line}}/bed_shifted_RFECS/{{data_type}}.bed', data_type=all_data_types, cell_line=['K562', 'Gm12878']),
 		f'{gencode_dir}/GR_Gencode_TSS.RDS'
 
 include: 'preprocessing.smk'
