@@ -127,7 +127,7 @@ rule phantompeakqualtools:
 		'''
 
 # Step 4: Shift the reads
-genome_file = 'bedtools_genomes/human.hg19.genome'
+genome_file = f'{project_dir}/bedtools_genomes/human.hg19.genome'
 
 rule estimate_shifts:
 	input:
@@ -167,7 +167,7 @@ rule shift_reads:
 		f'{data_dir}/{{cell_line}}/bed_shifted/{{data_type}}.bed'
 	run:
 		# Input and DNase-seq are not shifted.
-		if 'Input' in input or 'DNase' in input:
+		if 'input' in input or 'Dnase' in input:
 			shell(f'cp {input} {output}')
 		else:
 			# For MNase-seq data the shift is 149.
@@ -177,7 +177,7 @@ rule shift_reads:
 				# Lookup the required shift produced by phantompeakqualtools.
 				# These shifts are divided by 2 and rounded to the nearest integer.
 				shifts = pd.read_csv(f'{data_dir}/phantompeakqualtools.txt', sep='\t', index_col=[0, 1], usecols=[0, 1, 3])
-				shift = shifts.loc[(f'{cell_line}', f'{wildcards.data_type}.bam')][0]
+				shift = shifts.loc[(f'{wildcards.cell_line}', f'{wildcards.data_type}.bam')][0]
 				shift = round(shift / 2)
 			shell(f'shiftBed -i {input.bed_file} -g {genome_file} -s {shift} > {output}')
 
