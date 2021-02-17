@@ -97,7 +97,7 @@ rule extract_promoters:
 			--N={config[extract_promoters][N]} \
 			--tssdist={config[extract_promoters][between_TSS_distance]} \
 			--pathToDir={data_dir} \
-			--cellLine={cell_line} \
+			--cellLine={wildcards.cell_line} \
 			--DNaseFile={input.DNase} \
 			--normalize=FALSE \
 			--NormCellLine=""
