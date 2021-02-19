@@ -179,7 +179,7 @@ rule shift_reads:
 				shifts = pd.read_csv(f'{data_dir}/phantompeakqualtools.txt', sep='\t', index_col=[0, 1], usecols=[0, 1, 3])
 				shift = shifts.loc[(f'{wildcards.cell_line}', f'{wildcards.data_type}.bam')][0]
 				shift = round(shift / 2)
-			shell(f'shiftBed -i {input.bed_file} -g {genome_file} -s {shift} > {output}')
+			shell(f'shiftBed -i {input.bed_file} -g {genome_file} -p {shift} -m -{shift} > {output}')
 
 
 # Step 5: Convert bed files to format accepted by RFECS
