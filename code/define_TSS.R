@@ -34,7 +34,7 @@ strand(gencode_transcripts_positive) <- "*"
 strand(gencode_protein_coding_positive) <- "*"
 
 # Save everything
-saveRDS(gencode_transcripts, paste0(path, "/GENCODE_TSS/","GR_Gencode_TSS2.RDS"))
-saveRDS(gencode_transcripts_positive, paste0(path, "/GENCODE_TSS/","GR_Gencode_TSS_positive2.RDS"))
-saveRDS(gencode_protein_coding, paste0(path, "/GENCODE_TSS/","GR_Gencode_protein_coding_TSS2.RDS"))
-saveRDS(gencode_protein_coding_positive, paste0(path, "/GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive2.RDS"))
+saveRDS(gencode_transcripts, paste0(path, "/GENCODE_TSS/","GR_Gencode_TSS.RDS"))
+saveRDS(gencode_transcripts_positive, paste0(path, "/GENCODE_TSS/","GR_Gencode_TSS_positive.RDS"))
+saveRDS(gencode_protein_coding, paste0(path, "/GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS"))
+saveRDS(gencode_protein_coding_positive, paste0(path, "/GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS"))
