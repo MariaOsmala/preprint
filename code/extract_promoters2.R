@@ -79,107 +79,49 @@ promoters <- find_promoters(TSS_annotation = TSS_annotation,
                             blacklist = blacklist,
                             window = window,
                             N = N)
-# 
-# 
-# #SAVE counts
-# if(N==1000000){
-#   N=length(promoters$promoters)
-# }
-# print("number of promoters")
-# print(N)
-# 
-# promoters=promoters[1:N]
-# #promoters$strand=promoters$strand[1:N]
-# 
-# strand(promoters)="*" #THIS IS IMPORTANT
-# 
-# promoter_profiles_directed<-extract_profiles_parallel(bam_folder, regions=promoters, directionality=TRUE, 
-#                                                       directions=promoters$direction, window, bin_size)
-# promoter_profiles_undirected<-extract_profiles_parallel(bam_folder, regions=promoters, directionality=FALSE, 
-#                                                         directions=promoters$direction, window, bin_size)
-# 
-# setwd(bam_folder)
-# bai_files=dir(pattern=".bai")
-# bam_files=dir(pattern=".bam")
-# bam_files=bam_files[which(bam_files %in% bai_files ==FALSE)]
-# 
-# setwd(path_to_dir)
-# 
-# 
-# mark_name<-NULL
-# 
-# for(i in 1:length(bam_files)){
-#   mark_name[i]=strsplit(bam_files[i],".bam")[[1]]
-# }
-# 
-# profiles_directed<-list()
-# counts<-list()
-# profiles_temp<-list()
-# for(i in 1:length(promoter_profiles_directed)){
-#   profiles_temp[[mark_name[i]]]=promoter_profiles_directed[[i]][[1]]
-#   counts[[mark_name[i]]]=promoter_profiles_directed[[i]][[2]]
-# }
-# 
-# profiles_directed$profiles=profiles_temp
-# profiles_directed$counts=counts
-# 
-# profiles_undirected<-list()
-# counts<-list()
-# profiles_temp<-list()
-# for(i in 1:length(promoter_profiles_undirected)){
-#   profiles_temp[[mark_name[i]]]=promoter_profiles_undirected[[i]][[1]]
-#   counts[[mark_name[i]]]=promoter_profiles_undirected[[i]][[2]]
-# }
-# 
-# profiles_undirected$profiles=profiles_temp
-# profiles_undirected$counts=counts
-# 
-# normalized_profiles_directed=normalize(profiles_directed, round_logic, negatives_to_zero)
-# normalized_profiles_undirected=normalize(profiles_undirected, round_logic, negatives_to_zero)
-# 
-# if(normalizeBool==TRUE){
-#   otherCellLine_normalized_profiles_directed=normalize_Between_Cell_Lines(profiles=normalized_profiles_directed, counts=counts, 
-#                                                                  countsOtherCellLine=countsOtherCellLine, mods=names(normalized_profiles_directed), 
-#                                                                  round=FALSE, negatives_to_zero=FALSE)
-#   otherCellLine_normalized_profiles_undirected=normalize_Between_Cell_Lines(profiles=normalized_profiles_undirected, counts=counts, 
-#                                                                    countsOtherCellLine=countsOtherCellLine, mods=names(normalized_profiles_undirected), 
-#                                                                    round=FALSE, negatives_to_zero=FALSE)
-#   
-#   rm(counts, profiles_temp, promoter_profiles_directed, promoter_profiles_undirected)
-#   
-#   
-#   #save counts and enhancer profiles
-#   regions=promoters
-#   rm(promoters)
-#   
-#   save(profiles_directed,profiles_undirected, normalized_profiles_directed,normalized_profiles_undirected,
-#        otherCellLine_normalized_profiles_directed,otherCellLine_normalized_profiles_undirected, 
-#        regions, file=paste0(path, "/", cell_line, "/data_R/", NormCellLine, "_normalized_", N, "_promoters_bin_", bin_size, "_window_", window, ".RData"))
-#   
-#   
-#   
-# }else{
-#   rm(counts, profiles_temp, promoter_profiles_directed, promoter_profiles_undirected)
-#   
-#   
-#   #save counts and enhancer profiles
-#   regions=promoters
-#   rm(promoters)
-#   
-#   save(profiles_directed,profiles_undirected, normalized_profiles_directed,normalized_profiles_undirected, 
-#        regions, file=paste0(path, "/", cell_line, "/data_R/", N, "_promoters_bin_", bin_size, "_window_", window, ".RData"))
-#   
-#   
-# }
-# 
 
+# Create profiles for each promoter sites using all the histones available
+profiles = list()
 
+# First, collect a list of all the histone files
+bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam$", full.name = TRUE)
 
+# These are used to normalize the profiles
+print('Reading control histone')
+control_ind <- grep('Control', bam_files)
+profiles[['Control']] <- create_profile(promoters, histone = rtracklayer::import(bam_files[control_ind]),
+                                        reference = NULL)
+print('Reading input polymerase')
+input_ind <- grep('Input', bam_files)
+profiles[['Input']] <- create_profile(promoters, histone = rtracklayer::import(bam_files[input_ind]),
+                                      reference = NULL)
 
+# Create profiles for the rest of the histones
+for (bam_file in bam_files) {
+    name <- tools::file_path_sans_ext(basename(bam_file))
 
+    # Determine reference profile
+    if (length(grep('Dnase|Nsome', name)) > 0) {
+        reference <- NULL
+    } else if (length(grep('Pol', name)) > 0) {
+        reference <- profiles[['Input']]
+    } else {
+        reference <- profiles[['Control']]
+    }
 
+    # Create the profile (reference profiles have been created already)
+    if (length(grep('Input|Control', name)) == 0) {
+        print(paste0("Processing: ", name))
+        profiles[[name]] <- create_profile(promoters, histone = rtracklayer::import(bam_file),
+                                           reference = reference)
+    }
+}
 
+#normalize wrt to other cell line if applicaple
+if(normalizeBool==TRUE){
+    # Not implemented yet
+}
 
-
-
-
+# Save the profiles
+# dir.create(paste0(path, "/", cell_line, "/data_R"), recursive = TRUE, showWarnings = FALSE)
+# save(profiles, file = paste0(path, "/", cell_line,"/data_R/",N,"_promoters_bin_",bin_size,"_window_",window,".RData"))
