@@ -1,30 +1,5 @@
-# library(Rsamtools)
-# library(snow)
-# library(spp)
-# library(accelerometry)
-# library(Biostrings)
-# library(bitops)
 library(BSgenome.Hsapiens.UCSC.hg19)
-# library(circlize)
-# library(doParallel)
-# library(foreach)
-# library(gdata)
-# library(GenomicRanges)
-# library(GetoptLong)
-# library(ggplot2)
-# library(grid)
-# library(gridExtra)
-# library(MASS)
 library(optparse)
-# library(pryr)
-# library(RColorBrewer)
-# library(reshape2)
-# library(ROCR)
-# library(rtracklayer)
-# library(ShortRead)
-# library(stringr)
-
-
 
 option_list = list(
   make_option(c("-w", "--window"), type="integer", default=5000, 
@@ -58,18 +33,6 @@ option_list = list(
 # DNase_peaks_file=opt$DNaseFile
 # normalizeBool=opt$normalize
 # NormCellLine=opt$NormCellLine
-# 
-# 
-# 
-# print(window)
-# print(bin_size)
-# print(between_TSS_distance)
-# print(N) 
-# print(path_to_dir)
-# print(cell_line)
-# print(DNase_peaks_file)
-# print(normalizeBool)
-# print(NormCellLine)
 
 window=2000
 bin_size=100
@@ -78,83 +41,63 @@ N=1000
 path_to_dir='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
 cell_line='K562'
 DNase_peaks_file='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data/K562/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz'
-normalizeBool=FALSE
 NormCellLine=""
 
 print(window)
 print(bin_size)
 print(between_TSS_distance)
-print(N)
+print(N) 
 print(path_to_dir)
 print(cell_line)
 print(DNase_peaks_file)
-print(NormalizeBool)
+print(normalizeBool)
 print(NormCellLine)
 
-round_logic=FALSE #TRUE FALSE #11		
-negatives_to_zero=FALSE #TRUE
-#are we normalizing the data wrt some other cell line data
-if(normalizeBool==TRUE){
-  load( file=paste0(path_to_dir,"/",NormCellLine,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData")) #profiles, normalized_profiles, regions,
-  countsOtherCellLine=profiles$counts #remove "V2" from the names
-  names(countsOtherCellLine)=gsub("V2","",  names(countsOtherCellLine))
-}
 
-
-
-#setwd(path_to_dir)
-source("code/functions.R")
-
-
-
-path <- path_to_dir
-figure_path <- paste0(path_to_dir, "/figures")
-
+source('code/find_promoters.R')
+source('code/create_profile.R')
 
 directionality=TRUE # FALSE #
 
 
-GR_Gencode_protein_coding_TSS=readRDS( paste0(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS.RDS")) #73271
-GR_Gencode_protein_coding_TSS_positive=readRDS( paste0(path,"/GENCODE_TSS/","GR_Gencode_protein_coding_TSS_positive.RDS"))
+# Read promoter information
+TSS_annotation <- readRDS(paste0(path, "/GENCODE_TSS/GR_Gencode_protein_coding_TSS.RDS"))
+seqlengths(TSS_annotation) <- seqlengths(Hsapiens)[seqnames(seqinfo(TSS_annotation))]
 
-#these need the chromosome length information
+# Used for finding promoter sites
+DNase <- rtracklayer::import(DNase_peaks_file)
 
-human.chromlens = seqlengths(Hsapiens)
-seqlengths(GR_Gencode_protein_coding_TSS_positive)<-human.chromlens[seqnames(seqinfo(GR_Gencode_protein_coding_TSS_positive))]
-seqlengths(GR_Gencode_protein_coding_TSS)<-human.chromlens[seqnames(seqinfo(GR_Gencode_protein_coding_TSS))]
+# Blacklist to remove problematic promoter sites
+DAC <- rtracklayer::import(paste0(path, "/blacklists/wgEncodeDacMapabilityConsensusExcludable.bed.gz"))
+Duke <- rtracklayer::import(paste0(path, "/blacklists/wgEncodeDukeMapabilityRegionsExcludable.bed.gz"))
+blacklist = union(DAC, Duke)
+strand(blacklist) <- "+"
 
-
-bam_folder=paste0(path, "/", cell_line, "/bam_shifted")
-
-ENCODE_blacklist=ENCODE_blaclist_regions(path_to_dir)
-
-#quite slow now, can it be made faster
-promoters <- create_promoter_list(TSS_annotation = GR_Gencode_protein_coding_TSS, #There are 72371
-                                  TSS_annotation_positive = GR_Gencode_protein_coding_TSS_positive, 
-                                  DNase_peaks_file = DNase_peaks_file,
-                                  between_TSS_distance = between_TSS_distance, 
-                                  remove_blacklist_regions = TRUE, 
-                                  ENCODE_blacklist = ENCODE_blacklist,
-                                  window=window)
-
-
-#SAVE counts
-if(N==1000000){
-  N=length(promoters$promoters)
-}
-print("number of promoters")
-print(N)
-
-promoters=promoters[1:N]
-#promoters$strand=promoters$strand[1:N]
-
-strand(promoters)="*" #THIS IS IMPORTANT
-
-promoter_profiles_directed<-extract_profiles_parallel(bam_folder, regions=promoters, directionality=TRUE, 
-                                                      directions=promoters$direction, window, bin_size)
-promoter_profiles_undirected<-extract_profiles_parallel(bam_folder, regions=promoters, directionality=FALSE, 
-                                                        directions=promoters$direction, window, bin_size)
-
+promoters <- find_promoters(TSS_annotation = TSS_annotation,
+                            DNase = DNase,
+                            between_TSS_distance = between_TSS_distance, 
+                            blacklist = blacklist,
+                            window = window,
+                            N = N)
+# 
+# 
+# #SAVE counts
+# if(N==1000000){
+#   N=length(promoters$promoters)
+# }
+# print("number of promoters")
+# print(N)
+# 
+# promoters=promoters[1:N]
+# #promoters$strand=promoters$strand[1:N]
+# 
+# strand(promoters)="*" #THIS IS IMPORTANT
+# 
+# promoter_profiles_directed<-extract_profiles_parallel(bam_folder, regions=promoters, directionality=TRUE, 
+#                                                       directions=promoters$direction, window, bin_size)
+# promoter_profiles_undirected<-extract_profiles_parallel(bam_folder, regions=promoters, directionality=FALSE, 
+#                                                         directions=promoters$direction, window, bin_size)
+# 
 # setwd(bam_folder)
 # bai_files=dir(pattern=".bai")
 # bam_files=dir(pattern=".bam")
@@ -229,14 +172,14 @@ promoter_profiles_undirected<-extract_profiles_parallel(bam_folder, regions=prom
 #   
 # }
 # 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
+
+
+
+
+
+
+
+
+
+
+

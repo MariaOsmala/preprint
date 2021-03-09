@@ -47,7 +47,7 @@ option_list = list(
 # NormCellLine=opt$NormCellLine
 
 window=2000
-distance_to_promoters=1999
+distance_to_promoters=2000
 bin_size=100
 N=1000
 path='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
@@ -122,7 +122,7 @@ for (bam_file in bam_files) {
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         print(paste0("Processing: ", name))
-        profiles[[name]] <- create_profile(enhancers, histone = rtracklayer::import(histone_file),
+        profiles[[name]] <- create_profile(enhancers, histone = rtracklayer::import(bam_file),
                                            reference = reference)
     }
 }

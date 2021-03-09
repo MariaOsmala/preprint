@@ -21,8 +21,10 @@ find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
         # max_dist_to_promoter.
         # We ignore the strand, which means all strands are presumed to be "+".
         dist <- distanceToNearest(p300, promoters, ignore.strand = TRUE)
-        to_remove <- from(dist)[mcols(dist)$distance < (max_dist_to_promoter - 1)]  # FIXME: why the -1?
-        p300 <- p300[-to_remove]
+        to_drop <- from(dist)[mcols(dist)$distance < (max_dist_to_promoter - 1)]  # FIXME: why the -1?
+        if (length(to_drop) > 0) {
+            p300 <- p300[-to_drop]
+        }
     }
     print(paste0("#p300 peaks away from promoters: ", length(p300)))
 
@@ -33,7 +35,7 @@ find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
     # Cut a window around the peak.
     # If window%%2==0, add 1 to window, extend the enhancer window/2 downstream and window/2 upsteam
     # If window%%2==1, extend the enhancer window (window-1)/2 downstream and upstream
-    enhancers <- resize(enhancers, width = window + (window+1)%%2, fix="center")
+    enhancers <- resize(enhancers, width = window + (window + 1) %% 2, fix="center")
 
     # Remove enhancers which window falls outside the bounds of the sequence
     human.chromlens <- seqlengths(Hsapiens)
@@ -43,9 +45,12 @@ find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
 
     if (!is.null(blacklist)) {
         # Remove enhancers that fall within blacklisted regions
-        enhancers <- enhancers[-unique(from(findOverlaps(enhancers, blacklist)))]
+        to_drop <- unique(from(findOverlaps(enhancers, blacklist)))
+        if (length(to_drop) > 0) {
+            enhancers <- enhancers[-to_drop]
+        }
+        print(paste0("#enhancers after blacklist: ", length(enhancers)))
     }
-    print(paste0("#enhancers after blacklist: ", length(enhancers)))
 
     if (!is.null(N)) {
         # Sort first by qValue, then by signalValue

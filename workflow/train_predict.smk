@@ -138,7 +138,7 @@ rule bedtools_multicov:
 union_bedgraph_names = ' '.join(all_data_types('K562'))
 def all_bed_files(wildcards):
 	return [
-		f'{data_dir}/{wildcards.cell_line}/intervals_data_{config["binSize"]}/{data_type}/{wildcards.crom}.bed'
+		f'{data_dir}/{wildcards.cell_line}/intervals_data_{config["binSize"]}/{data_type}/{wildcards.chrom}.bed'
 		for data_type in all_data_types(wildcards.cell_line)
 	]
 rule union_bedgraph:

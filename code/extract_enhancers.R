@@ -45,41 +45,39 @@ option_list = list(
   make_option("--NormCellLine", type="character", default="", 
               help="name of the cell line normalized wrt [default= %default]", metavar="character")
   
-  
-  
 ); 
 
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
+# opt_parser = OptionParser(option_list=option_list);
+# opt = parse_args(opt_parser);
+# 
+# if (is.null(opt)){
+#   print_help(opt_parser)
+#   stop("At least one argument must be supplied (input file).n", call.=FALSE)
+# }
+# 
+# window=opt$window								
+# distance_to_promoters=opt$distToPromoter										
+# bin_size=opt$binSize
+# N=opt$N
+# path_to_dir=opt$pathToDir
+# cell_line=opt$cellLine
+# p300_peaks_file=opt$p300File
+# DNase_peaks_file=opt$DNaseFile
+# 
+# normalizeBool=opt$normalize
+# 
+# NormCellLine=opt$NormCellLine
 
-if (is.null(opt)){
-  print_help(opt_parser)
-  stop("At least one argument must be supplied (input file).n", call.=FALSE)
-}
-
-window=opt$window								
-distance_to_promoters=opt$distToPromoter										
-bin_size=opt$binSize
-N=opt$N
-path_to_dir=opt$pathToDir
-cell_line=opt$cellLine
-p300_peaks_file=opt$p300File
-DNase_peaks_file=opt$DNaseFile
-
-normalizeBool=opt$normalize
-
-NormCellLine=opt$NormCellLine
-
-# window=2000
-# distance_to_promoters=2000
-# bin_size=100
-# N=1000
-# path_to_dir='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
-# cell_line='K562'
-# p300_peaks_file='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data/K562/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'
-# DNase_peaks_file='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data/K562/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz'
-# normalizeBool=FALSE
-# NormCellLine=""
+window=2000
+distance_to_promoters=2000
+bin_size=100
+N=1000
+path_to_dir='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
+cell_line='K562'
+p300_peaks_file='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data/K562/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'
+DNase_peaks_file='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data/K562/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz'
+normalizeBool=FALSE
+NormCellLine=""
 
 print(window)
 print(distance_to_promoters)

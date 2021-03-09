@@ -32,10 +32,8 @@ extract_profiles_parallel<-function(bam_folder, regions, directionality=TRUE, di
   if(length( c(start_problem, end_problem) )!=0 ){
     roi=roi[-c(start_problem, end_problem)]
     if(directionality==TRUE){
-      directions=directions[c(start_problem, end_problem)]
-      
+      directions=directions[-c(start_problem, end_problem)]
     }
-    
   }
   
   #extract the ChIP-seq feature types
