@@ -82,6 +82,7 @@ promoters <- find_promoters(TSS_annotation = TSS_annotation,
 
 # Create profiles for each promoter sites using all the histones available
 profiles = list()
+profiles_undirected = list()
 
 # First, collect a list of all the histone files
 bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam$", full.name = TRUE)
@@ -89,12 +90,13 @@ bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam
 # These are used to normalize the profiles
 print('Reading control histone')
 control_ind <- grep('Control', bam_files)
-profiles[['Control']] <- create_profile(promoters, histone = rtracklayer::import(bam_files[control_ind]),
-                                        reference = NULL)
+control <- rtracklayer::import(bam_files[control_ind])
+profiles[['Control']] <- create_profile(promoters, histone = control, reference = NULL, ignore_strand = FALSE)
+
 print('Reading input polymerase')
 input_ind <- grep('Input', bam_files)
-profiles[['Input']] <- create_profile(promoters, histone = rtracklayer::import(bam_files[input_ind]),
-                                      reference = NULL)
+input <- rtracklayer::import(bam_files[input_ind])
+profiles[['Input']] <- create_profile(promoters, histone = input, reference = NULL, ignore_strand = FALSE)
 
 # Create profiles for the rest of the histones
 for (bam_file in bam_files) {
@@ -112,8 +114,9 @@ for (bam_file in bam_files) {
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         print(paste0("Processing: ", name))
-        profiles[[name]] <- create_profile(promoters, histone = rtracklayer::import(bam_file),
-                                           reference = reference)
+        histone <- rtracklayer::import(bam_file)
+        profiles[[name]] <- create_profile(promoters, histone = histone,
+                                           reference = reference, ignore_strand = FALSE)
     }
 }
 
@@ -123,5 +126,5 @@ if(normalizeBool==TRUE){
 }
 
 # Save the profiles
-# dir.create(paste0(path, "/", cell_line, "/data_R"), recursive = TRUE, showWarnings = FALSE)
-# save(profiles, file = paste0(path, "/", cell_line,"/data_R/",N,"_promoters_bin_",bin_size,"_window_",window,".RData"))
+dir.create(paste0(path, "/", cell_line, "/data_R"), recursive = TRUE, showWarnings = FALSE)
+save(profiles, profiles_undirected, file = paste0(path, "/", cell_line,"/data_R/",N,"_promoters_bin_",bin_size,"_window_",window,"2.RData"))
