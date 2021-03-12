@@ -82,7 +82,6 @@ promoters <- find_promoters(TSS_annotation = TSS_annotation,
 
 # Create profiles for each promoter sites using all the histones available
 profiles = list()
-profiles_undirected = list()
 
 # First, collect a list of all the histone files
 bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam$", full.name = TRUE)

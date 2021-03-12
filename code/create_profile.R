@@ -4,7 +4,7 @@ library(SummarizedExperiment)
 
 # Use the histone reads to create a profile for a list of sites.
 # The sites could for example be enhancer sites found with `find_enhancers`
-create_profile <- function(sites, histone, reference, bin_size = 100, ignore_strand = FALSE)
+create_profile <- function(sites, bam_file, reference, bin_size = 100, ignore_strand = FALSE)
 {
     # Explode the sites into bins.
     # We want each bin to be of a guarenteed size (bin_size). This means we
@@ -16,10 +16,37 @@ create_profile <- function(sites, histone, reference, bin_size = 100, ignore_str
 
     num_reads <- length(histone)
 
-    # Compute the number of reads that overlap between the histone and the
+    # Compute the number of reads that overlap between the bam_file and the
     # binned sites.
-    histone <- histone[from(findOverlaps(histone, sites_binned))]
-    data <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE))$counts
+    if (is.na(Rsamtools::yieldSize(bam_file))) {
+        # Read entire BAM file in one chunk
+        histone <- GRanges(readGAlignmentsList(bam_file))
+        histone <- histone[from(findOverlaps(histone, sites_binned))]
+        data <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE))$counts
+    } else {
+        # Read BAM file in chunks. Compute overlaps for each chunk.
+        pb <- txtProgressBar(min = 0, max = ceiling(countBam(bam_file)$records / yieldSize(bam_file)),
+                             style = 3)
+        if (!isOpen(bam_file)) {
+            open(bam_file)
+            on.exit(close(bam_file))
+            on.exit(close(pb))
+        }
+        data <- NULL
+        setTxtProgressBar(pb, 0)
+        while (length(alignments <- readGAlignmentsList(bam_file))) {
+            histone = GRanges(alignments)
+            histone <- histone[from(findOverlaps(histone, sites_binned))]
+            counts <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE))$counts
+            if (is.null(data)) {
+                data <- counts
+            } else {
+                data <- data + counts
+            }
+            setTxtProgressBar(pb, getTxtProgressBar(pb) + 1)
+        }
+    }
+
     data <- matrix(data, ncol = length(sites))  # nbins x nranges
 
     if (!ignore_strand) {
