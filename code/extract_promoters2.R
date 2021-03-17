@@ -89,12 +89,12 @@ bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam
 # These are used to normalize the profiles
 print('Reading control histone')
 control_ind <- grep('Control', bam_files)
-control <- rtracklayer::import(bam_files[control_ind])
+control <- BamFile(bam_files[control_ind])
 profiles[['Control']] <- create_profile(promoters, histone = control, reference = NULL, ignore_strand = FALSE)
 
 print('Reading input polymerase')
 input_ind <- grep('Input', bam_files)
-input <- rtracklayer::import(bam_files[input_ind])
+input <- BamFile(bam_files[input_ind])
 profiles[['Input']] <- create_profile(promoters, histone = input, reference = NULL, ignore_strand = FALSE)
 
 # Create profiles for the rest of the histones
@@ -113,7 +113,7 @@ for (bam_file in bam_files) {
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         print(paste0("Processing: ", name))
-        histone <- rtracklayer::import(bam_file)
+        histone <- BamFile(bam_file)
         profiles[[name]] <- create_profile(promoters, histone = histone,
                                            reference = reference, ignore_strand = FALSE)
     }

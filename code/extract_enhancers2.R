@@ -1,4 +1,5 @@
 library(GenomicRanges)
+library(Rsamtools)
 library(BSgenome.Hsapiens.UCSC.hg19)
 library(optparse)
 
@@ -99,12 +100,12 @@ bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam
 # These are used to normalize the profiles
 print('Reading control histone')
 control_ind <- grep('Control', bam_files)
-profiles[['Control']] <- create_profile(enhancers, histone = rtracklayer::import(bam_files[control_ind]),
-                                        reference = NULL)
+profiles[['Control']] <- create_profile(enhancers, bam_file = BamFile(bam_files[control_ind]),
+                                        reference = NULL, ignore_strand = TRUE)
 print('Reading input polymerase')
 input_ind <- grep('Input', bam_files)
-profiles[['Input']] <- create_profile(enhancers, histone = rtracklayer::import(bam_files[input_ind]),
-                                      reference = NULL)
+profiles[['Input']] <- create_profile(enhancers, bam_file = BamFile(bam_files[input_ind]),
+                                      reference = NULL, ignore_strand = TRUE)
 
 # Create profiles for the rest of the histones
 for (bam_file in bam_files) {
@@ -122,8 +123,8 @@ for (bam_file in bam_files) {
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         print(paste0("Processing: ", name))
-        profiles[[name]] <- create_profile(enhancers, histone = rtracklayer::import(bam_file),
-                                           reference = reference)
+        profiles[[name]] <- create_profile(enhancers, bam_file = BamFile(bam_file),
+                                           reference = reference, ignore_strand = TRUE)
     }
 }
 
@@ -133,5 +134,5 @@ if(normalizeBool==TRUE){
 }
 
 # Save the profiles
-# dir.create(paste0(path, "/", cell_line, "/data_R"), recursive = TRUE, showWarnings = FALSE)
-# save(profiles, file = paste0(path, "/", cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData"))
+dir.create(paste0(path, "/", cell_line, "/data_R"), recursive = TRUE, showWarnings = FALSE)
+save(profiles, file = paste0(path, "/", cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData"))

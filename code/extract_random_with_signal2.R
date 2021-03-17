@@ -53,10 +53,11 @@ chr_names <- c("chr1","chr2","chr3",  "chr4",  "chr5","chr6",  "chr7",  "chr8",
                "chr16", "chr17","chr18", "chr19",   "chr20", "chr21", "chr22",
                "chrX") 
 regions <- GRanges(chr_names, IRanges(start=1, end=seqlengths(Hsapiens)[chr_names]))
+regions <- slidingWindows(regions, width = bin_size, step = bin_size)
+regions <- unlist(regions)
+
 
 source('code/create_profile.R')
-
-profiles = list()
 
 # First, collect a list of all the BAM files
 bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam$", full.name = TRUE)
@@ -66,38 +67,45 @@ print('Computing whole genome coverage for control histone')
 control_ind <- grep('Control', bam_files)
 control <- BamFile(bam_files[control_ind])
 yieldSize(control) <- 1E6L
-profiles[['Control']] <- create_profile(regions, bam_file= control, reference = NULL, ignore_strand = TRUE)
+profile_control <- create_profile(regions, bam_file= control, reference = NULL, ignore_strand = TRUE)
 
 print('Computing whole genome coverage for input polymerase')
 input_ind <- grep('Input', bam_files)
 input <- BamFile(bam_files[input_ind])
 yieldSize(input) <- 1E6L
-profiles[['Input']] <- create_profile(regions, bam_file = input, reference = NULL, ignore_strand = TRUE)
+profile_input <- create_profile(regions, bam_file = input, reference = NULL, ignore_strand = TRUE)
 
 # Create profiles for the rest of the BAM files
+profiles = list()
 for (bam_file in bam_files) {
     name <- tools::file_path_sans_ext(basename(bam_file))
 
-    # Determine reference profile
-    if (length(grep('Dnase|Nsome', name)) > 0) {
-        reference <- NULL
-    } else if (length(grep('Pol', name)) > 0) {
-        reference <- profiles[['Input']]
-    } else {
-        reference <- profiles[['Control']]
+    # Reference profiles have been created already, and we don't need Nsome
+    # profiles.
+    if (grepl('Input|Control|Nsome', name)) {
+        next
     }
 
-    # Create the profile (reference profiles have been created already)
-    if (length(grep('Input|Control', name)) == 0) {
-        print(paste0("Computing whole genome coverage for: ", name))
-        bam_file <- BamFile(bam_file)
-        yieldSize(bam_file) <- 1E6L
-        profiles[[name]] <- create_profile(regions, bam_file = bam_file,
-                                           reference = reference, ignore_strand = TRUE)
+    # Determine reference profile
+    if (grepl('Dnase', name)) {
+        reference <- NULL
+    } else if (grepl('Pol', name)) {
+        reference <- profile_input
+    } else {
+        reference <- profile_control
     }
+
+    # Create the profile
+    print(paste0("Computing whole genome coverage for: ", name))
+    bam_file <- BamFile(bam_file)
+    yieldSize(bam_file) <- 1E6L
+    profiles[[name]] <- create_profile(regions, bam_file = bam_file,
+                                       reference = reference, ignore_strand = TRUE)
 }
 
-#normalize wrt to other cell line if applicaple
+#normalize wrt to other cell line if applicable
 if(normalizeBool==TRUE){
     # Not implemented yet
 }
+
+save(profiles, regions, file = paste0(path, "/", cell_line, "/data_R/whole_genome_coverage2.RData"))
