@@ -15,7 +15,7 @@ gencode <- resize(gencode, 1, fix = "start")  # We only care about the start of 
 
 # Make selections
 allowed_chroms <- c(sapply(1:22, function(x) paste0('chr', x)), "chrX", "chrY", "chrM")
-gencode <- gencode[chrom(gencode) %in% allowed_chroms]
+gencode <- GenomeInfoDb::keepSeqlevels(gencode, allowed_chroms, pruning.mode = "coarse")
 gencode_transcripts <- gencode[mcols(gencode)$type == "transcript"]
 gencode_protein_coding <- gencode_transcripts[mcols(gencode_transcripts)$transcript_type == "protein_coding"]
 

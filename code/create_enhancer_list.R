@@ -32,12 +32,22 @@ create_enhancer_list<-function(p300, DNase_peaks_file,  TSS_annotation,
   
   #8289 of 25881 enhancers removed if all transcripts used
   #5587 of 25881 enhancers removed if protein coding TSS used
+
+  print("Length of p300 file:")
+  print(length(p300peaks_GRanges))
   
   strand(p300peaks_GRanges)="+"
+
+  print("Some distances:")
+  print(head(distToTss(p300peaks_GRanges,TSS_annotation), 20))
   close_to_TSS=which(abs(distToTss(p300peaks_GRanges,TSS_annotation) ) < distance_to_promoters) 
+  
+  print("close_to_TSS:")
+  print(length(close_to_TSS))
   
   
   GR_Enhancers=p300peaks_GRanges[-close_to_TSS]
+
   
   
   #DNase_overlap==TRUE    

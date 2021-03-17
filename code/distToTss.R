@@ -10,4 +10,5 @@ distToTss <-function(peak, tss){
   sgn <- as.numeric(ifelse(strand(tss)[idx] == "+", 1, -1))
   distances=data.frame(rep(5000000, length(peak)))
   distances[notnaind,]=(as.data.frame(ranges(peak))$start[notnaind] - as.data.frame(ranges(tss))$start[idx]) * sgn
+  distances
 }

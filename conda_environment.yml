@@ -12,6 +12,7 @@ dependencies:
   - bioconductor-rsamtools
   - bioconductor-genomeinfodb
   - bioconductor-genomeinfodbdata
+  - bioconductor-genomeinfodbdata
   - snakemake
   - pandas
   # - r-gdata
@@ -27,6 +28,7 @@ dependencies:
 
   # For train-predict
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
+  - bioconductor-regioner
   - r-optparse
   - r-doparallel
   - r-gdata

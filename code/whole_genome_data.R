@@ -40,16 +40,23 @@ make_option("--normCellLine", type="character", default="",
             help="name of the cell line normalized wrt [default= %default]", metavar="character")
 ); 
 
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
-
-window=opt$window
-bin_size=opt$binSize
-N=opt$N
-path_to_dir=opt$pathToDir
-cell_line=opt$cellLine
-normalizeBool=opt$normalize
-NormCellLine=opt$NormCellLine
+# opt_parser = OptionParser(option_list=option_list);
+# opt = parse_args(opt_parser);
+# 
+# window=opt$window
+# bin_size=opt$binSize
+# N=opt$N
+# path_to_dir=opt$pathToDir
+# cell_line=opt$cellLine
+# normalizeBool=opt$normalize
+# NormCellLine=opt$NormCellLine
+window=2000
+bin_size=100
+N=1000
+path_to_dir='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
+cell_line='K562'
+normalizeBool=FALSE
+NormCellLine=NULL
 
 print(window)
 print(bin_size)

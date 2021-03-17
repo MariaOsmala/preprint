@@ -137,7 +137,7 @@ rule bedtools_multicov:
 union_bedgraph_names = ' '.join(all_data_types('K562'))
 def all_bed_files(wildcards):
 	return [
-		f'{data_dir}/{wildcards.cell_line}/intervals_data_{config["binSize"]}/{data_type}/{wildcards.crom}.bed'
+		f'{data_dir}/{wildcards.cell_line}/intervals_data_{config["binSize"]}/{data_type}/{wildcards.chrom}.bed'
 		for data_type in all_data_types(wildcards.cell_line)
 	]
 rule union_bedgraph:
@@ -268,6 +268,7 @@ rule create_training_data_combined:
 		code=f'{code_dir}/create_training_data_combined.R',
 		enhancers=f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_enhancers_bin_{config["binSize"]}_window_{config["window"]}.RData',
 		promoters=f'{data_dir}/{{cell_line}}/data_R/{config["extract_promoters"]["N"]}_promoters_bin_{config["binSize"]}_window_{config["window"]}.RData',
+		pure_random=f'{data_dir}/{{cell_line}}/data_R/pure_random_{config["extract_random_pure"]["N"]}_bin_{config["binSize"]}_window_{config["window"]}.RData',
 		random_with_signal=f'{data_dir}/{{cell_line}}/data_R/{config["extract_enhancers"]["N"]}_random_with_signal_bin_{config["binSize"]}_window_{config["window"]}.RData',
 	output:
 		rdata=expand(f'{cv_files}_training_data.RData', i=[1, 2, 3, 4, 5]),

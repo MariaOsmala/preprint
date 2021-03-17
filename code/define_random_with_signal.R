@@ -46,23 +46,31 @@ option_list = list(
               help="name of the cell line normalized wrt [default= %default]", metavar="character")
 ); 
 
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
+# opt_parser = OptionParser(option_list=option_list);
+# opt = parse_args(opt_parser);
+# 
+# 
+# #if (is.null(opt)){
+# #  print_help(opt_parser)
+# #  stop("At least one argument must be supplied (input file).n", call.=FALSE)
+# #}
+# 
+# 
+# window=opt$window					#5000			
+# bin_size=opt$binSize      #100
+# N=opt$N                 #1000
+# threshold=opt$threshold #5
+# path_to_dir=opt$pathToDir
+# cell_line=opt$cellLine
+# p300_peaks_file=opt$p300File
 
-
-#if (is.null(opt)){
-#  print_help(opt_parser)
-#  stop("At least one argument must be supplied (input file).n", call.=FALSE)
-#}
-
-
-window=opt$window					#5000			
-bin_size=opt$binSize      #100
-N=opt$N                 #1000
-threshold=opt$threshold #5
-path_to_dir=opt$pathToDir
-cell_line=opt$cellLine
-p300_peaks_file=opt$p300File
+window=2000
+bin_size=100
+N=1000
+path_to_dir='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
+cell_line='K562'
+p300_peaks_file='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data/K562/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'
+threshold=5
 
 print(window)
 print(bin_size)
