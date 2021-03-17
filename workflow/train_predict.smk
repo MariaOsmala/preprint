@@ -18,7 +18,6 @@ rule define_TSS:
 		f'{code_dir}/define_TSS.R',
 		f'{gencode_dir}/gencode.v27lift37.annotation.gtf.gz',
 	output:
-		f'{gencode_dir}/GENCODE.RData',
 		f'{gencode_dir}/GR_Gencode_protein_coding_TSS.RDS',
 		f'{gencode_dir}/GR_Gencode_protein_coding_TSS_positive.RDS',
 		f'{gencode_dir}/GR_Gencode_TSS.RDS',
