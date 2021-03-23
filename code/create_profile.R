@@ -14,7 +14,7 @@ create_profile <- function(sites, bam_file, reference, bin_size = 100, ignore_st
     sites_binned <- slidingWindows(sites, width = bin_size, step = bin_size)
     sites_binned <- sites_binned[width(sites_binned) == bin_size]  # Remove incomplete windows
 
-    num_reads <- length(histone)
+    num_reads <- countBam(bam_file)$records
 
     # Compute the number of reads that overlap between the bam_file and the
     # binned sites.
@@ -25,7 +25,7 @@ create_profile <- function(sites, bam_file, reference, bin_size = 100, ignore_st
         data <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE))$counts
     } else {
         # Read BAM file in chunks. Compute overlaps for each chunk.
-        pb <- txtProgressBar(min = 0, max = ceiling(countBam(bam_file)$records / yieldSize(bam_file)),
+        pb <- txtProgressBar(min = 0, max = ceiling(num_reads / yieldSize(bam_file)),
                              style = 3)
         if (!isOpen(bam_file)) {
             open(bam_file)
