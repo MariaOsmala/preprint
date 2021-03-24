@@ -1,4 +1,3 @@
-library(BSgenome.Hsapiens.UCSC.hg19)
 library(GenomicRanges)
 library(Rsamtools)
 library(optparse)
@@ -48,7 +47,8 @@ print(cell_line)
 print(normalizeBool)
 print(NormCellLine)
 
-source('code/find_random_with_signal.R')
+source('code/find_random.R')
+source('code/create_profile.R')
 
 # Loads profiles and regions
 load(file = paste0(path, "/", cell_line, "/data_R/whole_genome_coverage2.RData"))
@@ -57,7 +57,18 @@ load(file = paste0(path, "/", cell_line, "/data_R/whole_genome_coverage2.RData")
 DAC <- rtracklayer::import(paste0(path, "/blacklists/wgEncodeDacMapabilityConsensusExcludable.bed.gz"))
 Duke <- rtracklayer::import(paste0(path, "/blacklists/wgEncodeDukeMapabilityRegionsExcludable.bed.gz"))
 blacklist = union(DAC, Duke)
-strand(blacklist) <- "+"
+
+# Select the $data parts of the coverage list
+coverage <- unlist(profiles, recursive = FALSE)[c(TRUE, FALSE)]
+
+# Concatenate to one big matrix
+coverage <- t(do.call(rbind, coverage))
+
+# Don't count negative coverage values 
+coverage[coverage < 0] <- 0
+
+# Blacklist all regions which don't have enough coverage
+blacklist <- union(blacklist, regions[rowSums(coverage) < threshold])
 
 # Stay away from p300 peaks
 p300 <- rtracklayer::import(paste0(path, '/K562/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'))
@@ -66,6 +77,51 @@ p300 <- rtracklayer::import(paste0(path, '/K562/raw_data/wgEncodeAwgTfbsSydhK562
 TSS <- readRDS(paste0(path, "/GENCODE_TSS/", "GR_Gencode_protein_coding_TSS.RDS"))
 
 print('Finding random with signal')
-random_with_signal <- find_random_with_signal(profiles, regions, threshold,
-                                              window, N, p300 = p300, TSS = TSS,
-                                              blacklist = blacklist)
+random_regions <- find_random(window, N, p300 = p300, TSS = TSS,
+                              blacklist = blacklist)
+
+# Create profiles for each region using all the histones available
+profiles = list()
+
+# First, collect a list of all the histone files
+bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam$", full.name = TRUE)
+
+# These are used to normalize the profiles
+print('Reading control histone')
+control_ind <- grep('Control', bam_files)
+profiles[['Control']] <- create_profile(random_regions, bam_file = BamFile(bam_files[control_ind]),
+                                        reference = NULL, ignore_strand = TRUE)
+print('Reading input polymerase')
+input_ind <- grep('Input', bam_files)
+profiles[['Input']] <- create_profile(random_regions, bam_file = BamFile(bam_files[input_ind]),
+                                      reference = NULL, ignore_strand = TRUE)
+
+# Create profiles for the rest of the histones
+for (bam_file in bam_files) {
+    name <- tools::file_path_sans_ext(basename(bam_file))
+
+    # Determine reference profile
+    if (length(grep('Dnase|Nsome', name)) > 0) {
+        reference <- NULL
+    } else if (length(grep('Pol', name)) > 0) {
+        reference <- profiles[['Input']]
+    } else {
+        reference <- profiles[['Control']]
+    }
+
+    # Create the profile (reference profiles have been created already)
+    if (length(grep('Input|Control', name)) == 0) {
+        print(paste0("Processing: ", name))
+        profiles[[name]] <- create_profile(random_regions, bam_file = BamFile(bam_file),
+                                           reference = reference, ignore_strand = TRUE)
+    }
+}
+
+#normalize wrt to other cell line if applicaple
+if(normalizeBool==TRUE){
+    # Not implemented yet
+}
+
+# Save the profiles
+dir.create(paste0(path, "/", cell_line, "/data_R"), recursive = TRUE, showWarnings = FALSE)
+save(profiles, file = paste0(path, "/", cell_line,"/data_R/",N,"_random_with_signal_1000_bin_",bin_size,"_window_",window,"2.RData"))

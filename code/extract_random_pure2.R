@@ -1,4 +1,4 @@
-library(BSgenome.Hsapiens.UCSC.hg19)
+library(Rsamtools)
 library(optparse)
 
 # option_list = list(
@@ -47,42 +47,26 @@ normalizeBool=FALSE
 NormCellLine=NULL
 max_dist_to_promoter=2000
 
+source('code/find_random.R')
 source('code/create_profile.R')
-
-#############################Sample random regions###################################################
-#compute the probability for each chromosome, include only chr1-21 and chrX
-
-allowed_chroms=c("chr1",  "chr2",  "chr3",  "chr4",  "chr5",  "chr6",  "chr7",  "chr8",  "chr9", 
-"chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18",
-"chr19", "chr20", "chr21", "chr22", "chrX") 
-
-whole_genome <- GRanges(allowed_chroms, IRanges(start=1, end=seqlengths(Hsapiens)[allowed_chroms]))
 
 # Add the blacklist to the mask of regions not to use
 DAC <- rtracklayer::import(paste0(path, "/blacklists/wgEncodeDacMapabilityConsensusExcludable.bed.gz"))
 Duke <- rtracklayer::import(paste0(path, "/blacklists/wgEncodeDukeMapabilityRegionsExcludable.bed.gz"))
 blacklist <- union(DAC, Duke)
 
-# Add p300 BSs to the mask of regions not to use
-p300 <- rtracklayer::import(p300_peaks_file)
-p300 <- p300[seqnames(p300) != "chrM"]
-start(p300) <- start(p300) + p300$peak
-p300 <- resize(p300, 1000, fix="center")
-blacklist <- union(blacklist, p300)
+# Stay away from p300 peaks
+p300 <- rtracklayer::import(paste0(path, '/K562/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'))
 
-# Remove regions that are too close to a promotor range, as specified by
-# max_dist_to_promoter.
-promoters <- readRDS(paste0(path, "/GENCODE_TSS/", "GR_Gencode_protein_coding_TSS.RDS"))
-dist <- distanceToNearest(p300, promoters, ignore.strand = TRUE)
-too_close <- from(dist)[mcols(dist)$distance < (max_dist_to_promoter - 1)]  # FIXME: why the -1?
-blacklist <- union(blacklist, too_close)
+# Stay away from TSS annotations
+TSS <- readRDS(paste0(path, "/GENCODE_TSS/", "GR_Gencode_protein_coding_TSS.RDS"))
 
-blacklist <- keepSeqlevels(blacklist, allowed_chroms, pruning.mode = "coarse")
-random_regions <- regioneR::createRandomRegions(N, length.mean = window, length.sd = 0, genome = whole_genome, mask = blacklist)
+print('Finding random pure')
+random_regions <- find_random(window, N, p300 = p300, TSS = TSS,
+                              blacklist = blacklist)
 
 # Create profiles for each region using all the histones available
 profiles = list()
-profiles_undirected = list()
 
 # First, collect a list of all the histone files
 bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam$", full.name = TRUE)
@@ -90,13 +74,12 @@ bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam
 # These are used to normalize the profiles
 print('Reading control histone')
 control_ind <- grep('Control', bam_files)
-control <- rtracklayer::import(bam_files[control_ind])
-profiles[['Control']] <- create_profile(random_regions, histone = control, reference = NULL, ignore_strand = FALSE)
-
+profiles[['Control']] <- create_profile(random_regions, bam_file = BamFile(bam_files[control_ind]),
+                                        reference = NULL, ignore_strand = TRUE)
 print('Reading input polymerase')
 input_ind <- grep('Input', bam_files)
-input <- rtracklayer::import(bam_files[input_ind])
-profiles[['Input']] <- create_profile(random_regions, histone = input, reference = NULL, ignore_strand = FALSE)
+profiles[['Input']] <- create_profile(random_regions, bam_file = BamFile(bam_files[input_ind]),
+                                      reference = NULL, ignore_strand = TRUE)
 
 # Create profiles for the rest of the histones
 for (bam_file in bam_files) {
@@ -114,9 +97,8 @@ for (bam_file in bam_files) {
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         print(paste0("Processing: ", name))
-        histone <- rtracklayer::import(bam_file)
-        profiles[[name]] <- create_profile(random_regions, histone = histone,
-                                           reference = reference, ignore_strand = FALSE)
+        profiles[[name]] <- create_profile(random_regions, bam_file = BamFile(bam_file),
+                                           reference = reference, ignore_strand = TRUE)
     }
 }
 
@@ -127,4 +109,4 @@ if(normalizeBool==TRUE){
 
 # Save the profiles
 dir.create(paste0(path, "/", cell_line, "/data_R"), recursive = TRUE, showWarnings = FALSE)
-save(profiles, profiles_undirected, file = paste0(path, "/", cell_line,"/data_R/",N,"_pure_random_1000_bin_",bin_size,"_window_",window,"2.RData"))
+save(profiles, file = paste0(path, "/", cell_line,"/data_R/",N,"_pure_random_1000_bin_",bin_size,"_window_",window,"2.RData"))

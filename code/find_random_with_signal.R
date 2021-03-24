@@ -5,7 +5,11 @@ find_random_with_signal <- function(coverage, regions, threshold = 5, window = 1
                                     TSS = NULL, max_dist_to_TSS = 2000,
                                     blacklist = NULL)
 {
-    print('Loading data...')
+    # All blacklisted regions will be omitted
+    if (is.null(blacklist)) {
+        blacklist <- GRanges()
+    }
+
     # Select the $data parts of the coverage list
     coverage <- unlist(coverage, recursive = FALSE)[c(TRUE, FALSE)]
 
@@ -15,15 +19,8 @@ find_random_with_signal <- function(coverage, regions, threshold = 5, window = 1
     # Don't count negative coverage values 
     coverage[coverage < 0] <- 0
 
-    # Select all regions which have enough coverage
-    accepted <- rowSums(coverage) >= threshold
-    regions <- regions[accepted]
-    print(paste0('Selected ', length(regions), ' regions with enough coverage.'))
-
-    # Blacklist to remove problematic regions
-    if (is.null(blacklist)) {
-        blacklist <- GRanges()
-    }
+    # Blacklist all regions which don't have enough coverage
+    blacklist <- union(blacklist, regions[rowSums(coverage) < threshold])
 
     # Remove regions that are too close to a p300 peak, as specified by
     # max_dist_to_p300
@@ -41,21 +38,10 @@ find_random_with_signal <- function(coverage, regions, threshold = 5, window = 1
         blacklist <- union(blacklist, regions[too_close])
     }
 
-    # Remove all blacklisted regions
-    to_remove <- unique(from(findOverlaps(regions, blacklist)))
-    if (length(to_remove) > 0) {
-        regions <- regions[-to_remove]
-    }
-    print(paste0("#regions after blacklist: ", length(regions)))
+    allowed_chroms=c("chr1",  "chr2",  "chr3",  "chr4",  "chr5",  "chr6",  "chr7",  "chr8",  "chr9", 
+    "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18",
+    "chr19", "chr20", "chr21", "chr22", "chrX") 
+    blacklist <- keepSeqlevels(blacklist, allowed_chroms, pruning.mode = "coarse")
 
-    # Select N random locations, max 1 location per region
-    if (is.null(N)) {
-        N <- length(regions)
-    }
-    regions <- sort(sample(regions, N))
-    samples <- sample(seq(1, bin_size), N, replace = TRUE)
-    start(regions) <- start(regions) + samples
-    width(regions) <- 1
-
-    regions
+    regioneR::createRandomRegions(N, length.mean = window, length.sd = 0, genome = regions, mask = blacklist)
 }
