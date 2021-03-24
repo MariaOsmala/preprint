@@ -45,6 +45,7 @@ cell_line='K562'
 p300_peaks_file='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data/K562/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'
 normalizeBool=FALSE
 NormCellLine=NULL
+max_dist_to_promoter=2000
 
 source('code/create_profile.R')
 
@@ -64,13 +65,17 @@ blacklist <- union(DAC, Duke)
 
 # Add p300 BSs to the mask of regions not to use
 p300 <- rtracklayer::import(p300_peaks_file)
+p300 <- p300[seqnames(p300) != "chrM"]
 start(p300) <- start(p300) + p300$peak
 p300 <- resize(p300, 1000, fix="center")
 blacklist <- union(blacklist, p300)
 
-# Add protein coding TSS to the mask of regions not to use
-TSS <- readRDS(paste0(path, "/GENCODE_TSS/", "GR_Gencode_protein_coding_TSS.RDS"))
-blacklist <- union(blacklist, TSS)
+# Remove regions that are too close to a promotor range, as specified by
+# max_dist_to_promoter.
+promoters <- readRDS(paste0(path, "/GENCODE_TSS/", "GR_Gencode_protein_coding_TSS.RDS"))
+dist <- distanceToNearest(p300, promoters, ignore.strand = TRUE)
+too_close <- from(dist)[mcols(dist)$distance < (max_dist_to_promoter - 1)]  # FIXME: why the -1?
+blacklist <- union(blacklist, too_close)
 
 blacklist <- keepSeqlevels(blacklist, allowed_chroms, pruning.mode = "coarse")
 random_regions <- regioneR::createRandomRegions(N, length.mean = window, length.sd = 0, genome = whole_genome, mask = blacklist)

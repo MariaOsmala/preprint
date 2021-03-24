@@ -80,22 +80,22 @@ promoters <- find_promoters(TSS_annotation = TSS_annotation,
                             window = window,
                             N = N)
 
-# Create profiles for each promoter sites using all the histones available
+# Create profiles for each promoter sites using all the BAM files available
 profiles = list()
 
-# First, collect a list of all the histone files
+# First, collect a list of all the BAM files
 bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam$", full.name = TRUE)
 
 # These are used to normalize the profiles
 print('Reading control histone')
 control_ind <- grep('Control', bam_files)
 control <- BamFile(bam_files[control_ind])
-profiles[['Control']] <- create_profile(promoters, histone = control, reference = NULL, ignore_strand = FALSE)
+profiles[['Control']] <- create_profile(promoters, bam_file = control, reference = NULL, ignore_strand = FALSE)
 
 print('Reading input polymerase')
 input_ind <- grep('Input', bam_files)
 input <- BamFile(bam_files[input_ind])
-profiles[['Input']] <- create_profile(promoters, histone = input, reference = NULL, ignore_strand = FALSE)
+profiles[['Input']] <- create_profile(promoters, bam_file = input, reference = NULL, ignore_strand = FALSE)
 
 # Create profiles for the rest of the histones
 for (bam_file in bam_files) {
@@ -113,8 +113,8 @@ for (bam_file in bam_files) {
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         print(paste0("Processing: ", name))
-        histone <- BamFile(bam_file)
-        profiles[[name]] <- create_profile(promoters, histone = histone,
+        bam_file <- BamFile(bam_file)
+        profiles[[name]] <- create_profile(promoters, bam_file = bam_file,
                                            reference = reference, ignore_strand = FALSE)
     }
 }

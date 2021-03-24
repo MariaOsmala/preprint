@@ -21,8 +21,8 @@ create_profile <- function(sites, bam_file, reference, bin_size = 100, ignore_st
     if (is.na(Rsamtools::yieldSize(bam_file))) {
         # Read entire BAM file in one chunk
         histone <- unlist(readGAlignmentsList(bam_file))
-        histone <- histone[from(findOverlaps(histone, sites_binned))]
-        data <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE))$counts
+        histone <- histone[from(findOverlaps(histone, sites_binned, ignore.strand = ignore_strand))]
+        data <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE, ignore.strand = ignore_strand))$counts
     } else {
         # Read BAM file in chunks. Compute overlaps for each chunk.
         pb <- txtProgressBar(min = 0, max = ceiling(num_reads / yieldSize(bam_file)),
@@ -36,8 +36,8 @@ create_profile <- function(sites, bam_file, reference, bin_size = 100, ignore_st
         setTxtProgressBar(pb, 0)
         while (length(alignments <- readGAlignmentsList(bam_file))) {
             histone = unlist(alignments)
-            histone <- histone[from(findOverlaps(histone, sites_binned))]
-            counts <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE))$counts
+            histone <- histone[from(findOverlaps(histone, sites_binned, ignore.strand = ignore_strand))]
+            counts <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE, ignore.strand = ignore_strand))$counts
             if (is.null(data)) {
                 data <- counts
             } else {
