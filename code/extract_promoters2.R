@@ -50,7 +50,6 @@ print(N)
 print(path_to_dir)
 print(cell_line)
 print(DNase_peaks_file)
-print(normalizeBool)
 print(NormCellLine)
 
 
