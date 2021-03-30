@@ -2,9 +2,9 @@ library(GenomicRanges)
 library(GenomicAlignments)
 library(SummarizedExperiment)
 
-# Use the histone reads to create a profile for a list of sites.
+# Use the histone reads to create profiles for a list of sites.
 # The sites could for example be enhancer sites found with `find_enhancers`
-create_profile <- function(sites, bam_file, reference, bin_size = 100, ignore_strand = FALSE)
+create_profiles <- function(sites, bam_file, reference, bin_size = 100, ignore_strand = FALSE)
 {
     # Explode the sites into bins.
     # We want each bin to be of a guarenteed size (bin_size). This means we
@@ -22,7 +22,14 @@ create_profile <- function(sites, bam_file, reference, bin_size = 100, ignore_st
         # Read entire BAM file in one chunk
         histone <- unlist(readGAlignmentsList(bam_file))
         histone <- histone[from(findOverlaps(histone, sites_binned, ignore.strand = ignore_strand))]
-        data <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE, ignore.strand = ignore_strand))$counts
+        profiles <- assays(
+            summarizeOverlaps(
+                unlist(sites_binned),
+                histone,
+                inter.feature = FALSE,
+                ignore.strand = ignore_strand
+            )
+        )$counts
     } else {
         # Read BAM file in chunks. Compute overlaps for each chunk.
         pb <- txtProgressBar(min = 0, max = ceiling(num_reads / yieldSize(bam_file)),
@@ -32,40 +39,50 @@ create_profile <- function(sites, bam_file, reference, bin_size = 100, ignore_st
             on.exit(close(bam_file))
             on.exit(close(pb))
         }
-        data <- NULL
+        profiles <- NULL
         setTxtProgressBar(pb, 0)
         while (length(alignments <- readGAlignmentsList(bam_file))) {
             histone = unlist(alignments)
             histone <- histone[from(findOverlaps(histone, sites_binned, ignore.strand = ignore_strand))]
-            counts <- assays(summarizeOverlaps(unlist(sites_binned), histone, inter.feature = FALSE, ignore.strand = ignore_strand))$counts
-            if (is.null(data)) {
-                data <- counts
+            counts <- assays(
+                summarizeOverlaps(
+                    unlist(sites_binned),
+                    histone,
+                    inter.feature = FALSE,
+                    ignore.strand = ignore_strand
+                )
+            )$counts
+            if (is.null(profiles)) {
+                profiles <- counts
             } else {
-                data <- data + counts
+                profiles <- profiles + counts
             }
             setTxtProgressBar(pb, getTxtProgressBar(pb) + 1)
         }
     }
 
-    data <- matrix(data, ncol = length(sites))  # nbins x nranges
+    # Assemble the profiles matrix, annotate with metadata
+    profiles <- matrix(profiles, nrow = length(sites), byrow = TRUE)  # ranges x bins
+    attr(profiles, 'ranges') <- sites_binned
+    attr(profiles, 'num_reads') <- num_reads  # Needed when normalizing profiles
 
     if (!ignore_strand) {
         to_reverse <- as.vector(strand(sites) == "-")
-        data[, to_reverse] <- data[nrow(data):1, to_reverse]
+        profiles[to_reverse,] <- profiles[to_reverse, ncol(profiles):1]
     }
-
-    profile <- list(data = data, num_reads = num_reads)
 
     if (!is.null(reference)) {
-        profile <- normalize_profile(profile, reference)
+        profiles <- normalize_profiles(profiles, reference)
     }
 
-    profile
+    profiles
 }
 
-# Normalize one profile with another one
-normalize_profile <- function(profile, reference) {
-    scaling_factor <- profile$num_reads / reference$num_reads
-    profile$data <- profile$data - scaling_factor * reference$data
-    profile
+# Normalize one set of profiles with another
+normalize_profiles <- function(profiles, reference) {
+    scaling_factor <- attr(profiles, 'num_reads') / attr(reference, 'num_reads')
+    profiles <- profiles - scaling_factor * reference
+
+    # Make proper counts (positive integer values)
+    round(pmax(profiles, 0))
 }

@@ -74,31 +74,31 @@ bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam
 # These are used to normalize the profiles
 print('Reading control histone')
 control_ind <- grep('Control', bam_files)
-profiles[['Control']] <- create_profile(random_regions, bam_file = BamFile(bam_files[control_ind]),
-                                        reference = NULL, ignore_strand = TRUE)
+profiles_control <- create_profiles(random_regions, bam_file = BamFile(bam_files[control_ind]),
+                                    reference = NULL, ignore_strand = TRUE)
 print('Reading input polymerase')
 input_ind <- grep('Input', bam_files)
-profiles[['Input']] <- create_profile(random_regions, bam_file = BamFile(bam_files[input_ind]),
-                                      reference = NULL, ignore_strand = TRUE)
+profiles_input <- create_profiles(random_regions, bam_file = BamFile(bam_files[input_ind]),
+                                  reference = NULL, ignore_strand = TRUE)
 
 # Create profiles for the rest of the histones
 for (bam_file in bam_files) {
     name <- tools::file_path_sans_ext(basename(bam_file))
 
-    # Determine reference profile
+    # Determine reference profiles
     if (length(grep('Dnase|Nsome', name)) > 0) {
         reference <- NULL
     } else if (length(grep('Pol', name)) > 0) {
-        reference <- profiles[['Input']]
+        reference <- profiles_input
     } else {
-        reference <- profiles[['Control']]
+        reference <- profiles_control
     }
 
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         print(paste0("Processing: ", name))
-        profiles[[name]] <- create_profile(random_regions, bam_file = BamFile(bam_file),
-                                           reference = reference, ignore_strand = TRUE)
+        profiles[[name]] <- create_profiles(random_regions, bam_file = BamFile(bam_file),
+                                            reference = reference, ignore_strand = TRUE)
     }
 }
 
@@ -109,4 +109,4 @@ if(normalizeBool==TRUE){
 
 # Save the profiles
 dir.create(paste0(path, "/", cell_line, "/data_R"), recursive = TRUE, showWarnings = FALSE)
-save(profiles, file = paste0(path, "/", cell_line,"/data_R/",N,"_pure_random_1000_bin_",bin_size,"_window_",window,"2.RData"))
+save(profiles, file = paste0(path, "/", cell_line,"/data_R/pure_random_", N, "_bin_", bin_size, "_window_", window, "2.RData"))

@@ -51,13 +51,14 @@ library(optparse)
 #N=opt$N
 #distance_measure=opt$distanceMeasure #"Bayes_estimated_priors" # ML, Bayes_estimated_priors
 #k=opt$k #k-fold CV
-#path_to_dir=opt$pathToDir
+#path=opt$pathToDir
 
 window=2000
 distance_measure="Bayes_estimated_priors"
 k=5
+N=1000
 bin_size=100
-path_to_dir='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
+path='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
 cell_line='K562'
 
 print(cell_line)
@@ -66,14 +67,7 @@ print(bin_size)
 print(N)
 print(distance_measure)
 print(k)
-
-print(path_to_dir)
-
-
-#setwd(path_to_dir)
-source("code/functions.R")
-path=path_to_dir
-
+print(path)
 
 
 directionality=FALSE #for promoters
@@ -81,130 +75,101 @@ round_logic=FALSE
 negatives_to_zero=FALSE
 summary="mean"
 
+n_bins <- window / bin_size
 
-################################Load training data enhancers #############################################################
-load(file=paste0(path,"/",cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData")) #normalized_profiles, profiles, regions
+source('code/round_correct.R')
+source('code/createCrossValidationGroups.R')
 
-original_window=nrow(normalized_profiles[[1]])*bin_size
+# Enhancers
+load(paste0(path, "/", cell_line, "/data_R/", N, "_enhancers_bin_", bin_size, "_window_", window, ".RData"))
+enhancer_profiles <- profiles
 
-enhancer_profiles=normalized_profiles
-enhancer_regions=regions
+# Promoters
+load(paste0(path, "/", cell_line, "/data_R/", N, "_promoters_bin_", bin_size, "_window_", window, "2.RData"))
+promoter_profiles <- profiles
+
+# Random pure
+load(paste0(path, "/", cell_line, "/data_R/pure_random_", N, "_bin_", bin_size, "_window_", window, "2.RData"))
+random_pure_profiles <- profiles
+
+# Random with signal
+load(paste0(path, "/", cell_line, "/data_R/", N, "_random_with_signal_bin_", bin_size, "_window_", window, "2.RData"))
+random_with_signal_profiles <- profiles
+
+# Combine random data
+random_profiles <- mapply(cbind, random_pure_profiles, random_with_signal_profiles, SIMPLIFY = FALSE)
+
+# Make all profiles positive and integer
+make_pos_int <- function(x) { round_correct(pmax(x, 0)) }
+enhancer_profiles <- lapply(enhancer_profiles, make_pos_int)
+promoter_profiles <- lapply(promoter_profiles, make_pos_int)
+random_profiles <- lapply(random_profiles, make_pos_int)
+
+enhancers <- data.frame(t(do.call(cbind, enhancer_profiles)))
+enhancers[['hist']] <- rep(names(enhancer_profiles), each=ncol(enhancer_profiles[[1]]))
+enhancers[['type']] <- 'enhancer'
+
+promoters <- data.frame(t(do.call(cbind, promoter_profiles)))
+promoters[['hist']] <- rep(names(promoter_profiles), each=ncol(promoter_profiles[[1]]))
+promoters[['type']] <- 'promoter'
+
+random <- data.frame(t(do.call(cbind, promoter_profiles)))
+random[['hist']] <- rep(names(promoter_profiles), each=ncol(promoter_profiles[[1]]))
+random[['type']] <- 'random'
+
+data <- rbind(enhancers, promoters, random)
+
+# Create cross validation groups
+cv_groups <- createCrossValidationGroups(
+    N_pos = ncol(enhancer_profiles[[1]]),
+    N_promoter = ncol(promoter_profiles[[1]]),
+    N_random = ncol(random_profiles[[1]]),
+    k = k
+)
 
 
-enhancer_summary=profile_averages(enhancer_profiles)
-
-
-
-
-#change the window size
-#enhancer_profiles=change_window(enhancer_profiles, original_window, window, bin_size)
-#enhancer_summary=change_window(enhancer_summary, original_window, window, bin_size)
-
-
-##################Load training data promoters###########################################################################
-#profiles_directed,profiles_undirected, normalized_profiles_directed,normalized_profiles_undirected, regions
-load(file=paste0(path,"/",cell_line,"/data_R/",N,"_promoters_bin_",
-                 bin_size,"_window_",window,".RData"))
-
-#promoter_profiles=normalized_profiles_undirected
-# FIXME
-promoter_profiles=normalized_profiles
-#promoter_profiles=change_window(promoter_profiles, original_window, window, bin_size)
-promoter_regions=regions
-#promoter_directions=regions$strand
-#averages, quantiles
-
-##################Load training data random################################################################################
-
-
-#pure_random
-load(file=paste0(path,"/",cell_line,"/data_R/pure_random_" ,N,"_bin_",
-                 bin_size,"_window_",window,".RData")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
-  
-pure_random_profiles=normalized_profiles
-pure_random_regions=regions
-
-
-#random_with_signal
-load(file=paste0(path,"/",cell_line,"/data_R/",N,"_random_with_signal_bin_",
-                 bin_size,"_window_",window,".RData")) #profiles, normalized_profiles, regions, accepted_GRanges,steps
-  
-random_with_signal_profiles=normalized_profiles
-random_with_signal_regions=regions
-
-#combine negatives
-
-random_profiles=list()
-for(i in 1:length(pure_random_profiles)){
-  random_profiles[[i]]=cbind(pure_random_profiles[[i]], random_with_signal_profiles[[i]])
+distance_to_templates <- function(profiles, ..., measure = 'ML')
+{
+    distances = vector()
+    for (template in list(...)) {
+        alpha <- colSums(profiles) / sum(template)
+        lambdas <- outer(alpha, template)
+        likelyhood <- colSums(dpois(x = profiles, lambda = lambdas, log = TRUE))
+        distances <- rbind(distances, likelyhood)
+    }
+    distances
 }
 
-random_regions=c(pure_random_regions, random_with_signal_regions)
-
-##############positive and integer data############################################
-for(i in 1:length(enhancer_profiles)){
-  enhancer_profiles[[i]][which(enhancer_profiles[[i]]<0)]=0
-  enhancer_profiles[[i]]=round_correct(enhancer_profiles[[i]])
-  
-  promoter_profiles[[i]][which(promoter_profiles[[i]]<0)]=0
-  promoter_profiles[[i]]=round_correct(promoter_profiles[[i]])
-  
-  random_profiles[[i]][which(random_profiles[[i]]<0)]=0
-  random_profiles[[i]]=round_correct(random_profiles[[i]])
-  
-}
-
-####################COmbine negatives###############################################
-
-
-negative_profiles=mapply(cbind, promoter_profiles, random_profiles, SIMPLIFY=FALSE)
-tmp=promoter_regions
-elementMetadata(tmp)=NULL
-negative_regions=c(tmp, random_regions)
-
-
-###############Create cross validation groups#################################################
-
-cv_groups=createCrossValidationGroups(N_pos=length(enhancer_regions), N_promoter=length(promoter_regions),N_random=length(random_regions) ,k=k)
-
+enhancer_subset <- enhancer_profiles[[1]][, cv_groups$pos[[1]]$train]
+feature_mean <- rowMeans(enhancer_subset)
+lambdas <- outer(alpha, feature_mean)
 
 ################Choose function############################################################
-
-if(distance_measure=="ML"){
-  
-  fn=compute_ML
-  
-}else if(distance_measure=="Bayes_estimated_priors"){
-  
-  fn=compute_Bayes_estimated_prior
-  
-}else{
-  print("give correct distance measure")
+if (distance_measure=="ML") {
+    fn <- compute_ML
+} else if (distance_measure == "Bayes_estimated_priors") {
+    fn <- compute_Bayes_estimated_prior
+} else {
+    print("give correct distance measure")
 }
 
-train_summaries_pos<-list() #training data averages or medians
-train_summaries_promoters<-list()
-train_summaries_random<-list()
-for(i in 1:k){
+train_summaries_pos <- list() #training data averages or medians
+train_summaries_promoters <- list()
+train_summaries_random <- list()
+for (i in 1:k) {
+    train_summaries_pos[[i]]<-sapply( enhancer_profiles, function (x) rowMeans(x[, cv_groups$pos[[i]]$train]) ) #window length x 15
+    train_summaries_promoters[[i]]<-sapply( promoter_profiles, function (x) rowMeans(x[, cv_groups$neg_promoter[[i]]$train]) )
+    train_summaries_random[[i]]<-sapply( random_profiles, function (x) rowMeans(x[, cv_groups$neg_random[[i]]$train]) )
   
-  if(summary=="mean"){
-      train_summaries_pos[[i]]<-sapply( enhancer_profiles, function (x) rowMeans(x[, cv_groups$pos[[i]]$train]) ) #window length x 15
-      train_summaries_promoters[[i]]<-sapply( promoter_profiles, function (x) rowMeans(x[, cv_groups$neg_promoter[[i]]$train]) )
-      train_summaries_random[[i]]<-sapply( random_profiles, function (x) rowMeans(x[, cv_groups$neg_random[[i]]$train]) )
-  }
- 
-  
-  
-  
-  train_data_pos=compute_distance_two_negatives(profile=enhancer_profiles, 
-                                                subset=cv_groups$pos[[i]]$train, 
-                                                summary_pos=train_summaries_pos[[i]], 
-                                                summary_neg_promoters=train_summaries_promoters[[i]],
-                                                summary_neg_random=train_summaries_random[[i]],
-                                                fn=fn, distance_measure=distance_measure,
-                                                learn_alpha_prior=TRUE, priorgammas_pos=NULL, 
-                                                priorgammas_neg_promoters=NULL, 
-                                                priorgammas_neg_random=NULL)
+    train_data_pos=compute_distance_two_negatives(profile=enhancer_profiles, 
+                                                  subset=cv_groups$pos[[i]]$train, 
+                                                  summary_pos=train_summaries_pos[[i]], 
+                                                  summary_neg_promoters=train_summaries_promoters[[i]],
+                                                  summary_neg_random=train_summaries_random[[i]],
+                                                  fn=fn, distance_measure=distance_measure,
+                                                  learn_alpha_prior=TRUE, priorgammas_pos=NULL, 
+                                                  priorgammas_neg_promoters=NULL, 
+                                                  priorgammas_neg_random=NULL)
 
     
   if( distance_measure=="ML"){

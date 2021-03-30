@@ -167,7 +167,7 @@ rule shift_reads:
 		f'{data_dir}/{{cell_line}}/bed_shifted/{{data_type}}.bed'
 	run:
 		# Input and DNase-seq are not shifted.
-		if 'input' in input.bed_file or 'Dnase' in input.bed_file:
+		if 'Input' in input.bed_file or 'Dnase' in input.bed_file:
 			shell(f'cp {input.bed_file} {output}')
 		else:
 			# For MNase-seq data the shift is 149.

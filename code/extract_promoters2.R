@@ -54,7 +54,7 @@ print(NormCellLine)
 
 
 source('code/find_promoters.R')
-source('code/create_profile.R')
+source('code/create_profiles.R')
 
 directionality=TRUE # FALSE #
 
@@ -89,12 +89,12 @@ bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam
 print('Reading control histone')
 control_ind <- grep('Control', bam_files)
 control <- BamFile(bam_files[control_ind])
-profiles[['Control']] <- create_profile(promoters, bam_file = control, reference = NULL, ignore_strand = FALSE)
+profiles_control <- create_profiles(promoters, bam_file = control, reference = NULL, ignore_strand = FALSE)
 
 print('Reading input polymerase')
 input_ind <- grep('Input', bam_files)
 input <- BamFile(bam_files[input_ind])
-profiles[['Input']] <- create_profile(promoters, bam_file = input, reference = NULL, ignore_strand = FALSE)
+profiles_input <- create_profiles(promoters, bam_file = input, reference = NULL, ignore_strand = FALSE)
 
 # Create profiles for the rest of the histones
 for (bam_file in bam_files) {
@@ -104,17 +104,17 @@ for (bam_file in bam_files) {
     if (length(grep('Dnase|Nsome', name)) > 0) {
         reference <- NULL
     } else if (length(grep('Pol', name)) > 0) {
-        reference <- profiles[['Input']]
+        reference <- profiles_input
     } else {
-        reference <- profiles[['Control']]
+        reference <- profiles_control
     }
 
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         print(paste0("Processing: ", name))
         bam_file <- BamFile(bam_file)
-        profiles[[name]] <- create_profile(promoters, bam_file = bam_file,
-                                           reference = reference, ignore_strand = FALSE)
+        profiles[[name]] <- create_profiles(promoters, bam_file = bam_file,
+                                            reference = reference, ignore_strand = FALSE)
     }
 }
 

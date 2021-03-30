@@ -5,5 +5,9 @@ samtools.*
 env
 gurobi.log
 *.swp
+*.swo
+*.swn
 .Rproj.user
 .Rhistory
+.RData
+.RDataTmp

@@ -70,19 +70,18 @@ compute_features<-function(profile, subset, summary, fn, distance_measure){
 }
 
 
-compute_distance_two_negatives<-function(profile, subset, summary_pos, 
-                                         summary_neg_promoters, 
-                                         summary_neg_random, 
-                                         fn=fn, distance_measure,
-                                         learn_alpha_prior=TRUE, 
-                                         priorgammas_pos=NULL, 
-                                         priorgammas_neg_promoters=NULL, 
-                                         priorgammas_neg_random=NULL){
+compute_distance_to_negatives<-function(profile, subset, summary_pos, 
+                                        summary_neg_promoters, 
+                                        summary_neg_random, 
+                                        fn=fn, distance_measure,
+                                        learn_alpha_prior=TRUE, 
+                                        priorgammas_pos=NULL, 
+                                        priorgammas_neg_promoters=NULL, 
+                                        priorgammas_neg_random=NULL){
   
   
-  print(distance_measure)
   if(distance_measure=="ML"){
-    data_tmp<-matrix(0, nrow=3*length(profile), ncol=length(subset) ) #15 x N
+    data_tmp<-matrix(0, nrow=3*length(profile), ncol=length(subset) ) #45 x N
     alpha_positives<-matrix(0, nrow=length(profile), ncol=length(subset) )  #15 x N
     alpha_negatives_promoters<-matrix(0, nrow=length(profile), ncol=length(subset))
     alpha_negatives_random<-matrix(0, nrow=length(profile), ncol=length(subset))
@@ -142,7 +141,6 @@ compute_distance_two_negatives<-function(profile, subset, summary_pos,
     
   }
   if(distance_measure=="Bayes_estimated_priors"){
-    print('doing this one')
     
     if(learn_alpha_prior==TRUE){
       
@@ -285,6 +283,7 @@ compute_ML<-function(data_profile,summary){
   #data_profile is a vector
   #summary is a vector
   alpha=sum(data_profile)/sum(summary)
+  
   lh=sum( dpois(x=data_profile ,lambda=alpha*summary, log=TRUE) )
   
   rt=c(alpha, lh)

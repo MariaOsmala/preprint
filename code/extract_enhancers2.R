@@ -51,7 +51,8 @@ window=2000
 distance_to_promoters=2000
 bin_size=100
 N=1000
-path='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
+path='~/scratch_cs/csb/projects/enhancer_prediction/experiments/RProjects/preprint/Data'
+write_path='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
 cell_line='K562'
 p300_peaks_file='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data/K562/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'
 DNase_peaks_file='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data/K562/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz'
@@ -70,7 +71,7 @@ print(normalizeBool)
 print(NormCellLine)
 
 source('code/find_enhancers.R')
-source('code/create_profile.R')
+source('code/create_profiles.R')
 
 # Used for finding enhancer sites
 p300 <- rtracklayer::import(p300_peaks_file)
@@ -100,12 +101,12 @@ bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam
 # These are used to normalize the profiles
 print('Reading control histone')
 control_ind <- grep('Control', bam_files)
-profiles[['Control']] <- create_profile(enhancers, bam_file = BamFile(bam_files[control_ind]),
-                                        reference = NULL, ignore_strand = TRUE)
+profiles_control <- create_profiles(enhancers, bam_file = BamFile(bam_files[control_ind]),
+                                    reference = NULL, ignore_strand = TRUE)
 print('Reading input polymerase')
 input_ind <- grep('Input', bam_files)
-profiles[['Input']] <- create_profile(enhancers, bam_file = BamFile(bam_files[input_ind]),
-                                      reference = NULL, ignore_strand = TRUE)
+profiles_input <- create_profiles(enhancers, bam_file = BamFile(bam_files[input_ind]),
+                                  reference = NULL, ignore_strand = TRUE)
 
 # Create profiles for the rest of the histones
 for (bam_file in bam_files) {
@@ -115,16 +116,16 @@ for (bam_file in bam_files) {
     if (length(grep('Dnase|Nsome', name)) > 0) {
         reference <- NULL
     } else if (length(grep('Pol', name)) > 0) {
-        reference <- profiles[['Input']]
+        reference <- profiles_input
     } else {
-        reference <- profiles[['Control']]
+        reference <- profiles_control
     }
 
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         print(paste0("Processing: ", name))
-        profiles[[name]] <- create_profile(enhancers, bam_file = BamFile(bam_file),
-                                           reference = reference, ignore_strand = TRUE)
+        profiles[[name]] <- create_profiles(enhancers, bam_file = BamFile(bam_file),
+                                            reference = reference, ignore_strand = TRUE)
     }
 }
 
@@ -135,4 +136,4 @@ if(normalizeBool==TRUE){
 
 # Save the profiles
 dir.create(paste0(path, "/", cell_line, "/data_R"), recursive = TRUE, showWarnings = FALSE)
-save(profiles, file = paste0(path, "/", cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData"))
+save(profiles, enhancers, file = paste0(write_path, "/", cell_line,"/data_R/",N,"_enhancers_bin_",bin_size,"_window_",window,".RData"))
