@@ -11,3 +11,4 @@ gurobi.log
 .Rhistory
 .RData
 .RDataTmp
+NSamples_*.png
