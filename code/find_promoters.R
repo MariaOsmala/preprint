@@ -24,7 +24,6 @@ find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
     to_keep <- from(findOverlaps(TSS_with_DNase, DNase, ignore.strand = TRUE))
     promoters <- TSS_with_DNase[to_keep] #60528
 
-    # Remove any TSS that have other TSS nearby
     promoters <- promoters[order(promoters$distance)]
     tmp <- resize(promoters, between_TSS_distance / 2, fix = "center")
     tmp <- findOverlaps(tmp, ignore.strand = TRUE)
@@ -39,9 +38,7 @@ find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
     promoters <- promoters[promoters$distance == 0]
 
     # Create a window around the promoters
-    # If window%%2==0, add 1 to window, extend the enhancer window/2 downstream and window/2 upsteam
-    # If window%%2==1, extend the enhancer window (window-1)/2 downstream and upstream
-    promoters <- resize(promoters, width = window + (window + 1) %% 2 , fix = "center" )
+    promoters <- resize(promoters, width = window, fix = "center" )
 
     if (!is.null(blacklist)) {
         # Remove promoters that fall within blacklisted regions
@@ -60,5 +57,6 @@ find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
         print(paste0("#promoters after selecting N: ", length(promoters)))
     }
 
+    mcols(promoters)$type <- as.factor('promoter')
     promoters
 }

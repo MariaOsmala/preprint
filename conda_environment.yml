@@ -33,5 +33,7 @@ dependencies:
   - r-doparallel
   - r-gdata
   - r-mass
+  - r-caret
+  - r-e1071
   - gnuplot
   - libsvm

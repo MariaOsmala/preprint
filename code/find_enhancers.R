@@ -32,10 +32,8 @@ find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
     enhancers <- p300[unique(from(findOverlaps(p300, DNase)))]
     print(paste0("#enhancers: ", length(enhancers)))
 
-    # Cut a window around the peak.
-    # If window%%2==0, add 1 to window, extend the enhancer window/2 downstream and window/2 upsteam
-    # If window%%2==1, extend the enhancer window (window-1)/2 downstream and upstream
-    enhancers <- resize(enhancers, width = window + (window + 1) %% 2, fix="center")
+    # Cut a window around the peak
+    enhancers <- resize(enhancers, width = window, fix="center")
 
     # Remove enhancers which window falls outside the bounds of the sequence
     human.chromlens <- seqlengths(Hsapiens)
@@ -59,5 +57,6 @@ find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
     }
     print(paste0("#enhancers after selecting N: ", length(enhancers)))
 
+    mcols(enhancers)$type <- as.factor('enhancer')
     enhancers
 }

@@ -38,5 +38,8 @@ find_random <- function(window = 1000, N = NULL,
 
     print("Finding random regions that satisfy the criteria.")
     random_regions <- regioneR::createRandomRegions(N, length.mean = window, length.sd = 0, genome = whole_genome, mask = blacklist, non.overlapping = FALSE)
-    sort(random_regions)
+    random_regions <- sort(random_regions)
+    mcols(random_regions)$type <- as.factor('random')
+
+    random_regions
 }
