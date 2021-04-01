@@ -28,7 +28,7 @@ for (fold in folds) {
     test_labels <- as.factor(ifelse(profile_type(test_data) == "enhancer",
                                     "enhancer", "not.enhancer"))
 
-    tuneGrid <- expand.grid(C = 2 ^ seq(-5, 8, length = 10), sigma = 1 / 45, Weight = c(0.25, 1, 4))
+    tuneGrid <- expand.grid(C = 2 ^ seq(-5, 8, length = 20), sigma = 1 / 45, Weight = 0.25)
     fitControl <- trainControl(method = "cv", number = 5, classProbs = TRUE, verboseIter = TRUE)
     model <- train(train_data, train_labels, method = 'svmRadialWeights',
                    trControl = fitControl, tuneGrid = tuneGrid)
