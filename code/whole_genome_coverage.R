@@ -110,4 +110,4 @@ if(normalizeBool==TRUE){
     # Not implemented yet
 }
 
-save(profiles, file = paste0(path, "/", cell_line, "/data_R/whole_genome_coverage2.RData"))
+save(profiles, file = paste0(path, "/", cell_line, "/data_R/whole_genome_coverage.RData"))
