@@ -1,7 +1,8 @@
 library(GenomicRanges)
 
-TSS_protein_coding <- function(gencode_tss_file)
+TSS_protein_coding <- function(gencode_tss_file, verbose = TRUE)
 {
+    if (verbose) cat('Reading TSS annotations...')
     gencode <- rtracklayer::import(gencode_tss_file)
     gencode <- resize(gencode, 1, fix = "start")  # We only care about the start of the read
 
@@ -19,6 +20,8 @@ TSS_protein_coding <- function(gencode_tss_file)
 
     # Ignore strands
     strand(gencode_protein_coding) <- "*"
+
+    if (verbose) cat(' done.')
 
     gencode_protein_coding
 }

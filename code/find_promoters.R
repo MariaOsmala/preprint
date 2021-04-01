@@ -2,12 +2,15 @@ library(GenomicRanges)
 library(BSgenome.Hsapiens.UCSC.hg19)
 
 find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
-                           between_TSS_distance = 2000, blacklist = NULL)
+                           between_TSS_distance = 2000, blacklist = NULL,
+                           verbose = TRUE)
 {
+    if (verbose) cat('Finding suitable promoter sites:\n')
+
     # Find the closest overlap between DNase and TSS_annotation
     dist <- distanceToNearest(DNase, TSS_annotation, ignore.strand = TRUE)
     TSS_with_DNase <- TSS_annotation[to(dist)]
-    mcols(TSS_with_DNase) <- mcols(DNase[from(dist)])[c("signalValue", "pValue")]
+    mcols(TSS_with_DNase) <- mcols(DNase[from(dist)])[c('signalValue', 'pValue')]
     mcols(TSS_with_DNase)$distance <- mcols(dist)$distance
 
     # Compute the distance from the peak in the DNase to the corresponding TSS_annotation
@@ -25,20 +28,21 @@ find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
     promoters <- TSS_with_DNase[to_keep] #60528
 
     promoters <- promoters[order(promoters$distance)]
-    tmp <- resize(promoters, between_TSS_distance / 2, fix = "center")
+    tmp <- resize(promoters, between_TSS_distance / 2, fix = 'center')
     tmp <- findOverlaps(tmp, ignore.strand = TRUE)
     tmp <- tmp[from(tmp) != to(tmp)]  # Ranges always overlap themselves
     to_drop <- unique(c(from(tmp), to(tmp)))  # All ranges that overlap with any other ranges
     if (length(to_drop) > 0) {
         promoters <- promoters[-to_drop]
     }
-    print(paste0("#promoters that are nicely isolated: ", length(promoters)))
+    
+    if (verbose) cat(paste0('    #promoters that are nicely isolated: ', length(promoters), '\n'))
 
     # ???
     promoters <- promoters[promoters$distance == 0]
 
     # Create a window around the promoters
-    promoters <- resize(promoters, width = window, fix = "center" )
+    promoters <- resize(promoters, width = window, fix = 'center' )
 
     if (!is.null(blacklist)) {
         # Remove promoters that fall within blacklisted regions
@@ -46,7 +50,8 @@ find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
         if (length(to_remove) > 0) {
             promoters <- promoters[-to_remove]
         }
-        print(paste0("#promoters after blacklist: ", length(promoters)))
+        
+        if (verbose) cat(paste0('    #promoters after blacklist: ', length(promoters), '\n'))
     }
 
     if (!is.null(N)) {
@@ -54,7 +59,7 @@ find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
         promoters <- promoters[order(promoters$pValue, promoters$signalValue, decreasing = TRUE)]
         promoters <- promoters[order(promoters$peakDistance, decreasing = FALSE)]
         promoters <- promoters[1:N]
-        print(paste0("#promoters after selecting N: ", length(promoters)))
+        if (verbose) cat(paste0('    #promoters after selecting N: ', length(promoters), '\n'))
     }
 
     mcols(promoters)$type <- as.factor('promoter')
