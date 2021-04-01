@@ -15,25 +15,12 @@ dependencies:
   - bioconductor-genomeinfodbdata
   - snakemake
   - pandas
-  # - r-gdata
-  # - r-circlize
-  # - r-doParallel
-  # - r-ggplot2
-  # - r-GetoptLong
-  # - r-gridExtra
-  # - r-pryr
-  # - r-reshape2
-  # - r-ROCR
-  # - bioconductor-ShortRead
 
   # For train-predict
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
   - bioconductor-regioner
   - r-optparse
-  - r-doparallel
   - r-gdata
   - r-mass
   - r-caret
   - r-e1071
-  - gnuplot
-  - libsvm

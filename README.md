@@ -27,8 +27,6 @@ Software:
   - [samtools](http://www.htslib.org)
   - [bedtools](https://bedtools.readthedocs.io/en/latest/index.html)
   - [phantompeakqualtools](https://www.encodeproject.org/software/phantompeakqualtools/)
-  - [gnuplot](http://www.gnuplot.info)
-  - [libsvm](https://www.csie.ntu.edu.tw/~cjlin/libsvm/)
 
 R packages:
 
@@ -40,6 +38,9 @@ R packages:
   - [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
   - [doparallel](https://cran.r-project.org/web/packages/doParallel/index.html)
   - [gdata](https://cran.r-project.org/web/packages/gdata/index.html)
+  - [MASS](https://cran.r-project.org/web/packages/MASS/index.html)
+  - [caret](https://cran.r-project.org/web/packages/caret/index.html)
+  - [e1071](https://cran.r-project.org/web/packages/e1071/index.html)
 
 Python packages:
 
