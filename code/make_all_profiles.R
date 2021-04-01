@@ -14,7 +14,7 @@ threshold <- 5
 source('code/find_enhancers.R')
 source('code/find_promoters.R')
 source('code/find_random.R')
-source('code/create_profiles.R')
+source('code/profiles.R')
 
 p300 <- rtracklayer::import(paste0(path, '/', cell_line, '/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'))
 DNase <- rtracklayer::import( paste0(path, '/', cell_line, '/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz'))

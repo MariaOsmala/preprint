@@ -3,7 +3,7 @@ library(caret)
 path='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
 cell_line='K562'
 
-source('code/create_profiles.R')
+source('code/profiles.R')
 source('code/statistics.R')
 
 # Load the profiles

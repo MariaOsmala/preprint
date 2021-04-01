@@ -58,7 +58,7 @@ regions <- regions[width(regions) == bin_size]  # Remove incomplete bins
 regions <- unlist(regions)
 
 
-source('code/create_profiles.R')
+source('code/profiles.R')
 
 # First, collect a list of all the BAM files
 bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = "\\.bam$", full.name = TRUE)
