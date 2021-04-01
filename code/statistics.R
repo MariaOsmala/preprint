@@ -1,27 +1,32 @@
 # Meat of the PREPRINT method
-pattern_likelihoods <- function(profiles, agg_patterns, measure = 'ML')
+pattern_likelihoods <- function(profiles, agg_patterns, measure = 'ML', positive_class = 'enhancer')
 {
-    distances = vector()
+    likelihoods = vector()
     for (name in names(profiles)) {
         sel <- colnames(profiles) == name
-        for (agg_pattern in agg_patterns) {
-            # Estimate gamma
-            if (measure == 'Bayesian') {
-                likelihood <- likelihood_Bayesian(profiles[, sel], agg_pattern[sel])
-            } else if (measure == 'ML') {
-                likelihood <- likelihood_ML(profiles[, sel], agg_pattern[sel])
-            } else {
-                stop(paste0('Invalid measure "', measure, '". Must be either "Bayesian" or "ML"'))
-            }
 
-            distances <- cbind(distances, likelihood)
+        if (measure == 'Bayesian') {
+            pos_agg_pattern <- agg_patterns[[positive_class]]
+            gamma <- estimate_gamma(profiles[, sel], pos_agg_pattern[sel])
+            for (agg_pattern in agg_patterns) {
+                likelihood <- likelihood_Bayesian(profiles[, sel], agg_pattern[sel], gamma)
+                likelihoods <- cbind(likelihoods, likelihood)
+            }
+        } else if (measure == 'ML') {
+            for (agg_pattern in agg_patterns) {
+                likelihood <- likelihood_ML(profiles[, sel], agg_pattern[sel])
+                likelihoods <- cbind(likelihoods, likelihood)
+            }
+        } else {
+            stop(paste0('Invalid measure "', measure, '". Must be either "Bayesian" or "ML"'))
         }
     }
 
-    colnames(distances) <- levels(interaction(names(profiles), names(agg_patterns), lex.order = TRUE))
-    profile_data(profiles) <- distances
+    colnames(likelihoods) <- levels(interaction(names(profiles), names(agg_patterns), lex.order = TRUE))
+    profile_data(profiles) <- likelihoods
     profiles
 }
+
 
 likelihood_ML <- function(profiles, agg_pattern)
 {
@@ -33,10 +38,10 @@ likelihood_ML <- function(profiles, agg_pattern)
     likelihood <- rowSums(dpois(x = profiles, lambda = lambda, log = TRUE))
 }
 
-likelihood_Bayesian <- function(profiles, agg_pattern)
+estimate_gamma <- function(profiles, pos_agg_pattern)
 {
     # Formula 4 of the paper
-    alpha <- rowSums(profiles) / sum(agg_pattern)
+    alpha <- rowSums(profiles) / sum(pos_agg_pattern)
 
     # Estimate gamma
     gamma <- try(MASS::fitdistr(alpha[alpha > 0], 'gamma', lower = list(shape = 1E-3, rate = 1E-3), upper = list(shape = 1E3, rate = 1E3), start = list(shape=1, rate=1))$estimate)
@@ -46,10 +51,15 @@ likelihood_Bayesian <- function(profiles, agg_pattern)
         gamma[['rate']] <- gamma[['rate']] / 1000
         cat(' success!\n')
     }
+
+    gamma
+}
+
+likelihood_Bayesian <- function(profiles, agg_pattern, gamma)
+{
+    # Formula 5 of the paper.
     a0 <- gamma[['shape']]
     b0 <- gamma[['rate']]
-
-    # Formula 5 of the paper.
     likelihood <- a0 * log(b0) + rowSums(profiles * log(agg_pattern)) - (a0 + rowSums(profiles)) * log(b0 + sum(agg_pattern)) + lgamma(a0 + rowSums(profiles)) - lgamma(a0) - rowSums(lgamma(profiles + 1))
 }
 
