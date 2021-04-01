@@ -2,14 +2,18 @@ library(BSgenome.Hsapiens.UCSC.hg19)
 library(GenomicRanges)
 
 find_random <- function(window = 1000, N = NULL,
+                        chroms_of_interest = NULL,
                         p300 = NULL, max_dist_to_p300 = 2000,
                         TSS = NULL, max_dist_to_TSS = 2000,
                         blacklist = NULL)
 {
-    allowed_chroms=c("chr1",  "chr2",  "chr3",  "chr4",  "chr5",  "chr6",  "chr7",  "chr8",  "chr9", 
-    "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18",
-    "chr19", "chr20", "chr21", "chr22", "chrX") 
-    whole_genome <- GRanges(allowed_chroms, IRanges(start=1, end=seqlengths(Hsapiens)[allowed_chroms]))
+    if (is.null(chroms_of_interest)) {
+        chroms_of_interest = c("chr1",  "chr2",  "chr3",  "chr4",  "chr5",  "chr6",
+                               "chr7",  "chr8",  "chr9", "chr10", "chr11", "chr12",
+                               "chr13", "chr14", "chr15", "chr16", "chr17",
+                               "chr18", "chr19", "chr20", "chr21", "chr22", "chrX")
+    }
+    whole_genome <- GRanges(allowed_chroms, IRanges(start=1, end=seqlengths(Hsapiens)[chroms_of_interest]))
 
     if (is.null(blacklist)) {
         blacklist = GRanges()
