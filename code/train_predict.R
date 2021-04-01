@@ -1,7 +1,5 @@
 library(caret)
-library(doParallel)
 
-distance_measure="Bayes_estimated_priors"
 path='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
 cell_line='K562'
 
