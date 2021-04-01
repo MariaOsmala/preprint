@@ -43,7 +43,7 @@ cat(' done.\n')
 # Find interesting sites
 cat('Finding enhancer, promoter and pure random sites...')
 enhancers <- find_enhancers(p300, DNase, window = window, N = N,
-                            promoters = promoters, max_dist_to_promoter = max_dist_to_promoter,
+                            TSS = TSS_annotation, max_dist_to_promoter = max_dist_to_promoter,
                             blacklist = blacklist)
 
 promoters <- find_promoters(TSS_annotation, DNase, 

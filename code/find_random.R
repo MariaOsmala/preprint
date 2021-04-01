@@ -13,7 +13,7 @@ find_random <- function(window = 1000, N = NULL,
                                "chr13", "chr14", "chr15", "chr16", "chr17",
                                "chr18", "chr19", "chr20", "chr21", "chr22", "chrX")
     }
-    whole_genome <- GRanges(allowed_chroms, IRanges(start=1, end=seqlengths(Hsapiens)[chroms_of_interest]))
+    whole_genome <- GRanges(chroms_of_interest, IRanges(start=1, end=seqlengths(Hsapiens)[chroms_of_interest]))
 
     if (is.null(blacklist)) {
         blacklist = GRanges()
@@ -35,7 +35,7 @@ find_random <- function(window = 1000, N = NULL,
         blacklist <- union(blacklist, TSS_exclusion_zone)
     }
 
-    blacklist <- keepSeqlevels(blacklist, allowed_chroms, pruning.mode = "coarse")
+    blacklist <- keepSeqlevels(blacklist, chroms_of_interest, pruning.mode = "coarse")
 
     # reduce() will greatly reduce the number of ranges by merging adjacent ranges.
     blacklist <- reduce(blacklist)
