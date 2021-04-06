@@ -37,4 +37,6 @@ for (fold in folds) {
     predictions <- unlist(list(predictions, pred))
     reference <- unlist(list(reference, test_labels))
 }
+
 print(confusionMatrix(data = unlist(predictions), reference = unlist(reference)))
+save(predictions, reference, file = paste0(path, '/', cell_line, 'data_R/predictions.RData'))
