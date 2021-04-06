@@ -5,8 +5,8 @@ from snakemake.exceptions import WorkflowError
 # The default rule that will do the entire preprocessing pipeline
 rule preprocess:
 	input:
-		expand(f'{data_dir}/K562/bed_shifted_RFECS/{{data_type}}.bed', data_type=all_data_types('K562')),
-		expand(f'{data_dir}/Gm12878/bed_shifted_RFECS/{{data_type}}.bed', data_type=all_data_types('Gm12878')),
+		expand(f'{data_dir}/K562/bam_shifted/{{data_type}}.bed', data_type=all_data_types('K562')),
+		expand(f'{data_dir}/Gm12878/bam_shifted/{{data_type}}.bed', data_type=all_data_types('Gm12878')),
 
 
 # Step 0: Download the data
