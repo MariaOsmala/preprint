@@ -21,7 +21,7 @@ TSS_protein_coding <- function(gencode_tss_file, verbose = TRUE)
     # Ignore strands
     strand(gencode_protein_coding) <- "*"
 
-    if (verbose) cat(' done.')
+    if (verbose) cat(' done.\n')
 
     gencode_protein_coding
 }

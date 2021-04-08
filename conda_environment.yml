@@ -19,7 +19,7 @@ dependencies:
   # For train-predict
   - bioconductor-bsgenome.hsapiens.ucsc.hg19
   - bioconductor-regioner
-  - r-optparse
+  - r-argparser
   - r-gdata
   - r-mass
   - r-caret

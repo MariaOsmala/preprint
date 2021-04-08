@@ -1,2 +1,49 @@
-#data_dir: /u/45/vanvlm1/unix/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data
-data_dir: /m/cs/scratch/csb/projects/enhancer_prediction/aaltorse/Data
+# The root folder in which all the data will be kept.
+# This is something you probably need to change to fit your system.
+data_dir: /u/45/vanvlm1/unix/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data
+#data_dir: /m/cs/scratch/csb/projects/enhancer_prediction/aaltorse/Data
+
+# Cell lines relevant to the analysis.
+cell_lines: [K562, Gm12878]
+
+# Settings for profile creation
+profiles:
+  window: 2000
+  bin: 100
+  enhancers: 1000
+  promoters: 1000
+  random_pure: 1000
+  random_with_signal: 1000
+  min_dist_to_promoter: 2000
+  min_dist_between_promoters: 2000
+  signal_threshold: 5
+
+  # Cell line specific profile creation settings
+  Gm12878:
+    normalize: K562  # Normalize profiles with relation to this cell line
+
+# All the files that are consumed and produced during the analysis.
+# Files are specified in relation to `data_dir` as specified above.
+filenames:
+  annotations: GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz
+  blacklist:
+    - blacklists/wgEncodeDacMapabilityConsensusExcludable.bed.gz
+    - blacklists/wgEncodeDukeMapabilityRegionsExcludable.bed.gz
+
+  # Cell line specific files.
+  # These files are relative to `data_dir`/`cell_line` as specified above.
+  K562:
+    bam_folder: bam_shifted
+    whole_genome_cov: data_R/whole_genome_coverage.rds
+    profiles: data_R/profiles.rds
+    predictions: data_R/predictions.RData
+    p300: raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz
+    DNase: raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz
+
+  Gm12878:
+    bam_folder: bam_shifted
+    whole_genome_cov: data_R/whole_genome_coverage.rds
+    profiles: data_R/profiles.rds
+    predictions: data_R/predictions.RData
+    p300: raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz
+    DNase: raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz

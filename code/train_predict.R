@@ -1,13 +1,21 @@
-library(caret)
+library(yaml, quietly = TRUE)
+library(argparser, quietly = TRUE)
+library(caret, quietly = TRUE)
 
-path='~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
-cell_line='K562'
+config <- read_yaml('workflow/config.yaml')
+
+# parser <- arg_parser('Run the train-predict loop')
+# parser <- add_argument(parser, 'cell_line', type = 'character',
+#                        help = paste0('The cell line to process. Either ', paste(config$cell_lines, collapse = ' or ')))
+# cell_line <- parse_args(parser)$cell_line
+cell_line <- 'K562'
 
 source('code/profiles.R')
 source('code/statistics.R')
+source('code/fname.R')
 
 # Load the profiles
-load(paste0(path, "/", cell_line, "/data_R/profiles.RData"))
+profiles <- readRDS(fname('profiles', cell_line = cell_line))
 
 # Create cross validation groups
 folds <- caret::createFolds(profile_type(profiles), k = 5)
@@ -39,4 +47,4 @@ for (fold in folds) {
 }
 
 print(confusionMatrix(data = unlist(predictions), reference = unlist(reference)))
-save(predictions, reference, file = paste0(path, '/', cell_line, 'data_R/predictions.RData'))
+save(predictions, reference, fname('predictions', cell_line = cell_line))

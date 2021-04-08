@@ -1,21 +1,22 @@
-library(GenomicRanges)
-library(Rsamtools)
+library(GenomicRanges, quietly = TRUE)
+library(Rsamtools, quietly = TRUE)
+library(argparser, quietly = TRUE)
+library(yaml, quietly = TRUE)
 
-path <- '~/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data'
+config <- read_yaml('workflow/config.yaml')
+
+# parser <- arg_parser('Create the profiles that will serve as training data.')
+# parser <- add_argument(parser, 'cell_line', type = 'character',
+#                        help = paste0('The cell line to process. Either ', paste(config$cell_lines, collapse = ' or ')))
+# cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
-window <- 2000
-N <- 1000
-max_dist_to_promoter <- 2000
-between_TSS_distance <- 2000
-bin_size <- 100
-threshold <- 5
-
 
 source('code/find_enhancers.R')
 source('code/find_promoters.R')
 source('code/find_random.R')
 source('code/TSS_protein_coding.R')
 source('code/profiles.R')
+source('code/fname.R')
 
 # These are the chromosomes of interest
 chroms_of_interest = c('chr1',  'chr2',  'chr3',  'chr4',  'chr5',  'chr6',
@@ -24,43 +25,52 @@ chroms_of_interest = c('chr1',  'chr2',  'chr3',  'chr4',  'chr5',  'chr6',
                        'chr19', 'chr20', 'chr21', 'chr22', 'chrX') 
 
 # Read TSS annotations to extract protein codings
-TSS_annotation <- TSS_protein_coding(paste0(path, '/GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz'))
+TSS_annotation <- TSS_protein_coding(fname('annotations'))
 
 cat('Reading p300 and DNase peaks...')
-p300 <- rtracklayer::import(paste0(path, '/', cell_line, '/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'))
-DNase <- rtracklayer::import( paste0(path, '/', cell_line, '/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz'))
+p300 <- rtracklayer::import(fname('p300', cell_line = cell_line))
+DNase <- rtracklayer::import(fname('DNase', cell_line = cell_line))
 cat(' done.\n')
 
 # Blacklist to remove problematic sites
 cat('Creating blacklist...')
-DAC <- rtracklayer::import(paste0(path, '/blacklists/wgEncodeDacMapabilityConsensusExcludable.bed.gz'))
-Duke <- rtracklayer::import(paste0(path, '/blacklists/wgEncodeDukeMapabilityRegionsExcludable.bed.gz'))
-blacklist = union(DAC, Duke)
+blacklist = GRanges()
+for (blacklist_file in fname('blacklist')) {
+    blacklist = union(blacklist, rtracklayer::import(blacklist_file))
+}
 cat(' done.\n')
 
 # Find interesting sites
-enhancers <- find_enhancers(p300, DNase, window = window, N = N,
-                            TSS = TSS_annotation, max_dist_to_promoter = max_dist_to_promoter,
+enhancers <- find_enhancers(p300, DNase, window = config$profiles$window, N = config$profiles$enhancers,
+                            TSS = TSS_annotation, min_dist_to_promoter = config$profiles$min_dist_to_promoter,
                             blacklist = blacklist)
 
 promoters <- find_promoters(TSS_annotation, DNase, 
-                            between_TSS_distance = between_TSS_distance, 
-                            window = window, N = N,
+                            between_TSS_distance = config$profiles$min_dist_between_promoters,
+                            window = config$profiles$window, N = config$profiles$promoters,
                             blacklist = blacklist)
 
-random_regions <- find_random(window, N, p300 = p300, TSS = TSS_annotation,
-                              chroms_of_interest = chroms_of_interest, blacklist = blacklist)
+random_regions <- find_random(config$profiles$window, N = config$profiles$random_pure,
+                              p300 = p300, TSS = TSS_annotation,
+                              chroms_of_interest = chroms_of_interest,
+                              blacklist = blacklist)
 
 # Load whole genome coverage
-load(file = paste0(path, '/', cell_line, '/data_R/whole_genome_coverage2.RData'))
-coverage <- do.call(cbind, profiles)  # Concatenate to one big matrix
+coverage <- readRDS(fname('whole_genome_cov', cell_line = cell_line))
 
 # Blacklist all regions which don't have enough coverage
-coverage[coverage < 0] <- 0
-blacklist <- union(blacklist, regions[rowSums(coverage) < threshold])
+not_enough_coverage <- rowSums(coverage) < config$profiles$signal_threshold
+blacklist <- union(blacklist, attr(coverage, 'ranges')[not_enough_coverage])
 
-random_regions_with_signal <- find_random(window, N, p300 = p300, TSS = TSS_annotation,
-                                          chroms_of_interest = chroms_of_interest, blacklist = blacklist)
+# The whole genome coverage uses a lot of memory and is no longer needed.
+# Clearing it now makes space for the profile data later, which is also memory hungry.
+rm(coverage)
+
+random_regions_with_signal <- find_random(config$profiles$window,
+                                          config$profiles$random_with_signal,
+                                          p300 = p300, TSS = TSS_annotation,
+                                          chroms_of_interest = chroms_of_interest,
+                                          blacklist = blacklist)
 
 # All sites
 sites <- c(enhancers, promoters, random_regions, random_regions_with_signal)
@@ -69,7 +79,7 @@ sites <- c(enhancers, promoters, random_regions, random_regions_with_signal)
 profiles = list()
 
 # First, collect a list of all the histone files
-bam_files <- dir(paste0(path, '/', cell_line, '/bam_shifted'), pattern = '\\.bam$', full.name = TRUE)
+bam_files <- dir(fname('bam_folder', cell_line = cell_line), pattern = '\\.bam$', full.name = TRUE)
 
 # These are used to normalize the profiles
 cat('Reading control histone...')
@@ -106,16 +116,10 @@ for (bam_file in bam_files) {
     }
 }
 
-#normalize wrt to other cell line if applicaple
-# if(normalizeBool==TRUE){
-#     # Not implemented yet
-# }
-
 # Make one big Profiles object
 profiles <- do.call(cbind, profiles)
 
 # Save the profiles
-dir.create(paste0(path, '/', cell_line, '/data_R'), recursive = TRUE, showWarnings = FALSE)
-profiles_file <- paste0(path, '/', cell_line, '/data_R/profiles.RData')
-save(profiles, file = profiles_file)
-cat(paste0('Data saved to ', profiles_file, '\n'))
+dir.create(dirname(fname('profiles', cell_line = cell_line)), recursive = TRUE, showWarnings = FALSE)
+saveRDS(profiles, file = fname('profiles', cell_line = cell_line))
+cat(paste0('Data saved to ', fname('profiles', cell_line = cell_line), '\n'))

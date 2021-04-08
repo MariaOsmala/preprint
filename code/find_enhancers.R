@@ -2,7 +2,7 @@ library(GenomicRanges)
 library(BSgenome.Hsapiens.UCSC.hg19)
 
 find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
-                            TSS = NULL, max_dist_to_promoter = 2000,
+                            TSS = NULL, min_dist_to_promoter = 2000,
                             blacklist = NULL, verbose = TRUE)
 {
     if (verbose) cat('Finding suitable enhancer sites:\n')
@@ -19,10 +19,10 @@ find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
 
     if (!is.null(TSS)) { 
         # Remove p300 peaks that are too close to a promotor range, as specified by
-        # max_dist_to_promoter.
+        # min_dist_to_promoter.
         # We ignore the strand, which means all strands are presumed to be '+'.
         dist <- distanceToNearest(p300, TSS, ignore.strand = TRUE)
-        to_drop <- from(dist)[mcols(dist)$distance < (max_dist_to_promoter - 1)]  # FIXME: why the -1?
+        to_drop <- from(dist)[mcols(dist)$distance < (min_dist_to_promoter - 1)]  # FIXME: why the -1?
         if (length(to_drop) > 0) {
             p300 <- p300[-to_drop]
         }
