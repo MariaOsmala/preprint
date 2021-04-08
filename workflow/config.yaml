@@ -47,3 +47,8 @@ filenames:
     predictions: data_R/predictions.RData
     p300: raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz
     DNase: raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz
+
+
+# All the files that will be downloaded
+files:
+  

@@ -1,6 +1,7 @@
-library(BSgenome.Hsapiens.UCSC.hg19)
-library(GenomicRanges)
-
+#' Find random sites in the genome that are not enhancers or promoters.
+#' @importFrom IRanges IRanges resize reduce
+#' @importFrom GenomicRanges mcols
+#' @export
 find_random <- function(window = 1000, N = NULL,
                         chroms_of_interest = NULL,
                         p300 = NULL, max_dist_to_p300 = 2000,
@@ -15,10 +16,10 @@ find_random <- function(window = 1000, N = NULL,
                                'chr13', 'chr14', 'chr15', 'chr16', 'chr17',
                                'chr18', 'chr19', 'chr20', 'chr21', 'chr22', 'chrX')
     }
-    whole_genome <- GRanges(chroms_of_interest, IRanges(start=1, end=seqlengths(Hsapiens)[chroms_of_interest]))
+    whole_genome <- GenomicRanges::GRanges(chroms_of_interest, IRanges(start=1, end=seqlengths(BSgenome.Hsapiens.UCSC.hg19::Hsapiens)[chroms_of_interest]))
 
     if (is.null(blacklist)) {
-        blacklist = GRanges()
+        blacklist = GenomicRanges::GRanges()
     }
 
     # Remove regions that are too close to a p300 peak, as specified by
@@ -39,7 +40,7 @@ find_random <- function(window = 1000, N = NULL,
         if (verbose) cat(paste0('    There are ', length(TSS_exclusion_zone), ' TSS annotated sites to be avoided.\n'))
     }
 
-    blacklist <- keepSeqlevels(blacklist, chroms_of_interest, pruning.mode = 'coarse')
+    blacklist <- GenomeInfoDb::keepSeqlevels(blacklist, chroms_of_interest, pruning.mode = 'coarse')
 
     # reduce() will greatly reduce the number of ranges by merging adjacent ranges.
     blacklist <- reduce(blacklist)

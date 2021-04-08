@@ -1,6 +1,7 @@
-library(GenomicRanges)
-library(BSgenome.Hsapiens.UCSC.hg19)
-
+#' Find promoter sites suitable to serve as training data.
+#' @importFrom GenomicRanges mcols
+#' @importFrom IRanges from to resize findOverlaps
+#' @export
 find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
                            between_TSS_distance = 2000, blacklist = NULL,
                            verbose = TRUE)
@@ -8,7 +9,7 @@ find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
     if (verbose) cat('Finding suitable promoter sites:\n')
 
     # Find the closest overlap between DNase and TSS_annotation
-    dist <- distanceToNearest(DNase, TSS_annotation, ignore.strand = TRUE)
+    dist <- GenomicRanges::distanceToNearest(DNase, TSS_annotation, ignore.strand = TRUE)
     TSS_with_DNase <- TSS_annotation[to(dist)]
     mcols(TSS_with_DNase) <- mcols(DNase[from(dist)])[c('signalValue', 'pValue')]
     mcols(TSS_with_DNase)$distance <- mcols(dist)$distance
@@ -17,7 +18,7 @@ find_promoters <- function(TSS_annotation, DNase, window = 1000, N = NULL,
     DNase_peak <- DNase
     start(DNase_peak) <- start(DNase_peak) + DNase_peak$peak
     width(DNase_peak) <- 1
-    dist_peak <- distanceToNearest(DNase_peak, TSS_annotation, ignore.strand = TRUE)
+    dist_peak <- GenomicRanges::distanceToNearest(DNase_peak, TSS_annotation, ignore.strand = TRUE)
     mcols(TSS_with_DNase)$peakDistance <- mcols(dist_peak[from(dist)])$distance
 
     # Order

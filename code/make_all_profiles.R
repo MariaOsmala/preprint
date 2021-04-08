@@ -1,3 +1,4 @@
+library(preprint)
 library(GenomicRanges, quietly = TRUE)
 library(Rsamtools, quietly = TRUE)
 library(argparser, quietly = TRUE)
@@ -11,11 +12,9 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-source('code/find_enhancers.R')
 source('code/find_promoters.R')
 source('code/find_random.R')
 source('code/TSS_protein_coding.R')
-source('code/profiles.R')
 source('code/fname.R')
 
 # These are the chromosomes of interest

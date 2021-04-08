@@ -24,3 +24,6 @@ dependencies:
   - r-mass
   - r-caret
   - r-e1071
+
+  # For building the package
+  - r-devtools

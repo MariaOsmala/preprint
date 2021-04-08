@@ -1,4 +1,5 @@
-# Meat of the PREPRINT method
+#' Meat of the PREPRINT method.
+#' @export
 pattern_likelihoods <- function(profiles, agg_patterns, measure = 'ML', positive_class = 'enhancer')
 {
     likelihoods = vector()
@@ -35,7 +36,7 @@ likelihood_ML <- function(profiles, agg_pattern)
 
     # Formula 10 of the paper.
     lambda <- outer(alpha, agg_pattern)
-    likelihood <- rowSums(dpois(x = profiles, lambda = lambda, log = TRUE))
+    likelihood <- rowSums(stats::dpois(x = profiles, lambda = lambda, log = TRUE))
 }
 
 estimate_gamma <- function(profiles, pos_agg_pattern)
@@ -63,6 +64,8 @@ likelihood_Bayesian <- function(profiles, agg_pattern, gamma)
     likelihood <- a0 * log(b0) + rowSums(profiles * log(agg_pattern)) - (a0 + rowSums(profiles)) * log(b0 + sum(agg_pattern)) + lgamma(a0 + rowSums(profiles)) - lgamma(a0) - rowSums(lgamma(profiles + 1))
 }
 
+#' Create aggregate patterns from profiles.
+#' @export
 aggregate_patterns <- function(profiles)
 {
     profile_types <- levels(profile_type(profiles))

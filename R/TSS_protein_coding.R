@@ -1,5 +1,7 @@
-library(GenomicRanges)
-
+#' Use the histone reads to create profiles for a list of genomic sites
+#' @importFrom IRanges resize
+#' @importFrom GenomicRanges mcols strand<-
+#' @export
 TSS_protein_coding <- function(gencode_tss_file, verbose = TRUE)
 {
     if (verbose) cat('Reading TSS annotations...')

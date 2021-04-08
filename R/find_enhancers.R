@@ -1,6 +1,8 @@
-library(GenomicRanges)
-library(BSgenome.Hsapiens.UCSC.hg19)
-
+#' Find enhancer sites suitable to serve as training data.
+#' @importFrom IRanges end findOverlaps from resize start start<- width width<-
+#' @importFrom GenomicRanges strand<- seqnames seqinfo mcols mcols<-
+#' @importFrom GenomeInfoDb seqlengths seqlengths<-
+#' @export
 find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
                             TSS = NULL, min_dist_to_promoter = 2000,
                             blacklist = NULL, verbose = TRUE)
@@ -21,7 +23,7 @@ find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
         # Remove p300 peaks that are too close to a promotor range, as specified by
         # min_dist_to_promoter.
         # We ignore the strand, which means all strands are presumed to be '+'.
-        dist <- distanceToNearest(p300, TSS, ignore.strand = TRUE)
+        dist <- GenomicRanges::distanceToNearest(p300, TSS, ignore.strand = TRUE)
         to_drop <- from(dist)[mcols(dist)$distance < (min_dist_to_promoter - 1)]  # FIXME: why the -1?
         if (length(to_drop) > 0) {
             p300 <- p300[-to_drop]
@@ -38,7 +40,7 @@ find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
     enhancers <- resize(enhancers, width = window, fix='center')
 
     # Remove enhancers which window falls outside the bounds of the sequence
-    human.chromlens <- seqlengths(Hsapiens)
+    human.chromlens <- seqlengths(BSgenome.Hsapiens.UCSC.hg19::Hsapiens)
     seqlengths(enhancers) <- human.chromlens[seqnames(seqinfo(enhancers))]
     seq_lengths <- as.numeric(seqlengths(enhancers)[as.vector(seqnames(enhancers))])
     enhancers <- enhancers[start(enhancers) >= 1 & end(enhancers) <= seq_lengths]
