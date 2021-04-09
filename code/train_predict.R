@@ -1,7 +1,7 @@
-library(yaml, quietly = TRUE)
-library(argparser, quietly = TRUE)
-library(caret, quietly = TRUE)
-library(preprint, quietly = TRUE)
+library(yaml)
+library(argparser)
+library(caret)
+library(preprint)
 
 config <- read_yaml('workflow/config.yaml')
 
@@ -46,4 +46,4 @@ for (fold in folds) {
 }
 
 print(confusionMatrix(data = unlist(predictions), reference = unlist(reference)))
-save(predictions, reference, fname('predictions', cell_line = cell_line))
+save(predictions, reference, file = fname('predictions', cell_line = cell_line))

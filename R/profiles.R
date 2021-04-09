@@ -138,14 +138,25 @@ normalize_profiles <- function(profiles, reference) {
 
 # Method functions for Profiles
 ###############################
+
+#' Check whether a given object is a Profiles object (or subclass).
+#' @export
 is.Profiles <- function(x) inherits(x, 'Profiles')
 
-# Get the type (enhancer, promoter or random) of each profile
+#' Get the type (enhancer, promoter or random) of each profile
+#' @export
 profile_type <- function(x, ...) UseMethod("profile_type", x)
+
+#' Get the type (enhancer, promoter or random) of each profile
+#' @export
 profile_type.Profiles <- function(x) attr(x, 'ranges')$type
 
-# Interact with use the data part of the Profiles object
-`profile_data<-` <- function(x, ...) UseMethod("profile_data<-", x)
+#' Interact with use the data part of the Profiles object
+#' @export
+`profile_data<-` <- function(x, ...) UseMethod('profile_data<-', x)
+
+#' Interact with use the data part of the Profiles object
+#' @export
 `profile_data<-.Profiles` <- function(profiles, value)
 {
     attr(value, 'ranges') <- attr(profiles, 'ranges')
@@ -156,13 +167,19 @@ profile_type.Profiles <- function(x) attr(x, 'ranges')$type
     value
 }
 
-profile_data <- function(x, ...) UseMethod("profile_data<-", x)
+#' Get the data matrix of a Profiles object.
+#' @export
+profile_data <- function(x, ...) UseMethod('profile_data', x)
+
+#' Get the data matrix of a Profiles object.
+#' @export
 profile_data.Profiles <- function(profiles)
 {
     as.matrix(profiles)
 }
 
-# When subsetting a Profiles object, keep the metadata aligned
+#' When subsetting a Profiles object, keep the metadata aligned
+#' @export
 `[.Profiles` <- function(profile, i, j, ...) {
     selection <- NextMethod()
     attr(selection, 'window_size') <- attr(profile, 'window_size')
@@ -181,6 +198,7 @@ profile_data.Profiles <- function(profiles)
     selection
 }
 
+#' @export
 as.matrix.Profiles <- function(profiles)
 {
     attr(profiles, 'ranges') <- NULL
@@ -191,7 +209,8 @@ as.matrix.Profiles <- function(profiles)
     profiles
 }
 
-# Concatenate two or more Profiles row-wise
+#' Concatenate two or more Profiles row-wise
+#' @export
 rbind.Profiles <- function(...)
 {
     result <- do.call(rbind, lapply(list(...), as.matrix))
@@ -203,7 +222,8 @@ rbind.Profiles <- function(...)
     result
 }
 
-# Concatenate two or more Profiles column-wise
+#' Concatenate two or more Profiles column-wise
+#' @export
 cbind.Profiles <- function(...)
 {
     result <- do.call(cbind, lapply(list(...), as.matrix))
@@ -216,6 +236,8 @@ cbind.Profiles <- function(...)
     result
 }
 
+#' Get the names of the Profiles
+#' @export
 names.Profiles <- function(profiles)
 {
     unique(colnames(profiles))

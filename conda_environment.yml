@@ -23,7 +23,7 @@ dependencies:
   - r-gdata
   - r-mass
   - r-caret
-  - r-e1071
+  - r-kernlab
 
   # For building the package
   - r-devtools

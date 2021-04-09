@@ -27,7 +27,7 @@ find_random <- function(window = 1000, N = NULL,
     if (!is.null(p300)) {
         p300_exclusion_zone <- p300
         p300_exclusion_zone <- resize(p300_exclusion_zone, width = max_dist_to_p300 + (max_dist_to_p300 + 1) %% 2, fix='center')
-        blacklist <- union(blacklist, p300_exclusion_zone)
+        blacklist <- GenomicRanges::union(blacklist, p300_exclusion_zone)
         if (verbose) cat(paste0('    There are ', length(p300_exclusion_zone), ' p300 peaks to be avoided.\n'))
     }
 
@@ -36,7 +36,7 @@ find_random <- function(window = 1000, N = NULL,
     if (!is.null(TSS)) {
         TSS_exclusion_zone <- TSS
         TSS_exclusion_zone <- resize(TSS_exclusion_zone, width = max_dist_to_TSS + (max_dist_to_TSS + 1) %% 2, fix='center')
-        blacklist <- union(blacklist, TSS_exclusion_zone)
+        blacklist <- GenomicRanges::union(blacklist, TSS_exclusion_zone)
         if (verbose) cat(paste0('    There are ', length(TSS_exclusion_zone), ' TSS annotated sites to be avoided.\n'))
     }
 

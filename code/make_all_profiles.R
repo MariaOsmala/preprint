@@ -1,9 +1,8 @@
+library(GenomicRanges)
+library(Rsamtools)
+library(argparser)
+library(yaml)
 library(preprint)
-library(GenomicRanges, quietly = TRUE)
-library(Rsamtools, quietly = TRUE)
-library(argparser, quietly = TRUE)
-library(yaml, quietly = TRUE)
-library(preprint, quietly = TRUE)
 
 config <- read_yaml('workflow/config.yaml')
 
@@ -64,7 +63,7 @@ blacklist <- union(blacklist, attr(coverage, 'ranges')[not_enough_coverage])
 rm(coverage)
 
 random_regions_with_signal <- find_random(config$profiles$window_size,
-                                          config$profiles$random_with_signal,
+                                          config$profiles$num_random_with_signal,
                                           p300 = p300, TSS = TSS_annotation,
                                           chroms_of_interest = chroms_of_interest,
                                           blacklist = blacklist)
