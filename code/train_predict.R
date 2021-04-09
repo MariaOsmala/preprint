@@ -1,6 +1,7 @@
 library(yaml, quietly = TRUE)
 library(argparser, quietly = TRUE)
 library(caret, quietly = TRUE)
+library(preprint, quietly = TRUE)
 
 config <- read_yaml('workflow/config.yaml')
 
@@ -10,8 +11,6 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-source('code/profiles.R')
-source('code/statistics.R')
 source('code/fname.R')
 
 # Load the profiles

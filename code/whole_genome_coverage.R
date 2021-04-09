@@ -1,8 +1,9 @@
-library(yaml)
-library(argparser)
-library(BSgenome.Hsapiens.UCSC.hg19)
-library(GenomicRanges)
-library(Rsamtools)
+library(yaml, quietly = TRUE)
+library(argparser, quietly = TRUE)
+library(BSgenome.Hsapiens.UCSC.hg19, quietly = TRUE)
+library(GenomicRanges, quietly = TRUE)
+library(Rsamtools, quietly = TRUE)
+library(preprint, quietly = TRUE)
 
 config <- read_yaml('workflow/config.yaml')
 
@@ -12,7 +13,6 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-source('code/profiles.R')
 source('code/fname.R')
 
 chr_names <- c('chr1','chr2','chr3',  'chr4',  'chr5','chr6',  'chr7',  'chr8',
@@ -20,30 +20,30 @@ chr_names <- c('chr1','chr2','chr3',  'chr4',  'chr5','chr6',  'chr7',  'chr8',
                'chr16', 'chr17','chr18', 'chr19',   'chr20', 'chr21', 'chr22',
                'chrX') 
 regions <- GRanges(chr_names, IRanges(start = 1, end = seqlengths(Hsapiens)[chr_names]))
-regions <- slidingWindows(regions, width = opt$bin, step = opt$bin)
-regions <- regions[width(regions) == opt$bin]  # Remove incomplete bins
+regions <- slidingWindows(regions, width = config$profiles$bin_size, step = config$profiles$bin_size)
+regions <- regions[width(regions) == config$profiles$bin_size]  # Remove incomplete bins
 regions <- unlist(regions)
 
 # First, collect a list of all the BAM files
-bam_files <- dir(opt$bam_folder, pattern = '\\.bam$', full.name = TRUE)
+bam_files <- dir(fname('bam_folder', cell_line = cell_line), pattern = '\\.bam$', full.name = TRUE)
 
 # These are used to normalize the profiles
 cat('Computing whole genome coverage for control histone...\n')
 control_ind <- grep('Control', bam_files)
 control <- BamFile(bam_files[control_ind])
 yieldSize(control) <- 1E6L
-profiles_control <- create_profiles(regions, bam_file = control, reference = NULL, ignore_strand = TRUE)
+profiles_control <- create_profiles(regions, bam_file = control, bin_size = config$profiles$bin_size, reference = NULL, ignore_strand = TRUE)
 
 cat('Computing whole genome coverage for input polymerase...\n')
 input_ind <- grep('Input', bam_files)
 input <- BamFile(bam_files[input_ind])
 yieldSize(input) <- 1E6L
-profiles_input <- create_profiles(regions, bam_file = input, reference = NULL, ignore_strand = TRUE)
+profiles_input <- create_profiles(regions, bam_file = input, bin_size = config$profiles$bin_size, reference = NULL, ignore_strand = TRUE)
 
 # Create profiles for the rest of the BAM files
 profiles = list()
-for (bam_file in bam_files) {
-    name <- tools::file_path_sans_ext(basename(bam_file))
+for (filename in bam_files) {
+    name <- tools::file_path_sans_ext(basename(filename))
 
     # Reference profiles have been created already, and we don't need Nsome
     # profiles.
@@ -62,9 +62,10 @@ for (bam_file in bam_files) {
 
     # Create the profile
     cat(paste0('Computing whole genome coverage for: ', name, '\n'))
-    bam_file <- BamFile(bam_file)
+    bam_file <- BamFile(filename)
     yieldSize(bam_file) <- 1E6L
     profiles[[name]] <- create_profiles(regions, bam_file = bam_file,
+                                        bin_size = config$profiles$bin_size, 
                                         reference = reference, ignore_strand = TRUE)
 }
 
@@ -72,10 +73,10 @@ for (bam_file in bam_files) {
 profiles <- do.call(cbind, profiles)
 
 # Normalize with other cell line if applicable
-if (!is.null(opt$normalize)) {
-    reference <- readRDS(opt$normalize)
+if (!is.null(config$profiles[[cell_line]]$normalize)) {
+    reference <- readRDS(fname('whole_genome_cov', cell_line = config$profiles[[cell_line]]$normalize))
     profiles <- normalize_profiles(profiles, reference)
 }
 
-saveRDS(profiles, file = opt$output)
-cat(paste0('Saved whole genome coverage data to ', opt$output, '\n'))
+saveRDS(profiles, file = fname('whole_genome_cov', cell_line = cell_line))
+cat(paste0('Saved whole genome coverage data to ', fname('whole_genome_cov', cell_line = cell_line), '\n'))

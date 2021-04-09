@@ -3,6 +3,7 @@ library(GenomicRanges, quietly = TRUE)
 library(Rsamtools, quietly = TRUE)
 library(argparser, quietly = TRUE)
 library(yaml, quietly = TRUE)
+library(preprint, quietly = TRUE)
 
 config <- read_yaml('workflow/config.yaml')
 
@@ -12,9 +13,6 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-source('code/find_promoters.R')
-source('code/find_random.R')
-source('code/TSS_protein_coding.R')
 source('code/fname.R')
 
 # These are the chromosomes of interest
@@ -40,16 +38,16 @@ for (blacklist_file in fname('blacklist')) {
 cat(' done.\n')
 
 # Find interesting sites
-enhancers <- find_enhancers(p300, DNase, window = config$profiles$window, N = config$profiles$enhancers,
+enhancers <- find_enhancers(p300, DNase, window = config$profiles$window_size, N = config$profiles$num_enhancers,
                             TSS = TSS_annotation, min_dist_to_promoter = config$profiles$min_dist_to_promoter,
                             blacklist = blacklist)
 
 promoters <- find_promoters(TSS_annotation, DNase, 
                             between_TSS_distance = config$profiles$min_dist_between_promoters,
-                            window = config$profiles$window, N = config$profiles$promoters,
+                            window = config$profiles$window_size, N = config$profiles$num_promoters,
                             blacklist = blacklist)
 
-random_regions <- find_random(config$profiles$window, N = config$profiles$random_pure,
+random_regions <- find_random(config$profiles$window_size, N = config$profiles$num_random_pure,
                               p300 = p300, TSS = TSS_annotation,
                               chroms_of_interest = chroms_of_interest,
                               blacklist = blacklist)
@@ -65,7 +63,7 @@ blacklist <- union(blacklist, attr(coverage, 'ranges')[not_enough_coverage])
 # Clearing it now makes space for the profile data later, which is also memory hungry.
 rm(coverage)
 
-random_regions_with_signal <- find_random(config$profiles$window,
+random_regions_with_signal <- find_random(config$profiles$window_size,
                                           config$profiles$random_with_signal,
                                           p300 = p300, TSS = TSS_annotation,
                                           chroms_of_interest = chroms_of_interest,
@@ -94,8 +92,8 @@ profiles_input <- create_profiles(sites, bam_file = BamFile(bam_files[input_ind]
 cat(' done.\n')
 
 # Create profiles for the rest of the histones
-for (bam_file in bam_files) {
-    name <- tools::file_path_sans_ext(basename(bam_file))
+for (filename in bam_files) {
+    name <- tools::file_path_sans_ext(basename(filename))
 
     # Determine reference profile
     if (length(grep('Dnase|Nsome', name)) > 0) {
@@ -109,7 +107,7 @@ for (bam_file in bam_files) {
     # Create the profile (reference profiles have been created already)
     if (length(grep('Input|Control', name)) == 0) {
         cat(paste0('Processing ', name, '...'))
-        profiles[[name]] <- create_profiles(sites, bam_file = BamFile(bam_file),
+        profiles[[name]] <- create_profiles(sites, bam_file = BamFile(filename),
                                             reference = reference, ignore_strand = TRUE)
         cat(' done.\n')
     }

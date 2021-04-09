@@ -8,12 +8,12 @@ cell_lines: [K562, Gm12878]
 
 # Settings for profile creation
 profiles:
-  window: 2000
-  bin: 100
-  enhancers: 1000
-  promoters: 1000
-  random_pure: 1000
-  random_with_signal: 1000
+  window_size: 2000
+  bin_size: 100
+  num_enhancers: 1000
+  num_promoters: 1000
+  num_random_pure: 1000
+  num_random_with_signal: 1000
   min_dist_to_promoter: 2000
   min_dist_between_promoters: 2000
   signal_threshold: 5

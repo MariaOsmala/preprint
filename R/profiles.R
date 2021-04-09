@@ -1,4 +1,26 @@
-#' Use the histone reads to create profiles for a list of genomic sites
+#' Create profiles for a list of genome ranges, using the genome coverage from a BAM file.
+#'
+#' @param ranges
+#'     The ranges for which to make profiles. These should be windows of a
+#'     fixed size, centered on a site of interest. These ranges can for example
+#'     be created by the find_enhancers, find_promoters or find_random
+#'     functions.
+#' @param bam_file
+#'     The BAM File to read the coverage data from.
+#' @param reference
+#'     The profiles to use as reference. The coverage counts from the reference
+#'     are subtracted from the profile. Can be NULL to specify no reference.
+#' @param name
+#'     A name for the features which coverage we are computing. This is used to
+#'     build the colnames() for the profiles. Defaults to NA, meaning the name
+#'     will be automatically inferred from the BAM file.
+#' @param bin_size
+#'     The width of the bins, i.e. the resolution of the profiles.
+#' @param ignore_strand
+#'     Whether to ignore the strand when computing coverage.
+#'
+#' @return The profiles.
+#'
 #' @importFrom IRanges from width slidingWindows findOverlaps
 #' @export
 create_profiles <- function(ranges, bam_file, reference, name = NA, bin_size = 100, ignore_strand = FALSE)
@@ -36,9 +58,9 @@ create_profiles <- function(ranges, bam_file, reference, name = NA, bin_size = 1
         # Read BAM file in chunks. Compute overlaps for each chunk.
         pb <- utils::txtProgressBar(min = 0, max = ceiling(num_reads / Rsamtools::yieldSize(bam_file)),
                                     style = 3)
-        if (!isOpen(bam_file)) {
+        if (!Rsamtools::isOpen(bam_file)) {
             open(bam_file)
-            on.exit(close(bam_file))
+            on.exit(Rsamtools::close(bam_file))
             on.exit(close(pb))
         }
         profiles <- NULL
@@ -66,7 +88,7 @@ create_profiles <- function(ranges, bam_file, reference, name = NA, bin_size = 1
     profiles <- matrix(profiles, nrow = length(ranges), byrow = TRUE)  # ranges x bins
 
     if (is.na(name)) {
-        name <- tools::file_path_sans_ext(basename(bam_file))
+        name <- tools::file_path_sans_ext(basename(bam_file$path))
     }
     
     # name.1, name.2, name.3, name.4, ...
@@ -94,10 +116,6 @@ create_profiles <- function(ranges, bam_file, reference, name = NA, bin_size = 1
 
 # Subtract one set of profiles from another
 subtract_reference <- function(profiles, profiles_to_subtract) {
-    # Make sure the profiles are in the same order
-    if (!identical(colnames(profiles), colnames(profiles_to_subtract)))
-        profiles_to_subtract <- profiles_to_subtract[, colnames(profiles)]
-
     scaling_factor <- attr(profiles, 'num_reads') / attr(profiles_to_subtract, 'num_reads')
     profiles <- profiles - scaling_factor * profiles_to_subtract
 
