@@ -3,6 +3,7 @@ env
 gurobi.log
 figures
 results
+man
 samtools.*
 *.swp
 *.swo
