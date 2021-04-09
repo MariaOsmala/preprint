@@ -19,32 +19,33 @@ def all_bam_files(wildcards):
 # The steps needed for the analysis
 rule whole_genome_coverage:
 	input:
-		code=f'{code_dir}/whole_genome_coverage.R',
+		code=f'{code_dir}/1_whole_genome_coverage.R',
 		bam_files=all_bam_files,
 	output:
-		f'{data_dir}/{{cell_line}}/data_R/whole_genome_coverage.RData'
+		f'{data_dir}/{{cell_line}}/data_R/whole_genome_coverage.rds'
 	shell:
-		f'Rscript {code_dir}/whole_genome_coverage.R'
+		f'Rscript {code_dir}/1_whole_genome_coverage.R'
 
 rule make_profiles:
 	input:
-		code=f'{code_dir}/extract_enhancers.R',
+		code=f'{code_dir}/2_make_profiles.R',
 		bam_files=all_bam_files,
 		p300=f'{data_dir}/{{cell_line}}/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
 		DNase=f'{data_dir}/{{cell_line}}/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz',
 		blacklist_Dac=f'{blacklists_dir}/wgEncodeDacMapabilityConsensusExcludable.bed.gz',
 		blacklist_Duke=f'{blacklists_dir}/wgEncodeDukeMapabilityRegionsExcludable.bed.gz',
 		TSS_annotation=f'{gencode_dir}/gencode.v27lift37.annotation.gtf.gz',
+		whole_genome_cov=f'{data_dir}/{{cell_line}}/data_R/whole_genome_coverage.rds',
 	output:
-		f'{data_dir}/{{cell_line}}/data_R/profiles.RData'
+		f'{data_dir}/{{cell_line}}/data_R/profiles.rds'
 	shell:
-		f'Rscript {code_dir}/make_all_profiles.R'
+		f'Rscript {code_dir}/2_make_profiles.R'
 
 rule train_predict:
 	input:
-		code=f'{code_dir}/train_predict.R',
-		profiles=f'{data_dir}/{{cell_line}}/data_R/profiles.RData',
+		code=f'{code_dir}/3_train_predict.R',
+		profiles=f'{data_dir}/{{cell_line}}/data_R/profiles.rds',
 	output:
 		f'{data_dir}/{{cell_line}}/data_R/predictions.RData'
 	shell:
-		f'Rscript {code_dir}/train_predict.R'
+		f'Rscript {code_dir}/3_train_predict.R'
