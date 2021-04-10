@@ -131,13 +131,13 @@ genome_file = f'{project_dir}/bedtools_genomes/human.hg19.genome'
 
 rule estimate_shifts:
 	input:
-		f'{code_dir}/quality_control_summary.R',
+		f'{scripts_dir}/quality_control_summary.R',
 		expand(f'{data_dir}/K562/phantompeakqualtools/{{data_type}}.out', data_type=all_data_types('K562', exclude=['OpenChromDnaseV2', 'InputV2', 'Nsome'])),
 		expand(f'{data_dir}/Gm12878/phantompeakqualtools/{{data_type}}.out', data_type=all_data_types('Gm12878', exclude=['OpenChromDnase', 'Input', 'Nsome'])),
 	output:
 		f'{data_dir}/phantompeakqualtools.txt'
 	shell:
-		'Rscript {code_dir}/quality_control_summary.R --datadir={data_dir}'
+		'Rscript {scripts_dir}/quality_control_summary.R --datadir={data_dir}'
 
 # For shifting, bam format is converted to bed format
 rule bam_to_bed:

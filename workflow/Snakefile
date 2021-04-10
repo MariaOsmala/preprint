@@ -15,9 +15,6 @@ configfile: f"{project_dir}/workflow/config.yaml"
 data_dir = config['data_dir']
 workflow_dir = f'{project_dir}/workflow'
 scripts_dir = f'{project_dir}/scripts'
-gencode_dir = f'{data_dir}/GENCODE_TSS'
-blacklists_dir = f'{data_dir}/blacklists'
-intervals_dir= f'{data_dir}/intervals_bed_{config["binSize"]}'
 
 # Big list of all the samples
 all_samples = pd.read_csv(f'{workflow_dir}/samples.tsv', sep='\t').sort_index()

@@ -26,6 +26,7 @@ profiles:
 # Files are specified in relation to `data_dir` as specified above.
 filenames:
   annotations: GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz
+  blacklist_folder: blacklists
   blacklist:
     - blacklists/wgEncodeDacMapabilityConsensusExcludable.bed.gz
     - blacklists/wgEncodeDukeMapabilityRegionsExcludable.bed.gz
