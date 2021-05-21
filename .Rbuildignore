@@ -16,3 +16,5 @@
 ^\.Rhistory$
 ^\.RData$
 ^\.RDataTmp$
+^.*\.Rproj$
+^\.Rproj\.user$

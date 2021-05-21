@@ -12,7 +12,8 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-source('code/fname.R')
+# Convenience function for getting a filename from the config file
+source('fname.R')
 
 # These are the chromosomes of interest
 chroms_of_interest = c('chr1',  'chr2',  'chr3',  'chr4',  'chr5',  'chr6',
@@ -21,7 +22,7 @@ chroms_of_interest = c('chr1',  'chr2',  'chr3',  'chr4',  'chr5',  'chr6',
                        'chr19', 'chr20', 'chr21', 'chr22', 'chrX') 
 
 # Read TSS annotations to extract protein codings
-TSS_annotation <- TSS_protein_coding(fname('annotations'))
+TSS_annotations <- TSS_protein_coding(fname('annotations'))
 
 cat('Reading p300 and DNase peaks...')
 p300 <- rtracklayer::import(fname('p300', cell_line = cell_line))
@@ -38,16 +39,16 @@ cat(' done.\n')
 
 # Find interesting sites
 enhancers <- find_enhancers(p300, DNase, window = config$profiles$window_size, N = config$profiles$num_enhancers,
-                            TSS = TSS_annotation, min_dist_to_promoter = config$profiles$min_dist_to_promoter,
+                            TSS_annotations = TSS_annotations, min_dist_to_promoter = config$profiles$min_dist_to_promoter,
                             blacklist = blacklist)
 
-promoters <- find_promoters(TSS_annotation, DNase, 
-                            between_TSS_distance = config$profiles$min_dist_between_promoters,
+promoters <- find_promoters(TSS_annotations, DNase, 
+                            between_promoter_distance = config$profiles$min_dist_between_promoters,
                             window = config$profiles$window_size, N = config$profiles$num_promoters,
                             blacklist = blacklist)
 
 random_regions <- find_random(config$profiles$window_size, N = config$profiles$num_random_pure,
-                              p300 = p300, TSS = TSS_annotation,
+                              p300 = p300, TSS = TSS_annotations,
                               chroms_of_interest = chroms_of_interest,
                               blacklist = blacklist)
 
@@ -64,7 +65,7 @@ rm(coverage)
 
 random_regions_with_signal <- find_random(config$profiles$window_size,
                                           config$profiles$num_random_with_signal,
-                                          p300 = p300, TSS = TSS_annotation,
+                                          p300 = p300, TSS = TSS_annotations,
                                           chroms_of_interest = chroms_of_interest,
                                           blacklist = blacklist)
 
