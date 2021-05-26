@@ -1,6 +1,6 @@
 # PREPRINT
 
-This package is a PRobabilistic Enhancer PRedictIoN Tool PREPRINT.
+This package contains the PRobabilistic Enhancer PRedictIoN Tool called PREPRINT.
 
 ## Installation
 
@@ -58,22 +58,11 @@ Then, from the main `preprint/` folder, run:
 snakemake
 ```
 
-The download all data and run the entire analysis pipeline.
+This downloads all data and runs the entire analysis pipeline.
 
 ## Citation:
 
-```
-@Article{Osmala2020,
-    AUTHOR = "Maria Osmala and Harri Lähdesmäki",
-    TITLE = "Enhancer prediction in the human genome by probabilistic modelling of the chromatin feature patterns",
-    VOLUME = {},
-    PAGES = "",
-    ADDRESS= "",
-    ORGANIZATION = "",
-    PUBLISHER="",
-    MONTH = "",
-    YEAR = }
-```
+Osmala, M., & Lähdesmäki, H. (2020). Enhancer prediction in the human genome by probabilistic modelling of the chromatin feature patterns. BMC Bioinformatics, 21(1), 317. https://doi.org/10.1186/s12859-020-03621-3
 
 ## License
 
