@@ -2,10 +2,11 @@
 #' @importFrom GenomicRanges strand<- seqnames seqinfo mcols mcols<-
 #' @importFrom GenomeInfoDb seqlengths seqlengths<-
 
-#' Find enhancer sites
+#' Find enhancer sites suitable for extracting a characteristic profile.
 #'
 #' @description
-#' Finds enhancer sites suitable to serve as training data.
+#' Finds enhancer sites suitable to serve as training data for building a
+#' characteristic profile. This profile can then be used to 
 #'
 #' @details
 #' Enhancer sites are sites on the genome that correspond to p300 peaks and are

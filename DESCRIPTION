@@ -1,6 +1,6 @@
 Package: preprint
-Title: Code What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: PRobabilistic Enhancer PRedictIoN Tool (PREPRINT)
+Version: 0.1
 Authors@R: 
     person(given = "Maria",
            family = "Osmala",
@@ -10,7 +10,12 @@ Authors@R:
            family = "van Vliet",
            role = c("aut", "cre"),
            email = "marijn.vanvliet@aalto.fi")
-Description: What the package does (one paragraph).
+Description: The PRobabilistic Enhancer PRedictIoN Tool (PREPRINT) finds
+	genomic regulatory enhancers in Human DNA based on chromatin features.
+	PREPRINT defines functions to extract characteristic coverage patterns
+	surrounding known enhancer sites, build a statistical model to account for
+	their variability. This model can then by used to produce probability
+	scores for as yet unseen genomic regions.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -11,7 +11,7 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-source('code/fname.R')
+source('scripts/fname.R')
 
 # Load the profiles
 profiles <- readRDS(fname('profiles', cell_line = cell_line))
