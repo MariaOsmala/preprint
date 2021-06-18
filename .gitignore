@@ -1,0 +1,15 @@
+Data
+env
+gurobi.log
+figures
+results
+man
+samtools.*
+*.swp
+*.swo
+*.swn
+.snakemake
+.Rproj.user
+.Rhistory
+.RData
+.RDataTmp

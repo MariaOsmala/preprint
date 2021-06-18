@@ -1,0 +1,39 @@
+import pandas as pd
+from pathlib import Path
+
+# Figure out the root dir of the project
+cwd = Path.cwd()
+if cwd.name == 'workflow':
+	project_dir = str(cwd.parent)
+else:
+	project_dir = str(cwd)
+
+# Load the user configuration
+configfile: f"{project_dir}/workflow/config.yaml"
+
+# Various paths we will be using in this analysis pipeline
+data_dir = config['data_dir']
+workflow_dir = f'{project_dir}/workflow'
+scripts_dir = f'{project_dir}/scripts'
+
+# Big list of all the samples
+all_samples = pd.read_csv(f'{workflow_dir}/samples.tsv', sep='\t').sort_index()
+
+def all_data_types(cell_line, exclude=None):
+	"""
+	Get all data types (chromatin features?) for a given cell line.
+	Optionally exclude some data types.
+	"""
+	query = f"cell_line=='{cell_line}'"
+	if exclude is not None:
+		for ex in exclude:
+			query += f' and data_type != "{ex}"'
+	return all_samples.dropna().query(query).data_type.unique()
+
+# Default rule to run the entire analysis pipeline
+rule all:
+	input: f'{data_dir}/K562/data_R/predictions.RData'
+
+# These include files contain the rules for the individual steps
+include: 'preprocessing.smk'
+include: 'train_predict.smk'

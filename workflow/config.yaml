@@ -1,0 +1,18 @@
+# The root folder in which all the data will be kept.
+# This is something you probably need to change to fit your system.
+data_dir: /u/45/vanvlm1/unix/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data
+
+# Cell lines relevant to the analysis.
+cell_lines: [K562, Gm12878]
+
+# Settings for profile creation
+profiles:
+  window_size: 2000
+  bin_size: 100
+  num_enhancers: 1000
+  num_promoters: 1000
+  num_random_pure: 1000
+  num_random_with_signal: 1000
+  min_dist_to_promoter: 2000
+  min_dist_between_promoters: 2000
+  signal_threshold: 5

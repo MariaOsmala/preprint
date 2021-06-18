@@ -1,0 +1,30 @@
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  # For preprocessing pipeline
+  - r-base > 3.5, < 4.0
+  - bowtie2
+  - samtools
+  - bedtools
+  - phantompeakqualtools
+  - bioconductor-rsamtools
+  - bioconductor-genomeinfodb
+  - bioconductor-genomeinfodbdata
+  - bioconductor-genomeinfodbdata
+  - snakemake
+  - pandas
+
+  # For train-predict
+  - bioconductor-bsgenome.hsapiens.ucsc.hg19
+  - bioconductor-regioner
+  - r-argparser
+  - r-gdata
+  - r-mass
+  - r-caret
+  - r-kernlab
+    r-e1071
+
+  # For building the package
+  - r-devtools

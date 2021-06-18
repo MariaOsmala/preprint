@@ -1,0 +1,40 @@
+Package: preprint
+Title: PRobabilistic Enhancer PRedictIoN Tool (PREPRINT)
+Version: 0.1
+Authors@R: 
+    person(given = "Maria",
+           family = "Osmala",
+           role = c("aut", "cre"),
+           email = "maria.osmala@aalto.fi")
+    person(given = "Marijn",
+           family = "van Vliet",
+           role = c("aut", "cre"),
+           email = "marijn.vanvliet@aalto.fi")
+Description: The PRobabilistic Enhancer PRedictIoN Tool (PREPRINT) finds
+	genomic regulatory enhancers in Human DNA based on chromatin features.
+	PREPRINT defines functions to extract characteristic coverage patterns
+	surrounding known enhancer sites, build a statistical model to account for
+	their variability. This model can then by used to produce probability
+	scores for as yet unseen genomic regions.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+biocViews:
+Imports: 
+	BSgenome.Hsapiens.UCSC.hg19,
+	GenomeInfoDb,
+	GenomicAlignments,
+	GenomicRanges,
+	IRanges,
+	MASS,
+	Rsamtools,
+	SummarizedExperiment,
+	regioneR,
+	rtracklayer,
+	stats,
+	tools,
+	utils,
+	caret,
+	e1071
