@@ -1,7 +1,6 @@
 # The root folder in which all the data will be kept.
 # This is something you probably need to change to fit your system.
 data_dir: /u/45/vanvlm1/unix/scratch_cs/csb/projects/enhancer_prediction/aaltorse/Data
-#data_dir: /m/cs/scratch/csb/projects/enhancer_prediction/aaltorse/Data
 
 # Cell lines relevant to the analysis.
 cell_lines: [K562, Gm12878]
@@ -17,7 +16,3 @@ profiles:
   min_dist_to_promoter: 2000
   min_dist_between_promoters: 2000
   signal_threshold: 5
-
-  # Cell line specific profile creation settings
-  Gm12878:
-    normalize: K562  # Normalize profiles with relation to this cell line

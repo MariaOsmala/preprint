@@ -70,12 +70,6 @@ for (filename in bam_files) {
 # Make one big Profiles object
 profiles <- do.call(cbind, profiles)
 
-# Normalize with other cell line if applicable
-if (!is.null(config$profiles[[cell_line]]$normalize)) {
-    reference <- readRDS(paste0(config$data_dir, '/', config$profiles[[cell_line]]$normalize, '/data_R/whole_genome_coverage.rds'))
-    profiles <- normalize_profiles(profiles, reference)
-}
-
 fname <- paste0(config$data_dir, '/', cell_line, '/data_R/whole_genome_coverage.rds')
 dir.create(dirname(fname), recursive = TRUE, showWarnings = FALSE)
 saveRDS(profiles, file = fname)
