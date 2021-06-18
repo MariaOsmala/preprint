@@ -34,6 +34,7 @@ K562	OpenChromDnaseV2	wgEncodeOpenChromDnaseK562AlnRep2V2	wgEncodeOpenChromDnase
 K562	OpenChromDnaseV2	wgEncodeOpenChromDnaseK562AlnRep2V2	wgEncodeOpenChromDnaseK562AlnRep2V2.bam.bai	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromDnase/wgEncodeOpenChromDnaseK562AlnRep2V2.bam.bai
 K562	OpenChromDnaseV2	wgEncodeOpenChromDnaseK562AlnRep3V2	wgEncodeOpenChromDnaseK562AlnRep3V2.bam	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromDnase/wgEncodeOpenChromDnaseK562AlnRep3V2.bam
 K562	OpenChromDnaseV2	wgEncodeOpenChromDnaseK562AlnRep3V2	wgEncodeOpenChromDnaseK562AlnRep3V2.bam.bai	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromDnase/wgEncodeOpenChromDnaseK562AlnRep3V2.bam.bai
+K562			wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeOpenChromDnase/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz
 K562			wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeAwgTfbsUniform/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz
 K562	Nsome	wgEncodeSydhNsomeK562AlnRep1	wgEncodeSydhNsomeK562AlnRep1.bam	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeSydhNsome/wgEncodeSydhNsomeK562AlnRep1.bam
 K562	Nsome	wgEncodeSydhNsomeK562AlnRep1	wgEncodeSydhNsomeK562AlnRep1.bam.bai	http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeSydhNsome/wgEncodeSydhNsomeK562AlnRep1.bam.bai
