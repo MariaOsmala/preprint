@@ -247,5 +247,9 @@ names.Profiles <- function(profiles)
 #' @export
 print.Profiles <- function(profiles)
 {
-    print(paste0('Profiles object containing profiles for ', nrow(profiles), ' sites.'))
+    cat('Profiles object with 4000 profiles.\n')
+    cat(paste0('  data dimensions: ', nrow(profiles), ' x ', ncol(profiles), '\n'))
+    cat(paste0('  profiles are defined for: ', toString(names(profiles)), '\n'))
+    cat(paste0('  window_size: ', attr(profiles, 'window_size'), '\n'))
+    cat(paste0('  bin_size: ', attr(profiles, 'bin_size'), '\n'))
 }
