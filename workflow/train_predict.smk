@@ -1,12 +1,12 @@
 # Rules for downloading various files
 rule download_gencode:
 	input:
-	output: f'{gencode_dir}/gencode.v27lift37.annotation.gtf.gz'
+	output: f'{data_dir}/GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz'
 	shell: 'wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_27/GRCh37_mapping/gencode.v27lift37.annotation.gtf.gz -O {output}'
 
 rule download_blacklists:
 	input:
-	output: f'{blacklists_dir}/{{file}}'
+	output: f'{data_dir}/blacklists/{{file}}'
 	shell: 'wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEncodeMapability/{wildcards.file} -O {output}'
 
 # Function that finds all the available BAM files
@@ -32,9 +32,9 @@ rule make_profiles:
 		bam_files=all_bam_files,
 		p300=f'{data_dir}/{{cell_line}}/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz',
 		DNase=f'{data_dir}/{{cell_line}}/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz',
-		blacklist_Dac=f'{blacklists_dir}/wgEncodeDacMapabilityConsensusExcludable.bed.gz',
-		blacklist_Duke=f'{blacklists_dir}/wgEncodeDukeMapabilityRegionsExcludable.bed.gz',
-		TSS_annotation=f'{gencode_dir}/gencode.v27lift37.annotation.gtf.gz',
+		blacklist_Dac=f'{data_dir}/blacklists/wgEncodeDacMapabilityConsensusExcludable.bed.gz',
+		blacklist_Duke=f'{data_dir}/blacklists/wgEncodeDukeMapabilityRegionsExcludable.bed.gz',
+		TSS_annotation=f'{data_dir}/GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz',
 		whole_genome_cov=f'{data_dir}/{{cell_line}}/data_R/whole_genome_coverage.rds',
 	output:
 		f'{data_dir}/{{cell_line}}/data_R/profiles.rds'
