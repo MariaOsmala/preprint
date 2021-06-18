@@ -1,15 +1,36 @@
 # PREPRINT
 
-This package contains the PRobabilistic Enhancer PRedictIoN Tool called PREPRINT.
+This R package contains the PRobabilistic Enhancer PRedictIoN Tool called PREPRINT.
 
 ## Installation
 
-Clone the project:
+You can install the R package using [devtools](https://devtools.r-lib.org):
 
-```
-git clone git@github.com:AaltoRSE/preprint.git
+```R
+devtools::install_github('AaltoRSE/preprint', ref='devel')
 ```
 
+PREPRINT depends on the following R-packages, which should be installed automatically when you install the `preprint` package:
+
+  - [bioconductor](http://bioconductor.org)
+  - [bioconductor-rsamtools](http://bioconductor.org/packages/release/bioc/html/Rsamtools.html)
+  - [bioconductor-genomeinfodb](http://bioconductor.org/packages/release/bioc/html/GenomeInfoDb.html)
+  - [bioconductor-genomeinfodbdata](http://bioconductor.org/packages/release/data/annotation/html/GenomeInfoDbData.html)
+  - [bioconductor-bsgenome.hsapiens.ucsc.hg19](http://bioconductor.org/packages/release/data/annotation/html/BSgenome.Hsapiens.UCSC.hg19.html)
+  - [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
+  - [doparallel](https://cran.r-project.org/web/packages/doParallel/index.html)
+  - [gdata](https://cran.r-project.org/web/packages/gdata/index.html)
+  - [MASS](https://cran.r-project.org/web/packages/MASS/index.html)
+  - [caret](https://cran.r-project.org/web/packages/caret/index.html)
+  - [e1071](https://cran.r-project.org/web/packages/e1071/index.html)
+
+
+## Running (part of) the analysis pipeline in the paper
+
+The scripts to reproduce a part of the analysis pipeline as described in the paper, are in the `preprint/scripts` folder.
+For convenicne, the `preprint/workflow` folder contains a [SnakeMake](https://snakemake.readthedocs.io) pipeline for running everything.
+
+Running the analysis depends on more software than just the PREPRINT package.
 To install the required software, R and Python packages, we recommend using [anaconda](https://www.anaconda.com/products/individual) and the provided `conda_environment.yml` file:
 
 ```
@@ -28,30 +49,12 @@ Software:
   - [bedtools](https://bedtools.readthedocs.io/en/latest/index.html)
   - [phantompeakqualtools](https://www.encodeproject.org/software/phantompeakqualtools/)
 
-R packages:
-
-  - [bioconductor](http://bioconductor.org)
-  - [bioconductor-rsamtools](http://bioconductor.org/packages/release/bioc/html/Rsamtools.html)
-  - [bioconductor-genomeinfodb](http://bioconductor.org/packages/release/bioc/html/GenomeInfoDb.html)
-  - [bioconductor-genomeinfodbdata](http://bioconductor.org/packages/release/data/annotation/html/GenomeInfoDbData.html)
-  - [bioconductor-bsgenome.hsapiens.ucsc.hg19](http://bioconductor.org/packages/release/data/annotation/html/BSgenome.Hsapiens.UCSC.hg19.html)
-  - [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
-  - [doparallel](https://cran.r-project.org/web/packages/doParallel/index.html)
-  - [gdata](https://cran.r-project.org/web/packages/gdata/index.html)
-  - [MASS](https://cran.r-project.org/web/packages/MASS/index.html)
-  - [caret](https://cran.r-project.org/web/packages/caret/index.html)
-  - [e1071](https://cran.r-project.org/web/packages/e1071/index.html)
-
 Python packages:
 
   - [snakemake](https://snakemake.readthedocs.io/en/stable/)
   - [pandas](https://pandas.pydata.org)
 
-
-## Running the analysis pipeline
-
-The codes are in the `preprint/code` folder and the `preprint/workflow` folders contains SnakeMake pipelines for running everything.
-First, edit `preprint/workflows/config.yaml` to specify the folders in which to place the data (needs around 1 terabyte of free space).
+When all required software has been installed, you can continue to run the analysis by first editing `preprint/workflows/config.yaml` to specify the folders in which to place the data (needs around 1 terabyte of free space).
 Then, from the main `preprint/` folder, run:
 
 ```
