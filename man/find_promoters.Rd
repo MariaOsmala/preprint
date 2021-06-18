@@ -2,7 +2,7 @@
 % Please edit documentation in R/find_promoters.R
 \name{find_promoters}
 \alias{find_promoters}
-\title{Find promoter sites suitable to serve as training data.}
+\title{Find promoter sites suitable for extracting a characteristic profile.}
 \usage{
 find_promoters(
   TSS_annotations,
@@ -45,7 +45,8 @@ sites. The promoter site itself lies in the center of the window. The
 }
 }
 \description{
-Finds promoter sites suitable to serve as training data.
+Finds promoter sites suitable to serve as training data for building a
+characteristic profile for use with the pattern_likelihoods function.
 }
 \details{
 Promoter sites are sites on the genome that have TSS annotations and are

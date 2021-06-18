@@ -4,6 +4,7 @@ library(argparser)
 library(yaml)
 library(preprint)
 
+source('R/find_enhancers.R')
 config <- read_yaml('workflow/config.yaml')
 
 # parser <- arg_parser('Create the profiles that will serve as training data.')
