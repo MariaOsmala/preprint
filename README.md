@@ -1,6 +1,6 @@
 # PREPRINT
 
-This package is a PRobabilistic Enhancer PRedictIoN Tool PREPRINT.
+This package is a PRobabilistic Enhancer PRedictIoN Tool PREPRINT. The code used to obtain the BMC Bioinformatis 2020 results.
 
 ## Installation
 
