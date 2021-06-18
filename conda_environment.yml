@@ -13,7 +13,7 @@ dependencies:
   - bioconductor-genomeinfodb
   - bioconductor-genomeinfodbdata
   - bioconductor-genomeinfodbdata
-  - snakemake
+  - snakemake=6.1.0
   - pandas
 
   # For train-predict
