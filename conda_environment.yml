@@ -13,7 +13,7 @@ dependencies:
   - bioconductor-genomeinfodb
   - bioconductor-genomeinfodbdata
   - bioconductor-genomeinfodbdata
-  - snakemake
+  - snakemake=6.1.0
   - pandas
 
   # For train-predict
@@ -24,7 +24,8 @@ dependencies:
   - r-mass
   - r-caret
   - r-kernlab
-    r-e1071
+  - r-e1071
+  - yaml
 
   # For building the package
   - r-devtools
