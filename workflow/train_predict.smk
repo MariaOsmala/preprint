@@ -1,3 +1,7 @@
+# The default rule that will do the entire prediction pipeline
+rule predict:
+	input: f'{data_dir}/K562/data_R/predictions.RData'
+
 # Rules for downloading various files
 rule download_gencode:
 	input:

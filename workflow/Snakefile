@@ -30,6 +30,10 @@ def all_data_types(cell_line, exclude=None):
 			query += f' and data_type != "{ex}"'
 	return all_samples.dropna().query(query).data_type.unique()
 
+# Default rule to run the entire analysis pipeline
+rule all:
+	input: f'{data_dir}/K562/data_R/predictions.RData'
+
 # These include files contain the rules for the individual steps
 include: 'preprocessing.smk'
 include: 'train_predict.smk'
