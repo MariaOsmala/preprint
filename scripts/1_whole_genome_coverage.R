@@ -13,8 +13,6 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-source('code/fname.R')
-
 chr_names <- c('chr1','chr2','chr3',  'chr4',  'chr5','chr6',  'chr7',  'chr8',
                'chr9',  'chr10', 'chr11', 'chr12', 'chr13', 'chr14', 'chr15',
                'chr16', 'chr17','chr18', 'chr19',   'chr20', 'chr21', 'chr22',
@@ -25,7 +23,7 @@ regions <- regions[width(regions) == config$profiles$bin_size]  # Remove incompl
 regions <- unlist(regions)
 
 # First, collect a list of all the BAM files
-bam_files <- dir(fname('bam_folder', cell_line = cell_line), pattern = '\\.bam$', full.name = TRUE)
+bam_files <- dir(paste0(config$data_dir, '/', cell_line, '/bam_shifted'), pattern = '\\.bam$', full.name = TRUE)
 
 # These are used to normalize the profiles
 cat('Computing whole genome coverage for control histone...\n')
@@ -74,9 +72,11 @@ profiles <- do.call(cbind, profiles)
 
 # Normalize with other cell line if applicable
 if (!is.null(config$profiles[[cell_line]]$normalize)) {
-    reference <- readRDS(fname('whole_genome_cov', cell_line = config$profiles[[cell_line]]$normalize))
+    reference <- readRDS(paste0(config$data_dir, '/', config$profiles[[cell_line]]$normalize, '/data_R/whole_genome_coverage.rds'))
     profiles <- normalize_profiles(profiles, reference)
 }
 
-saveRDS(profiles, file = fname('whole_genome_cov', cell_line = cell_line))
-cat(paste0('Saved whole genome coverage data to ', fname('whole_genome_cov', cell_line = cell_line), '\n'))
+fname <- paste0(config$data_dir, '/', cell_line, '/data_R/whole_genome_coverage.rds')
+dir.create(dirname(fname), recursive = TRUE, showWarnings = FALSE)
+saveRDS(profiles, file = fname)
+cat(paste0('Saved whole genome coverage data to ', fname, '\n'))

@@ -21,34 +21,3 @@ profiles:
   # Cell line specific profile creation settings
   Gm12878:
     normalize: K562  # Normalize profiles with relation to this cell line
-
-# All the files that are consumed and produced during the analysis.
-# Files are specified in relation to `data_dir` as specified above.
-filenames:
-  annotations: GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz
-  blacklist_folder: blacklists
-  blacklist:
-    - blacklists/wgEncodeDacMapabilityConsensusExcludable.bed.gz
-    - blacklists/wgEncodeDukeMapabilityRegionsExcludable.bed.gz
-
-  # Cell line specific files.
-  # These files are relative to `data_dir`/`cell_line` as specified above.
-  K562:
-    bam_folder: bam_shifted
-    whole_genome_cov: data_R/whole_genome_coverage.rds
-    profiles: data_R/profiles.rds
-    predictions: data_R/predictions.RData
-    p300: raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz
-    DNase: raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz
-
-  Gm12878:
-    bam_folder: bam_shifted
-    whole_genome_cov: data_R/whole_genome_coverage.rds
-    profiles: data_R/profiles.rds
-    predictions: data_R/predictions.RData
-    p300: raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz
-    DNase: raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz
-
-# All the files that will be downloaded
-files:
-  

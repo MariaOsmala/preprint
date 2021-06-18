@@ -12,9 +12,6 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-# Convenience function for getting a filename from the config file
-source('fname.R')
-
 # These are the chromosomes of interest
 chroms_of_interest = c('chr1',  'chr2',  'chr3',  'chr4',  'chr5',  'chr6',
                        'chr7',  'chr8',  'chr9', 'chr10', 'chr11', 'chr12',
@@ -22,17 +19,18 @@ chroms_of_interest = c('chr1',  'chr2',  'chr3',  'chr4',  'chr5',  'chr6',
                        'chr19', 'chr20', 'chr21', 'chr22', 'chrX') 
 
 # Read TSS annotations to extract protein codings
-TSS_annotations <- TSS_protein_coding(fname('annotations'))
+TSS_annotations <- TSS_protein_coding(paste0(config$data_dir, '/GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz'))
 
 cat('Reading p300 and DNase peaks...')
-p300 <- rtracklayer::import(fname('p300', cell_line = cell_line))
-DNase <- rtracklayer::import(fname('DNase', cell_line = cell_line))
+p300 <- rtracklayer::import(paste0(config$data_dir, '/', cell_line, '/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'))
+DNase <- rtracklayer::import(paste0(config$data_dir, '/', cell_line, 'raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz'))
 cat(' done.\n')
 
 # Blacklist to remove problematic sites
 cat('Creating blacklist...')
 blacklist = GRanges()
-for (blacklist_file in fname('blacklist')) {
+for (blacklist_type in c('Consensus', 'Regions')) {
+    blacklist_file <- paste0(config$data_dir, '/blacklists/wgEncodeDacMapability', blacklist_type, 'Excludable.bed.gz')
     blacklist = union(blacklist, rtracklayer::import(blacklist_file))
 }
 cat(' done.\n')
@@ -53,7 +51,7 @@ random_regions <- find_random(config$profiles$window_size, N = config$profiles$n
                               blacklist = blacklist)
 
 # Load whole genome coverage
-coverage <- readRDS(fname('whole_genome_cov', cell_line = cell_line))
+coverage <- readRDS(paste0(config$data_dir, '/', cell_line, '/data_R/whole_genome_coverage.rds'))
 
 # Blacklist all regions which don't have enough coverage
 not_enough_coverage <- rowSums(coverage) < config$profiles$signal_threshold
@@ -76,7 +74,7 @@ sites <- c(enhancers, promoters, random_regions, random_regions_with_signal)
 profiles = list()
 
 # First, collect a list of all the histone files
-bam_files <- dir(fname('bam_folder', cell_line = cell_line), pattern = '\\.bam$', full.name = TRUE)
+bam_files <- dir(paste0(config$data_dir, '/', cell_line, '/bam_shifted'), pattern = '\\.bam$', full.name = TRUE)
 
 # These are used to normalize the profiles
 cat('Reading control histone...')
@@ -117,6 +115,7 @@ for (filename in bam_files) {
 profiles <- do.call(cbind, profiles)
 
 # Save the profiles
-dir.create(dirname(fname('profiles', cell_line = cell_line)), recursive = TRUE, showWarnings = FALSE)
-saveRDS(profiles, file = fname('profiles', cell_line = cell_line))
-cat(paste0('Data saved to ', fname('profiles', cell_line = cell_line), '\n'))
+fname <- paste0(config$data_dir, '/', cell_line, '/data_R/profiles.rds')
+dir.create(dirname(fname), recursive = TRUE, showWarnings = FALSE)
+saveRDS(profiles, file = fname)
+cat(paste0('Data saved to ', fname, '\n'))

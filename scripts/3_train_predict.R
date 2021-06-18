@@ -11,10 +11,8 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-source('scripts/fname.R')
-
 # Load the profiles
-profiles <- readRDS(fname('profiles', cell_line = cell_line))
+profiles <- readRDS(paste0(config$data_dir, '/', cell_line, '/data_R/profiles.rds'))
 
 # Create cross validation groups
 folds <- caret::createFolds(profile_type(profiles), k = 5)
@@ -46,4 +44,8 @@ for (fold in folds) {
 }
 
 print(confusionMatrix(data = unlist(predictions), reference = unlist(reference)))
-save(predictions, reference, file = fname('predictions', cell_line = cell_line))
+
+fname <- paste0(config$data_dir, '/', cell_line, '/data_R/predictions.RData')
+dir.create(dirname(fname), recursive = TRUE, showWarnings = FALSE)
+save(predictions, reference, file = fname)
+cat(paste0('Saved predictions to ', fname, '\n'))
