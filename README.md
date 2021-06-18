@@ -7,7 +7,7 @@ This R package contains the PRobabilistic Enhancer PRedictIoN Tool called PREPRI
 You can install the R package using [devtools](https://devtools.r-lib.org):
 
 ```R
-devtools::install_github('AaltoRSE/preprint', ref='devel')
+devtools::install_github('MariaOsmala/preprint')
 ```
 
 PREPRINT depends on the following R-packages, which should be installed automatically when you install the `preprint` package:
