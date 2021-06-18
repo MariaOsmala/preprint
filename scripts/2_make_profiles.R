@@ -23,14 +23,14 @@ TSS_annotations <- TSS_protein_coding(paste0(config$data_dir, '/GENCODE_TSS/genc
 
 cat('Reading p300 and DNase peaks...')
 p300 <- rtracklayer::import(paste0(config$data_dir, '/', cell_line, '/raw_data/wgEncodeAwgTfbsSydhK562P300IggrabUniPk.narrowPeak.gz'))
-DNase <- rtracklayer::import(paste0(config$data_dir, '/', cell_line, 'raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz'))
+DNase <- rtracklayer::import(paste0(config$data_dir, '/', cell_line, '/raw_data/wgEncodeOpenChromDnaseK562PkV2.narrowPeak.gz'))
 cat(' done.\n')
 
 # Blacklist to remove problematic sites
 cat('Creating blacklist...')
 blacklist = GRanges()
-for (blacklist_type in c('Consensus', 'Regions')) {
-    blacklist_file <- paste0(config$data_dir, '/blacklists/wgEncodeDacMapability', blacklist_type, 'Excludable.bed.gz')
+for (blacklist_type in c('DacMapabilityConsensus', 'DukeMapabilityRegions')) {
+    blacklist_file <- paste0(config$data_dir, '/blacklists/wgEncode', blacklist_type, 'Excludable.bed.gz')
     blacklist = union(blacklist, rtracklayer::import(blacklist_file))
 }
 cat(' done.\n')
