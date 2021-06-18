@@ -1,8 +1,9 @@
+#' Read TSS annotations and extract the genetic protein coding.
+#'
+#' @export
+#'
 #' @importFrom IRanges resize
 #' @importFrom GenomicRanges mcols strand<-
-
-#' Read TSS annotations and extract the genetic protein coding.
-#' @export
 TSS_protein_coding <- function(gencode_tss_file, verbose = TRUE)
 {
     if (verbose) cat('Reading TSS annotations...')
