@@ -240,5 +240,12 @@ cbind.Profiles <- function(...)
 #' @export
 names.Profiles <- function(profiles)
 {
-    unique(colnames(profiles))
+    unique(sapply(colnames(profiles), function(name) strsplit(name, '\\.')[[1]][[1]]))
+}
+
+#' Display of the Profiles object
+#' @export
+print.Profiles <- function(profiles)
+{
+    print(paste0('Profiles object containing profiles for ', nrow(profiles), ' sites.'))
 }

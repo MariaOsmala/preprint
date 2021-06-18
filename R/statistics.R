@@ -33,7 +33,7 @@ pattern_likelihoods <- function(profiles, characteristic_profiles, measure = 'Ba
 {
     likelihoods = vector()
     for (name in names(profiles)) {
-        sel <- colnames(profiles) == name
+        sel <- sapply(colnames(profiles), function(x) strsplit(x, '\\.')[[1]][[1]] == name)
 
         if (measure == 'Bayesian') {
             pos_char_prof <- characteristic_profiles[[positive_class]]
@@ -52,26 +52,26 @@ pattern_likelihoods <- function(profiles, characteristic_profiles, measure = 'Ba
         }
     }
 
-    colnames(likelihoods) <- levels(interaction(names(profiles), names(agg_patterns), lex.order = TRUE))
+    colnames(likelihoods) <- levels(interaction(names(profiles), names(characteristic_profiles), lex.order = TRUE))
     profile_data(profiles) <- likelihoods
     profiles
 }
 
 
-likelihood_ML <- function(profiles, agg_pattern)
+likelihood_ML <- function(profiles, characteristic_profile)
 {
     # Formula 4 of the paper
-    alpha <- rowSums(profiles) / sum(agg_pattern)
+    alpha <- rowSums(profiles) / sum(characteristic_profile)
 
     # Formula 10 of the paper.
-    lambda <- outer(alpha, agg_pattern)
+    lambda <- outer(alpha, characteristic_profile)
     likelihood <- rowSums(stats::dpois(x = profiles, lambda = lambda, log = TRUE))
 }
 
-estimate_gamma <- function(profiles, pos_agg_pattern)
+estimate_gamma <- function(profiles, pos_char_prof)
 {
     # Formula 4 of the paper
-    alpha <- rowSums(profiles) / sum(pos_agg_pattern)
+    alpha <- rowSums(profiles) / sum(pos_char_prof)
 
     # Estimate gamma
     gamma <- try(MASS::fitdistr(alpha[alpha > 0], 'gamma', lower = list(shape = 1E-3, rate = 1E-3), upper = list(shape = 1E3, rate = 1E3), start = list(shape=1, rate=1))$estimate)
@@ -85,12 +85,12 @@ estimate_gamma <- function(profiles, pos_agg_pattern)
     gamma
 }
 
-likelihood_Bayesian <- function(profiles, agg_pattern, gamma)
+likelihood_Bayesian <- function(profiles, characteristic_profile, gamma)
 {
     # Formula 5 of the paper.
     a0 <- gamma[['shape']]
     b0 <- gamma[['rate']]
-    likelihood <- a0 * log(b0) + rowSums(profiles * log(agg_pattern)) - (a0 + rowSums(profiles)) * log(b0 + sum(agg_pattern)) + lgamma(a0 + rowSums(profiles)) - lgamma(a0) - rowSums(lgamma(profiles + 1))
+    likelihood <- a0 * log(b0) + rowSums(profiles * log(characteristic_profile)) - (a0 + rowSums(profiles)) * log(b0 + sum(characteristic_profile)) + lgamma(a0 + rowSums(profiles)) - lgamma(a0) - rowSums(lgamma(profiles + 1))
 }
 
 #' Aggregate multiple profiles to create characteristic profiles.
