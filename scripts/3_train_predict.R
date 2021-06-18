@@ -24,9 +24,9 @@ folds <- caret::createFolds(profile_type(profiles), k = 5)
 predictions = list()
 reference = list()
 for (fold in folds) {
-    train_patterns <- aggregate_patterns(profiles[-fold,])
-    train_data <- pattern_likelihoods(profiles[-fold,], train_patterns, measure = 'Bayesian')
-    test_data <- pattern_likelihoods(profiles[fold,], train_patterns, measure = 'Bayesian')
+    characteristic_profiles <- aggregate_profiles(profiles[-fold,])
+    train_data <- pattern_likelihoods(profiles[-fold,], characteristic_profiles, measure = 'Bayesian')
+    test_data <- pattern_likelihoods(profiles[fold,], characteristic_profiles, measure = 'Bayesian')
 
     train_labels <- as.factor(ifelse(profile_type(train_data) == "enhancer",
                                      "enhancer", "not.enhancer"))

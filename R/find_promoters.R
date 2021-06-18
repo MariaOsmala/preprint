@@ -1,11 +1,8 @@
-#' Find promoter sites suitable to serve as training data.
-#' @importFrom GenomicRanges mcols
-#' @importFrom IRanges from to resize findOverlaps
-
-#' Find promoter sites
+#' Find promoter sites suitable for extracting a characteristic profile.
 #'
 #' @description
-#' Finds promoter sites suitable to serve as training data.
+#' Finds promoter sites suitable to serve as training data for building a
+#' characteristic profile for use with the pattern_likelihoods function.
 #'
 #' @details
 #' Promoter sites are sites on the genome that have TSS annotations and are
@@ -43,6 +40,9 @@
 #' @seealso [find_enhancers()] for finding suitable enhancer sites and
 #'          [find_random()] for finding suitable random sites.
 #' @export
+#'
+#' @importFrom GenomicRanges mcols
+#' @importFrom IRanges from to resize findOverlaps
 find_promoters <- function(TSS_annotations, DNase, window = 1000, N = NULL,
                            between_promoter_distance = 2000, blacklist = NULL,
                            verbose = TRUE)

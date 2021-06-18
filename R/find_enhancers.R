@@ -1,12 +1,8 @@
-#' @importFrom IRanges end findOverlaps from resize start start<- width width<-
-#' @importFrom GenomicRanges strand<- seqnames seqinfo mcols mcols<-
-#' @importFrom GenomeInfoDb seqlengths seqlengths<-
-
 #' Find enhancer sites suitable for extracting a characteristic profile.
 #'
 #' @description
 #' Finds enhancer sites suitable to serve as training data for building a
-#' characteristic profile. This profile can then be used to 
+#' characteristic profile for use with the pattern_likelihoods function.
 #'
 #' @details
 #' Enhancer sites are sites on the genome that correspond to p300 peaks and are
@@ -47,6 +43,10 @@
 #' @seealso [find_promoters()] for finding suitable promoter sites and
 #'          [find_random()] for finding suitable random sites.
 #' @export
+#'
+#' @importFrom IRanges end findOverlaps from resize start start<- width width<-
+#' @importFrom GenomicRanges strand<- seqnames seqinfo mcols mcols<-
+#' @importFrom GenomeInfoDb seqlengths seqlengths<-
 find_enhancers  <- function(p300, DNase, window = 1000, N = NULL,
                             TSS_annotations = NULL, min_dist_to_promoter = 2000,
                             blacklist = NULL, verbose = TRUE)

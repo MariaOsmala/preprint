@@ -1,6 +1,3 @@
-#' @importFrom IRanges IRanges resize reduce
-#' @importFrom GenomicRanges mcols
-
 #' Find random sites in the genome that are not enhancers or promoters.
 #'
 #' @description
@@ -42,6 +39,10 @@
 #' @seealso [find_enhancers()] for finding suitable enhancer sites and
 #'          [find_promoters()] for finding suitable promoter sites.
 #' @export
+#'
+#' @importFrom IRanges IRanges resize reduce
+#' @importFrom GenomicRanges mcols
+
 find_random <- function(window = 1000, N = NULL,
                         chroms_of_interest = NULL,
                         p300 = NULL, max_dist_to_enhancer = 2000,
