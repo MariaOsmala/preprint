@@ -24,15 +24,17 @@ RoxygenNote: 7.1.1
 biocViews:
 Imports: 
     BSgenome.Hsapiens.UCSC.hg19,
-	GenomeInfoDb,
+    GenomeInfoDb,
     GenomicAlignments,
     GenomicRanges,
     IRanges,
-	MASS,
+    MASS,
     Rsamtools,
     SummarizedExperiment,
-	regioneR,
-	rtracklayer,
-	stats,
+    regioneR,
+    rtracklayer,
+    stats,
     tools,
-	utils
+    utils,
+	caret,
+	e1071
