@@ -24,7 +24,7 @@ dependencies:
   - r-mass
   - r-caret
   - r-kernlab
-    r-e1071
+  - r-e1071
 
   # For building the package
   - r-devtools
