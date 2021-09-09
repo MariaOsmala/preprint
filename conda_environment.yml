@@ -25,6 +25,7 @@ dependencies:
   - r-caret
   - r-kernlab
   - r-e1071
+  - yaml
 
   # For building the package
   - r-devtools
