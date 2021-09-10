@@ -21,7 +21,7 @@ all_samples = pd.read_csv(f'{workflow_dir}/samples.tsv', sep='\t').sort_index()
 
 def all_data_types(cell_line, exclude=None):
 	"""
-	Get all data types(chromatin features etc.) for a given cell line.
+	Get all data types (chromatin features?) for a given cell line.
 	Optionally exclude some data types.
 	"""
 	query = f"cell_line=='{cell_line}'"
