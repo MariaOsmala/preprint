@@ -13,13 +13,13 @@ config <- read_yaml('workflow/config.yaml')
 # cell_line <- parse_args(parser)$cell_line
 cell_line <- 'K562'
 
-# These are the chromosomes of interest
+# These are the chromosomes of interest, chrM excluded
 chroms_of_interest = c('chr1',  'chr2',  'chr3',  'chr4',  'chr5',  'chr6',
                        'chr7',  'chr8',  'chr9', 'chr10', 'chr11', 'chr12',
                        'chr13', 'chr14', 'chr15', 'chr16', 'chr17', 'chr18',
                        'chr19', 'chr20', 'chr21', 'chr22', 'chrX') 
 
-# Read TSS annotations to extract protein codings
+# Read TSS annotations to extract TSS of protein coding genes
 TSS_annotations <- TSS_protein_coding(paste0(config$data_dir, '/GENCODE_TSS/gencode.v27lift37.annotation.gtf.gz'))
 
 cat('Reading p300 and DNase peaks...')
@@ -76,18 +76,18 @@ profiles = list()
 
 # First, collect a list of all the histone files
 bam_files <- dir(paste0(config$data_dir, '/', cell_line, '/bam_shifted'), pattern = '\\.bam$', full.name = TRUE)
-
+# bam_files <- dir(paste0(config$data_dir, '/', cell_line, '/bam_combined'), pattern = '\\.bam$', full.name = TRUE)
 # These are used to normalize the profiles
 cat('Reading control histone...')
 control_ind <- grep('Control', bam_files)
 profiles_control <- create_profiles(sites, bam_file = BamFile(bam_files[control_ind]),
-                                    reference = NULL, ignore_strand = TRUE)
+                                    reference = NULL, ignore_strand = TRUE, five_prime_end=config$profiles$five_prime_end)
 cat(' done.\n')
 
 cat('Reading input polymerase...')
 input_ind <- grep('Input', bam_files)
 profiles_input <- create_profiles(sites, bam_file = BamFile(bam_files[input_ind]),
-                                  reference = NULL, ignore_strand = TRUE)
+                                  reference = NULL, ignore_strand = TRUE, five_prime_end=config$profiles$five_prime_end)
 cat(' done.\n')
 
 # Create profiles for the rest of the histones
@@ -107,7 +107,8 @@ for (filename in bam_files) {
     if (length(grep('Input|Control', name)) == 0) {
         cat(paste0('Processing ', name, '...'))
         profiles[[name]] <- create_profiles(sites, bam_file = BamFile(filename),
-                                            reference = reference, ignore_strand = TRUE)
+                                            reference = reference, ignore_strand = TRUE,
+                                            five_prime_end=config$profiles$five_prime_end)
         cat(' done.\n')
     }
 }

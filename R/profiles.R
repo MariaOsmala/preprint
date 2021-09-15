@@ -18,16 +18,34 @@
 #'     The width of the bins, i.e. the resolution of the profiles.
 #' @param ignore_strand
 #'     Whether to ignore the strand when computing coverage.
+#' @param five_prime_end
+#'     Whether to consider only the 5' read end position when computing coverage. (default FALSE)
 #'
 #' @return The profiles.
 #'
 #' @importFrom IRanges from width slidingWindows findOverlaps
 #' @export
-create_profiles <- function(ranges, bam_file, reference, name = NA, bin_size = 100, ignore_strand = FALSE)
+create_profiles <- function(ranges, bam_file, reference, name = NA, bin_size = 100, ignore_strand = FALSE, five_prime_end=FALSE)
 {
+    
+ 
+    # ranges=sites
+    # bam_file = BamFile(bam_files[control_ind])
+    # reference = NULL
+    # ignore_strand = TRUE
+    # five_prime_end=TRUE
+    # bin_size=100
+    
+    
     window_size <- unique(width(ranges))
     if (length(window_size) > 1) {
         stop('Not all ranges are of the same length.')
+    }
+    
+    #Whether we consider the 5' ends of the reads only when
+    preprocess.reads=NULL
+    if(five_prime_end==TRUE){
+        preprocess.reads=ResizeReads
     }
 
     # Explode the ranges into bins.
@@ -45,13 +63,15 @@ create_profiles <- function(ranges, bam_file, reference, name = NA, bin_size = 1
     if (is.na(Rsamtools::yieldSize(bam_file))) {
         # Read entire BAM file in one chunk
         histone <- unlist(GenomicAlignments::readGAlignmentsList(bam_file))
+       
         histone <- histone[from(findOverlaps(histone, ranges_binned, ignore.strand = ignore_strand))]
         profiles <- SummarizedExperiment::assays(
             GenomicAlignments::summarizeOverlaps(
                 unlist(ranges_binned),
                 histone,
                 inter.feature = FALSE,
-                ignore.strand = ignore_strand
+                ignore.strand = ignore_strand,
+                preprocess.reads=preprocess.reads
             )
         )$counts
     } else {
@@ -73,7 +93,8 @@ create_profiles <- function(ranges, bam_file, reference, name = NA, bin_size = 1
                     unlist(ranges_binned),
                     histone,
                     inter.feature = FALSE,
-                    ignore.strand = ignore_strand
+                    ignore.strand = ignore_strand,
+                    preprocess.reads=preprocess.reads
                 )
             )$counts
             if (is.null(profiles)) {
@@ -123,6 +144,13 @@ subtract_reference <- function(profiles, profiles_to_subtract) {
     profiles[profiles < 0] <- 0
     round(profiles)
 }
+
+ResizeReads <- function(reads, width=1, fix="start", ...) {
+    reads <- as(reads, "GRanges")
+    stopifnot(all(strand(reads) != "*"))
+    resize(reads, width=width, fix=fix, ...)
+}
+
 
 #' Normalize one set of profiles with another
 #' @export
