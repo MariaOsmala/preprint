@@ -16,3 +16,4 @@ profiles:
   min_dist_to_promoter: 2000
   min_dist_between_promoters: 2000
   signal_threshold: 5
+  five_prime_end: FALSE
