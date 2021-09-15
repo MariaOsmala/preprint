@@ -19,6 +19,30 @@ rule download:
 		shell(f'wget {URL} -O {output}')
 
 
+rule download_bowtie2_index:
+	input:
+	output: f'{data_dir}/bowtie2-index/hg19.zip'
+	shell: 'wget https://genome-idx.s3.amazonaws.com/bt/hg19.zip -O {output}'
+
+
+rule unzip_bowtie2_index:
+	input:
+	    file = f'{data_dir}/bowtie2-index/hg19.zip'
+	output:
+	    folder = directory(f'{data_dir}/bowtie2-index/hg19/'),
+		output1 = f'{data_dir}/bowtie2-index/hg19/hg19.1.bt2',
+		output2 = f'{data_dir}/bowtie2-index/hg19/hg19.2.bt2',
+		output3 = f'{data_dir}/bowtie2-index/hg19/hg19.3.bt2',
+		output4 = f'{data_dir}/bowtie2-index/hg19/hg19.4.bt2',
+		output5 = f'{data_dir}/bowtie2-index/hg19/hg19.rev.1.bt2',
+		output6 = f'{data_dir}/bowtie2-index/hg19/hg19.rev.2.bt2',
+		output7 = f'{data_dir}/bowtie2-index/hg19/make_hg19.sh',
+	shell: 'unzip {input} -d {output.folder} -x {output.output1} {output.output2} {output.output3} {output.output4} {output.output5} {output.output6} {output.output7}'
+
+
+
+
+
 # Step 1: Align the reads
 def find_raw_files(wildcards):
 	"""
@@ -36,7 +60,14 @@ def get_ext(fname):
 
 rule align_reads:
 	input:
-		find_raw_files
+		find_raw_files,
+		index1 = f'{data_dir}/bowtie2-index/hg19/hg19.1.bt2',
+		index2 = f'{data_dir}/bowtie2-index/hg19/hg19.2.bt2',
+		index3 = f'{data_dir}/bowtie2-index/hg19/hg19.3.bt2',
+		index4 = f'{data_dir}/bowtie2-index/hg19/hg19.4.bt2',
+		index5 = f'{data_dir}/bowtie2-index/hg19/hg19.rev.1.bt2',
+		index6 = f'{data_dir}/bowtie2-index/hg19/hg19.rev.2.bt2',
+		index7 = f'{data_dir}/bowtie2-index/hg19/make_hg19.sh'
 	output:
 		bam = f'{data_dir}/{{cell_line}}/bam_replicates/{{sample}}.bam',
 		bai = f'{data_dir}/{{cell_line}}/bam_replicates/{{sample}}.bam.bai',
@@ -44,7 +75,7 @@ rule align_reads:
 		input_ext = get_ext(input[0])
 		if input_ext == 'fastq.gz':
 			# .fastq.gz input files need aligning with bowtie
-			bowtie_indexes = f'{data_dir}/genome_indexes/Homo_sapiens/UCSC/hg19/Sequence/Bowtie2Index/genome'
+			bowtie_indexes = f'{data_dir}/bowtie2-index/hg19/hg19'
 			shell(
 				r'''
 				bowtie2 -x {bowtie_indexes} -U {input[0]} \
