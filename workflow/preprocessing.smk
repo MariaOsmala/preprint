@@ -71,7 +71,7 @@ rule align_reads:
 	output:
 		bam = f'{data_dir}/{{cell_line}}/bam_replicates/{{sample}}.bam',
 		bai = f'{data_dir}/{{cell_line}}/bam_replicates/{{sample}}.bam.bai',
-   threads: 2
+	threads: 2
 	run:
 		input_ext = get_ext(input[0])
 		if input_ext == 'fastq.gz':
