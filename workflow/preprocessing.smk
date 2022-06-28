@@ -71,6 +71,7 @@ rule align_reads:
 	output:
 		bam = f'{data_dir}/{{cell_line}}/bam_replicates/{{sample}}.bam',
 		bai = f'{data_dir}/{{cell_line}}/bam_replicates/{{sample}}.bam.bai',
+	threads: 2
 	run:
 		input_ext = get_ext(input[0])
 		if input_ext == 'fastq.gz':
@@ -112,7 +113,7 @@ rule combine_replicates:
 	output:
 		bam = f'{data_dir}/{{cell_line}}/bam_combined/{{data_type}}.bam',
 		bai = f'{data_dir}/{{cell_line}}/bam_combined/{{data_type}}.bam.bai'
-	threads: 4
+	threads: 5
 	run:
 		if len(input) == 0:
 			raise WorkflowError(f'No raw files found for data type "{wildcards.data_type}".')
@@ -123,10 +124,12 @@ rule combine_replicates:
 		else:
 			# Merge the input .bam files
 			input_bam_files = ' '.join(input[::2])
+			step_1_threads = threads-1
+			step_2_threads = 1
 			shell(
 				r'''
-				samtools merge - {input_bam_files} --threads {threads} \
-				| samtools sort -T /tmp -@ {threads} - \
+				samtools merge - {input_bam_files} --threads {step_1_threads} \
+				| samtools sort -T /tmp -@ {step_2_threads} - \
 				> {output.bam}
 				''')
 			# Make index for the merged file
@@ -182,6 +185,7 @@ rule bed_to_bam:
 	output:
 		bam=f'{data_dir}/{{cell_line}}/bam_shifted/{{data_type}}.bam',
 		bai=f'{data_dir}/{{cell_line}}/bam_shifted/{{data_type}}.bam.bai',
+	threads: 2
 	shell:
 		r'''
 		bedtools bedtobam -i {input} -g {genome_file} \
