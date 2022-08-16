@@ -36,6 +36,7 @@ To install the required software, R and Python packages, we recommend using [ana
 ```
 conda env create -f preprint/conda_environment.yml -n preprint
 source activate preprint
+R -e "devtools::install_github('MariaOsmala/preprint')"
 ```
 
 Alternatively, you could install the software manually.
